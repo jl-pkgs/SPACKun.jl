@@ -74,9 +74,9 @@ function swb_case4(wa, IWS, pEc, pEs, s_tem, s_vod, soilpar, pftpar, wet, zm, zg
   Tr_p1, Tr_p2, Tr_p3 = pTr_partition(pEc, wa1, wa2, wa3, soilpar, pftpar, wet, zm)
 
   # Calculate the moisture constrains for plant and soil in unsaturated zone
-  f_sm1, f_sm_s1 = swc_stress(wa1, soilpar, pEc, pftpar)
-  f_sm2, _ = swc_stress(wa2, soilpar, pEc, pftpar)
-  f_sm3, _ = swc_stress(wa3, soilpar, pEc, pftpar)
+  f_sm1, f_sm_s1 = swc_stress(wa1, pEc, soilpar, pftpar)
+  f_sm2, _ = swc_stress(wa2, pEc, soilpar, pftpar)
+  f_sm3, _ = swc_stress(wa3, pEc, soilpar, pftpar)
 
   # Actual transpiration
   Tr1 = f_sm1 * s_vod * s_tem * Tr_p1

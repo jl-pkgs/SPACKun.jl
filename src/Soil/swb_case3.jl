@@ -64,9 +64,9 @@ function swb_case3(wa, IWS, pEc, pEs, s_tem, s_vod, soilpar, pftpar, wet, zm, zg
   Tr_p3_u = Tr_p3 * (d3 * wa3_unsat) / (d3 * wa3_unsat + (zm[3] - d3) * θ_sat)
   Tr_p3_g = Tr_p3 * ((zm[3] - d3) * θ_sat) / (d3 * wa3_unsat + (zm[3] - d3) * θ_sat)
 
-  f_sm1, f_sm_s1 = swc_stress(wa1, soilpar, pEc, pftpar)
-  f_sm2, _ = swc_stress(wa2, soilpar, pEc, pftpar)
-  f_sm3, _ = swc_stress(wa3_unsat, soilpar, pEc, pftpar)
+  f_sm1, f_sm_s1 = swc_stress(wa1, pEc, soilpar, pftpar)
+  f_sm2, _ = swc_stress(wa2, pEc, soilpar, pftpar)
+  f_sm3, _ = swc_stress(wa3_unsat, pEc, soilpar, pftpar)
 
   Tr1 = f_sm1 * s_vod * s_tem * Tr_p1
   Tr2 = f_sm2 * s_vod * s_tem * Tr_p2

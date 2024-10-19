@@ -41,7 +41,7 @@ function swb_case1(wa, IWS, pEc, pEs, s_tem, s_vod, soilpar, pftpar, wet, zm, zg
   Tr_p1_g = Tr_p1 * ((zm[1] - d1) * θ_sat) / (d1 * wa1_unsat + (zm[1] - d1) * θ_sat)
 
   # Moisture constraints
-  f_sm1, f_sm_s1 = swc_stress(wa1, soilpar, pEc, pftpar)
+  f_sm1, f_sm_s1 = swc_stress(wa1, pEc, soilpar, pftpar)
 
   # Actual transpiration
   Tr1_u = clamp( f_sm1 * s_vod * s_tem * Tr_p1_u, 0, d1 * (wa1_unsat - θ_wp))

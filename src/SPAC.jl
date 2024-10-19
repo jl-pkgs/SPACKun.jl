@@ -9,7 +9,7 @@ export potentialET, pTr_partition, interception, snp_balance, runoff_up
 export ZM
 
 # Set the soil depth for three soil layers
-const ZM = [50, 1450, 3500]  # mm
+const ZM = [50.0, 1450.0, 3500.0]  # mm
 
 include("DataType.jl")
 include("Param/get_pftpar.jl")
