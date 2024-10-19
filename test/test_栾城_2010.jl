@@ -1,6 +1,7 @@
 using Test, SPAC, RTableTools
 using DataFrames
 
+
 function absmax(d::AbstractDataFrame; fun=maximum)
   absmax(x) = fun(abs.(x))
   values = map(j -> absmax(d[:, j]), 1:ncol(d))
@@ -8,7 +9,7 @@ function absmax(d::AbstractDataFrame; fun=maximum)
   NamedTuple{Symbol.(keys)}(values)
 end
 
-function init_param(soil_type=2, PFTi = 22)
+function init_param(soil_type=2, PFTi=22)
   soilpar = get_soilpar(soil_type)
   pftpar = get_pftpar(PFTi)
 
@@ -20,12 +21,12 @@ function init_param(soil_type=2, PFTi = 22)
   soilpar, pftpar, state
 end
 
-
 dir_root = "$(@__DIR__)/.."
 d = fread("$dir_root/data/dat_栾城_ERA5L_2010.csv")
 
-@testset "SiTHv2_site" begin
+function test_LuanCheng(; zgw=0.0)
   soilpar, pftpar, state = init_param()
+  state.zgw = zgw
   topt = 24.0
 
   (; Rn, Pa, Prcp, Tavg, LAI, VOD) = d
@@ -44,7 +45,21 @@ d = fread("$dir_root/data/dat_栾城_ERA5L_2010.csv")
   SM2 = SM[:, 2]
   SM3 = SM[:, 3]
   df_jl = DataFrame(; ET, Tr, Es, Ei, Esb, RF, GW, SM1, SM2, SM3)
-  fwrite(df_jl, "$dir_root/data/OUTPUT_栾城_2010.csv")
+
+  fwrite(df_jl, "$dir_root/data/OUTPUT_栾城_2010_zgw=$(Int(zgw)).csv")
+end
+
+# const ZM = [50, 1450, 3500]  # mm
+test_LuanCheng(; zgw=0.0)
+test_LuanCheng(; zgw=25.0)
+test_LuanCheng(; zgw=1000.0)
+test_LuanCheng(; zgw=2000.0)
+test_LuanCheng(; zgw=6000.0)
+
+@testset "SiTHv2_site" begin
+  zgw = 0.0
+  f_jl = "$dir_root/data/OUTPUT_栾城_2010_zgw=$(Int(zgw)).csv"
+  df_jl = fread(f_jl)
   df_mat = fread("$dir_root/data/OUTPUT_栾城_2010_MATLAB.csv")
 
   diff = df_mat .- df_jl
