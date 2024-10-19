@@ -49,7 +49,7 @@ function swb_case1(wa, IWS, pEc, pEs, s_tem, s_vod, soilpar, pftpar, wet, zm, zg
   f_sm1, f_sm_s1 = swc_stress(wa1, soilpar, pEc, pftpar)
 
   # Actual transpiration
-  Tr1_u = clamp(f_sm1 * s_vod * s_tem * Tr_p1_u, 0, d1 * (wa1_unsat - wwp))
+  Tr1_u = clamp( f_sm1 * s_vod * s_tem * Tr_p1_u, 0, d1 * (wa1_unsat - wwp))
   Tr1_g = s_vod * s_tem * Tr_p1_g
   Tr1 = Tr1_u + Tr1_g
   Tr2 = s_vod * s_tem * Tr_p2

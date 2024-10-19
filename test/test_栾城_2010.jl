@@ -5,10 +5,10 @@ function init_param(soil_type=2, PFTi = 22)
   pftpar = get_pftpar(PFTi)
 
   θ_sat = soilpar.θ_sat
-  sm = ones(3) * θ_sat
+  wa = ones(3) * θ_sat
   zg = 0.0
   snowpack = 0.0
-  state = State(; sm, zg, snowpack)
+  state = State(; wa, zg, snowpack)
   soilpar, pftpar, state
 end
 
@@ -32,13 +32,13 @@ begin
 
   @time ET, Tr, Es, Ei, Esb, SM, RF, GW =
     SiTHv2_site(Rn, Tavg, Tas, Prcp, Pa, Gi, LAI, s_VODi, topt, soilpar, pftpar, state, false)
-end
 
-# SM1 = SM[:, 1]
-# SM2 = SM[:, 2]
-# SM3 = SM[:, 3]
-# df_out = DataFrame(; ET, Tr, Es, Ei, Esb, RF, GW, SM1, SM2, SM3)
-# fwrite(df_out, "data/OUTPUT_栾城_2010.csv")
+  SM1 = SM[:, 1]
+  SM2 = SM[:, 2]
+  SM3 = SM[:, 3]
+  df_out = DataFrame(; ET, Tr, Es, Ei, Esb, RF, GW, SM1, SM2, SM3)
+  fwrite(df_out, "$dir_root/data/OUTPUT_栾城_2010.csv")
+end
 
 # begin
 #   using Plots

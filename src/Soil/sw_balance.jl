@@ -1,4 +1,4 @@
-function sw_balance(IWS, pEc, pEs, Ta, Topt, s_VOD, wa, soilpar, pftpar, wet, ZM, zgw)
+function sw_balance(IWS, pEc, pEs, Ta, Topt, s_VOD, soilpar, pftpar, wet, ZM, wa, zgw)
   # ----INPUT:
   # IWS     -- total water enter into soil surface, mm
   # pEc     -- potential ET allocate to plant, mm
