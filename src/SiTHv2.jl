@@ -31,27 +31,21 @@ export SiTHv2_site
 """
 function SiTHv2(Rn, Ta, Tas, Topt, Pe, Pa, s_VOD, G, LAI, soilpar, pftpar, state::State)
   (; wa, zgw, snowpack) = state
-  # Potential Evaporation allocated to canopy and soil surface
-  pEc, pEs = potentialET(Rn, G, LAI, Ta, Pa)
-
-  # Interception evaporation
-  Ei, fwet, _ = interception(Pe, pEc, LAI, pftpar)
+  pEc, pEs = potentialET(Rn, G, LAI, Ta, Pa) # PET allocated to canopy and soil surface
+  Ei, fwet, _ = interception(Pe, pEc, LAI, pftpar)  # Interception evaporation
 
   # Snow sublimation, snow melt
   new_Pe = max(Pe - Ei, 0)
-  snowpack, Esb, _, Pnet = snp_balance(new_Pe, Ta, Tas, snowpack, pEs)
+  state.snowpack, Esb, _, Pnet = snp_balance(new_Pe, Ta, Tas, snowpack, pEs)
 
   srf, IWS, Vmax = runoff_up(Pnet, zgw, ZM, wa, soilpar)
 
   # Variables associated with soil water balance
   new_pEs = max(pEs - Esb, 0)
-  wa, zgw, Tr, Es, uex = sw_balance(IWS, pEc, new_pEs, Ta, Topt, s_VOD, soilpar, pftpar, fwet, ZM, wa, zgw)
+  Tr, Es, uex = sw_balance(IWS, pEc, new_pEs, Ta, Topt, s_VOD, soilpar, pftpar, fwet, ZM, state)
 
-  # Total Evapotranspiration
-  Et = Tr + Es + Ei + Esb
+  Et = Tr + Es + Ei + Esb # Total Evapotranspiration
   srf += uex
-
-  update_state!(state, wa, zgw, snowpack)
   return Et, Tr, Es, Ei, Esb, srf, Pnet, IWS, Vmax
 end
 
