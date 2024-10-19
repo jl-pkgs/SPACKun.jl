@@ -1,23 +1,24 @@
 """
 # INPUT
- Soil Type index
+Soil Type index
 
 # OUTPUT
   soilpar ::
-     1  ks         -- hydraulic conductivity, mm day-1
-     2  pha_sat    -- water potential at saturation condition
-     3  θ_sat  -- water content at saturation condition
-     4  b          -- an empirical parameter
-     5  θ_fc   -- soil moisture at field capacity
-     6  θ_c    -- soil moisture at critical value
-     7  θ_wp   -- soil moisture at wilting point
+     1. `Ksat`  : hydraulic conductivity, mm day-1
+     2. `Ψ_sat` : water potential at saturation condition
+     3. `θ_sat` : water content at saturation condition
+     4. `b`     : an empirical parameter
+     5. `θ_fc`  : soil moisture at field capacity
+     6. `θ_c`   : soil moisture at critical value
+     7. `θ_wp`  : soil moisture at wilting point
 
  ----------- 3-D rasters that contain the seven soil characteristic parameters ---------------
-  1         2           3           4     5         6        7
-  Ksat      pha_sat     θ_sat   b     θ_fc  θ_c  θ_wp   Soil Type
+  1     2        3       4      5      6      7
+  Ksat  Ψ_sat    θ_sat   b      θ_fc   θ_c    θ_wp   Soil Type
 """
 function get_soilpar(SC)
   store = [
+    # Ksat, Ψ_sat, θ_sat, b,  θ_fc, θ_c,  θ_wp
     1.3841 -0.0232 0.373 3.39 0.151 0.109 0.035;  # 1 Sand
     0.8229 -0.0175 0.386 3.86 0.189 0.142 0.052;  # 2 Loamy sand
     0.5353 -0.0316 0.416 4.50 0.265 0.208 0.087;  # 3 Sandy loam
@@ -33,5 +34,5 @@ function get_soilpar(SC)
   ]
   store[:, 1] .= 1000 .* store[:, 1]  # m --> mm
   soilpar = store[SC, :]
-  return @LArray(soilpar, (:Ks, :Ψ_sat, :θ_sat, :b, :θ_fc, :θ_c, :θ_wp))
+  return @LArray(soilpar, (:Ksat, :Ψ_sat, :θ_sat, :b, :θ_fc, :θ_c, :θ_wp))
 end

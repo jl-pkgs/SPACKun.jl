@@ -50,12 +50,11 @@ function test_LuanCheng(; zgw=0.0)
 end
 
 # const ZM = [50, 1450, 3500]  # mm
-# test_LuanCheng(; zgw=2000.0)
-# test_LuanCheng(; zgw=6000.0)
+# @run test_LuanCheng(; zgw=2000.0)
 
 @testset "SiTHv2_site" begin
   zgws = [0, 25, 1000, 2000, 6000]
-  for zgw = zgws[1:3]
+  for zgw = zgws
     test_LuanCheng(; zgw)
     
     f_jl = "$dir_root/data/OUTPUT_栾城_2010_zgw=$(Int(zgw)).csv"
@@ -65,11 +64,12 @@ end
     df_mat = fread(f_mat)
 
     diff = df_mat .- df_jl
-    # absmax(diff)
+    absmax(diff)
     # maximum(absmax(diff))
     @test maximum(absmax(diff)) <= 1e-9
   end
 end
+
 
 # begin
 #   using Plots

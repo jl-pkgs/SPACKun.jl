@@ -12,8 +12,8 @@
   IWS      : Water that enters into the soil surface (mm)
   Vmax     : Maximum water retention capacity (mm)
 """
-function runoff_up(Pnet, zgw, ZM, wa, soilpar)
-  θ_sat = soilpar[3]  # saturated soil moisture
+function runoff_up(Pnet, zgw, zm, wa, soilpar)
+  (; θ_sat) = soilpar
 
   Vmax = 0.0
   if zgw <= 0
@@ -22,23 +22,23 @@ function runoff_up(Pnet, zgw, ZM, wa, soilpar)
     srf = -zgw * θ_sat
     Pnet = 0.0
   else
-    if zgw > 0 && zgw <= ZM[1]
+    if zgw > 0 && zgw <= zm[1]
       d1 = zgw  # Thickness of unsaturated soil (mm)
       # Unsaturated soil water (mm)
-      wa1_unsat = (wa[1] * ZM[1] - θ_sat * (ZM[1] - d1)) / d1
+      wa1_unsat = (wa[1] * zm[1] - θ_sat * (zm[1] - d1)) / d1
       # Calculate overall soil water retention capacity (Vmax)
       Vmax = d1 * (θ_sat - wa1_unsat)
-    elseif zgw > ZM[1] && zgw <= ZM[1] + ZM[2]
-      d1 = ZM[1]
-      d2 = zgw - ZM[1]
+    elseif zgw > zm[1] && zgw <= zm[1] + zm[2]
+      d1 = zm[1]
+      d2 = zgw - zm[1]
       # Unsaturated soil water (mm)
       wa1_unsat = wa[1]
-      wa2_unsat = (wa[2] * ZM[2] - θ_sat * (ZM[2] - d2)) / d2
+      wa2_unsat = (wa[2] * zm[2] - θ_sat * (zm[2] - d2)) / d2
       # Calculate overall soil water retention capacity (Vmax)
       Vmax = d1 * (θ_sat - wa1_unsat) + d2 * (θ_sat - wa2_unsat)
-    elseif zgw > ZM[1] + ZM[2]
-      d1 = ZM[1]
-      d2 = ZM[2]
+    elseif zgw > zm[1] + zm[2]
+      d1 = zm[1]
+      d2 = zm[2]
       # Unsaturated soil water (mm)
       wa1_unsat = wa[1]
       wa2_unsat = wa[2]

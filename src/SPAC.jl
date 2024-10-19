@@ -16,7 +16,7 @@ include("Param/get_pftpar.jl")
 include("Param/get_soilpar.jl")
 
 include("pTr_partition.jl")
-include("ultilize.jl")
+# include("ultilize.jl")
 include("potentialET.jl")
 include("interception.jl")
 include("snp_balance.jl")

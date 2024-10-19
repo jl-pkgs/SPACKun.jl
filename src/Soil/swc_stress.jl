@@ -22,27 +22,21 @@ function swc_stress(wa, soilpar, pET, pftpar)
   # S_soil    =   1- -----------------    =   1-(1-w/wc)=w/wc
   #                    θ_c-θ_r
   # -------------------------------------------------------------------------
+  (; θ_fc, θ_wp) = soilpar
+  (; Zr) = pftpar # root depth
 
-  # soil parameters
-  θ_fc = soilpar[5]
-  θ_wp = soilpar[7]
-  # θ_c = soilpar[6]
-
-  # Canopy height
-  CH = pftpar[4]
-  k = CH^0.5
+  k = Zr^0.5
   # scale [1, 25] to [1, 5]
   k = 4 * ((k - 0.7) / 4.3) + 1
 
   a = 0.1
-  p = 1 / (1 + pET) - a * (1 / (1 + CH))
+  p = 1 / (1 + pET) - a * (1 / (1 + Zr))
 
   θ_wpCH = θ_wp / k
 
   # critical soil moisture for different PFTs
   θ_c = (1 - p) * (θ_fc - θ_wpCH) + θ_wpCH
   θ_c = clamp(θ_c, θ_wpCH, θ_fc)
-  # θ_c   = soilpar[6]
 
   if wa <= θ_wpCH
     f_sm = 0

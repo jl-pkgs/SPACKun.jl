@@ -13,13 +13,8 @@ function swb_case2(wa, IWS, pEc, pEs, s_tem, s_vod, soilpar, pftpar, wet, zm, zg
   # Unsaturated depth in layer #1~2
   d1 = zm[1]
   d2 = zgw - d1
-
   wa1, wa2, wa3 = wa
-
-  ks = soilpar[1]  # hydraulic conductivity
-  θ_sat = soilpar[3]  # saturated soil water content
-  θ_fc = soilpar[5]  # field capacity
-  wwp = soilpar[7]  # wilting point
+  (; Ksat, θ_sat, θ_fc, θ_wp) = soilpar
 
   # ====== Water Supplement ====== #
   # Layer #1 - Unsaturated zone
@@ -65,7 +60,7 @@ function swb_case2(wa, IWS, pEc, pEs, s_tem, s_vod, soilpar, pftpar, wet, zm, zg
 
   # Actual transpiration
   Tr1 = f_sm1 * s_vod * s_tem * Tr_p1
-  Tr2_u = clamp(f_sm2 * s_vod * s_tem * Tr_p2_u, 0, d2 * (wa2_unsat - wwp))
+  Tr2_u = clamp(f_sm2 * s_vod * s_tem * Tr_p2_u, 0, d2 * (wa2_unsat - θ_wp))
   Tr2_g = s_vod * s_tem * Tr_p2_g
   Tr2 = Tr2_u + Tr2_g
   Tr3 = s_vod * s_tem * Tr_p3
@@ -84,11 +79,11 @@ function swb_case2(wa, IWS, pEc, pEs, s_tem, s_vod, soilpar, pftpar, wet, zm, zg
     Es = d1 * wa1 - Tr1
   end
 
-  f1 = soil_drainage(wa1_unsat, θ_sat, ks, 0.048, 4.8)
+  f1 = soil_drainage(wa1_unsat, θ_sat, Ksat, 0.048, 4.8)
   wa1 = max((wa1 * d1 - f1 - Es - Tr1) / d1, 0)
 
   # Layer #2
-  f2 = soil_drainage(wa2_unsat, θ_sat, ks, 0.012, 1.2)
+  f2 = soil_drainage(wa2_unsat, θ_sat, Ksat, 0.012, 1.2)
   wa2_unsat = clamp((wa2_unsat * d2 + f1 - f2 - Tr2_u) / d2, 0, 1)
 
   ff2 = max((wa2_unsat - θ_sat) * d2, 0)

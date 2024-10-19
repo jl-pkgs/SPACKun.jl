@@ -1,20 +1,21 @@
-# Potential transpiration partition
+# 
+"""
+Partition PET into three soil layers
+
+# INPUT:
+- pEc    :  Potential Evaporation on canopy
+- w      :  Initialized values for soil moisture
+- pftpar :  PFT parameters
+
+# OUTPUT:
+- Tr_p :  separate potential Transpiration
+"""
 function pTr_partition(pEc, wa1, wa2, wa3, soilpar, pftpar, fwet, ZM)
-  # INPUT:
-  # pEc    :  Potential Evaporation on canopy
-  # w      :  Initialized values for soil moisture
-  # pftpar :  PFT parameters
-  #
-  # OUTPUT:
-  # Tr_p :  separate potential Transpiration
-  b = soilpar[4]
-  D50 = pftpar[2]
-  D95 = pftpar[3]
+  (; b, θ_sat) = soilpar
+  (; D50, D95) = pftpar
   c = -2.944 / log(D95 / D50)
 
-  θ_sat = soilpar[3]
-
-  r1 = (1 / (1 + (ZM[1] / D50)^c))
+  r1 = (1 / (1 + (ZM[1] / D50)^c)) # Zhang 2019, Eq. 21
   r2 = (1 / (1 + (ZM[2] / D50)^c)) - (1 / (1 + (ZM[1] / D50)^c))
   r3 = (1 / (1 + (ZM[3] / D50)^c)) - (1 / (1 + (ZM[2] / D50)^c))
 
@@ -31,6 +32,5 @@ function pTr_partition(pEc, wa1, wa2, wa3, soilpar, pftpar, fwet, ZM)
   Tr_p1 = (1 - fwet) * beta1 * pEc
   Tr_p2 = (1 - fwet) * beta2 * pEc
   Tr_p3 = (1 - fwet) * beta3 * pEc
-
   return Tr_p1, Tr_p2, Tr_p3
 end

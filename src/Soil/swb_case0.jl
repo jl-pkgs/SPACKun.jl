@@ -12,9 +12,7 @@ function swb_case0(wa, IWS, pEc, pEs, s_tem, s_vod, soilpar, pftpar, wet, zm, zg
 
   # Old soil water content in layer 1-3
   wa1, wa2, wa3 = wa
-
-  θ_sat = soilpar[3]  # saturated soil water content
-  θ_fc = soilpar[5]  # field capacity
+  (; θ_sat, θ_fc) = soilpar
 
   # ====== Water consumption ====== #
   # Evapotranspiration

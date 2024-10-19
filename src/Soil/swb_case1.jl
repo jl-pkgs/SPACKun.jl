@@ -12,14 +12,9 @@ function swb_case1(wa, IWS, pEc, pEs, s_tem, s_vod, soilpar, pftpar, wet, zm, zg
 
   # Unsaturated depth in layer #1
   d1 = zgw
-
   wa1, wa2, wa3 = wa
-
-  ks = soilpar[1]  # hydraulic conductivity
-  θ_sat = soilpar[3]  # saturated soil water content
-  θ_fc = soilpar[5]  # field capacity
-  wwp = soilpar[7]  # wilting point
-
+  (; Ksat, θ_sat, θ_fc, θ_wp) = soilpar
+  
   # ====== Water supplement ====== #
   # Layer #1 - Unsaturated zone
   wa1_unsat = (wa1 * zm[1] - θ_sat * (zm[1] - d1)) / d1  # Unsaturated region soil moisture
@@ -49,7 +44,7 @@ function swb_case1(wa, IWS, pEc, pEs, s_tem, s_vod, soilpar, pftpar, wet, zm, zg
   f_sm1, f_sm_s1 = swc_stress(wa1, soilpar, pEc, pftpar)
 
   # Actual transpiration
-  Tr1_u = clamp( f_sm1 * s_vod * s_tem * Tr_p1_u, 0, d1 * (wa1_unsat - wwp))
+  Tr1_u = clamp( f_sm1 * s_vod * s_tem * Tr_p1_u, 0, d1 * (wa1_unsat - θ_wp))
   Tr1_g = s_vod * s_tem * Tr_p1_g
   Tr1 = Tr1_u + Tr1_g
   Tr2 = s_vod * s_tem * Tr_p2
@@ -61,7 +56,7 @@ function swb_case1(wa, IWS, pEc, pEs, s_tem, s_vod, soilpar, pftpar, wet, zm, zg
   Es_u = clamp(Es * (d1 * wa1_unsat) / (d1 * wa1_unsat + (zm[1] - d1) * θ_sat), 0, d1 * wa1_unsat)
 
   # ====== Soil water drainage (unsaturated zone) ====== #
-  f1 = soil_drainage(wa1_unsat, θ_sat, ks, 0.048, 4.8)
+  f1 = soil_drainage(wa1_unsat, θ_sat, Ksat, 0.048, 4.8)
   wa1_unsat = max((wa1_unsat * d1 - f1 - Es_u - Tr1_u) / d1, 0)
 
   # ====== Groundwater table depth update ====== #
