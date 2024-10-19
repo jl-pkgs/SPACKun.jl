@@ -50,24 +50,47 @@ function test_LuanCheng(; zgw=0.0)
 end
 
 # const ZM = [50, 1450, 3500]  # mm
-test_LuanCheng(; zgw=0.0)
-test_LuanCheng(; zgw=25.0)
-test_LuanCheng(; zgw=1000.0)
-test_LuanCheng(; zgw=2000.0)
-test_LuanCheng(; zgw=6000.0)
+# test_LuanCheng(; zgw=2000.0)
+# test_LuanCheng(; zgw=6000.0)
 
 @testset "SiTHv2_site" begin
-  zgw = 0.0
-  f_jl = "$dir_root/data/OUTPUT_栾城_2010_zgw=$(Int(zgw)).csv"
-  df_jl = fread(f_jl)
-  df_mat = fread("$dir_root/data/OUTPUT_栾城_2010_MATLAB.csv")
+  zgws = [0, 25, 1000, 2000, 6000]
+  for zgw = zgws[1:3]
+    test_LuanCheng(; zgw)
+    
+    f_jl = "$dir_root/data/OUTPUT_栾城_2010_zgw=$(Int(zgw)).csv"
+    f_mat = "$dir_root/data/OUTPUT/OUTPUT_栾城_2010_MATLAB_zgw=$(Int(zgw)).csv"
 
-  diff = df_mat .- df_jl
-  @test maximum(absmax(diff)) <= 1e-9
+    df_jl = fread(f_jl)
+    df_mat = fread(f_mat)
+
+    diff = df_mat .- df_jl
+    # absmax(diff)
+    # maximum(absmax(diff))
+    @test maximum(absmax(diff)) <= 1e-9
+  end
 end
 
 # begin
 #   using Plots
-#   gr(framestyle = :box)
-#   plot(ET)
+
+#   function plot_var(var=:ET)
+#     plot(df_mat[:, var], label="MATLAB", title=string(var))
+#     plot!(df_jl[:, var], label="Julia")
+#   end
+
+#   gr(; framestyle=:box)
+#   plot(
+#     plot_var(:ET),
+#     plot_var(:Tr),
+#     plot_var(:Es),
+#     plot_var(:Ei),
+#     plot_var(:Esb),
+#     plot_var(:RF),
+#     plot_var(:GW),
+#     plot_var(:SM1),
+#     plot_var(:SM2),
+#     plot_var(:SM3),
+#     size=(1400, 800)
+#   )
 # end
