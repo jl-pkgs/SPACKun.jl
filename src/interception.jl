@@ -17,7 +17,7 @@ Choudhury BJ, Digirolamo NE, 1998, A biological process-based estimate
 of global land surface evaporation using satellite and ancillary data I.
 Model description and comparison with observation. Journal of Hydrology.
 """
-function interception(pEc, LAI, Rain, pftpar)
+function interception(Rain, pEc, LAI, pftpar)
   # Interception (I, mm) was calculated using Horton's model:
   #   I       =   min(P, aP + b)
   # Where P   =   precipitation in mm
@@ -26,11 +26,12 @@ function interception(pEc, LAI, Rain, pftpar)
   # x, parameter values, used for calculating daily rainfall interception
   inc = pftpar[1]
   Sc = min(Rain, inc * LAI * Rain)
-  wetT = min(0.7 * Sc / pEc, 1)
 
   if pEc < 1e-3
+    wetT = 1.0
     Ei = 0
   else
+    wetT = min(0.7 * Sc / pEc, 1)
     Ei = pEc * wetT
   end
 

@@ -13,12 +13,14 @@ function init_param(soil_type=2, PFTi = 22)
 end
 
 
-@testset "cal_SiTHv2_site" begin
+dir_root = "$(@__DIR__)/.."
+d = fread("$dir_root/data/dat_栾城_ERA5L_2010.csv")
+
+# @testset "SiTHv2_site" 
+begin
   soilpar, pftpar, state = init_param()
   topt = 24.0
 
-  dir_root = "$(@__DIR__)/.."
-  d = fread("$dir_root/data/dat_栾城_ERA5L_2010.csv")
   (; Rn, Pa, Prcp, Tavg, LAI, VOD) = d
 
   Tas = deepcopy(Tavg) # Effective accumulated temperature
@@ -37,10 +39,6 @@ end
 # SM3 = SM[:, 3]
 # df_out = DataFrame(; ET, Tr, Es, Ei, Esb, RF, GW, SM1, SM2, SM3)
 # fwrite(df_out, "data/OUTPUT_栾城_2010.csv")
-
-# df_mat = fread("./data/OUTPUT_栾城_2010_MATLAB.csv")
-# df_jl = fread("./data/OUTPUT_栾城_2010.csv")
-# df_mat .- df_jl
 
 # begin
 #   using Plots

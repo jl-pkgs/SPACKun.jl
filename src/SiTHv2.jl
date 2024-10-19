@@ -35,7 +35,7 @@ function SiTHv2(Rn, Ta, Tas, Topt, Pe, Pa, s_VOD, G, LAI, soilpar, pftpar, state
   pEc, pEs = potentialET(Rn, G, LAI, Ta, Pa)
 
   # Interception evaporation
-  Ei, fwet, _ = interception(pEc, LAI, Pe, pftpar)
+  Ei, fwet, _ = interception(Pe, pEc, LAI, pftpar)
 
   # Snow sublimation, snow melt
   new_Pe = max(Pe - Ei, 0)
