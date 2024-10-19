@@ -54,3 +54,5 @@ function temp_stress(Topt, Ta)
   St = exp(-((Ta - Topt) / Topt)^2)
   return St
 end
+
+export sw_balance

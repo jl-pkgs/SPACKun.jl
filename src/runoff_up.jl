@@ -1,7 +1,8 @@
 """
 INPUT:
 - zm       : Soil depth of different layers (mm)
-- wa       : The antecedent soil water content (mm) expressed as a function of the WHC in that layer
+- wa       : The antecedent soil water content (mm) expressed as a function of
+  the WHC in that layer
 - soilpar  : Soil parameters according to Soil type
 - Pnet     : Net precipitation = P-I+Snowmelt
 - zgw      : groundwater table depth
@@ -12,14 +13,16 @@ OUTPUT:
 
 Reference:
 1. Choudhury BJ, Digirolamo NE, 1998
-2. SCS (1985). National Engineering Handbook. Section 4: Hydrology.
-Washington, DC: Soil Conservation Service, U.S. Department of Agriculture.
+2. SCS (1985). National Engineering Handbook. Section 4: Hydrology. Washington,
+   DC: Soil Conservation Service, U.S. Department of Agriculture.
 3. SCS (1986). Urban Hydrology for Small Watersheds, Technical Release No. 55.
-Washington, DC: Soil Conservation Service, U.S. Department of Agriculture.
+   Washington, DC: Soil Conservation Service, U.S. Department of Agriculture.
 """
 function runoff_up(Pnet, zgw, zm, wa, soilpar)
   theta_sat = soilpar[3]  # saturated wa
 
+  Vmax = 0.0
+  
   if zgw <= 0
     # exceeded groundwater on the soil surface
     Vmax = 0

@@ -1,30 +1,32 @@
-function get_pftpar(LC)
-  # Standard numbering rule for different PFTs based on MCD12, IGBP
-  # 0     'water'
-  # 1     'evergreen needleleaf forest'
-  # 2     'evergreen broadleaf forest'
-  # 3     'deciduous needleleaf forest'
-  # 4     'deciduous broadleaf forest'
-  # 5     'mixed forests'
-  # 6     'closed shrubland'
-  # 7     'open shrublands'
-  # 8     'woody savannas'
-  # 9     'savannas'
-  # 10    'grasslands'
-  # 11    'permanent wetlands'
-  # 12    'croplands'
-  # 13    'urban and built-up'
-  # 14    'cropland/natural vegetation mosaic'
-  # 15    'snow and ice'
-  # 16    'barren or sparsely vegetated'
+"""
 
-  # Output:
-  # pftpar  ::
-  # 1  beta -- the coefficient for calculation of interceptions
-  # 2  D50  -- the depth above which 50% of the root mas is located, mm
-  # 3  c    -- the shape parameters of logistic dose-response root distribution model
-  # 4  Zr   -- root depth (m)
+# Output:
+- pftpar
+  + 1  `beta`: the coefficient for calculation of interceptions
+  + 2  `D50` : the depth above which 50% of the root mas is located, mm
+  + 3  `c`   : the shape parameters of logistic dose-response root distribution model
+  + 4  `Zr`  : root depth (m)
 
+Standard numbering rule for different PFTs based on MCD12, IGBP
+- `0` : 'water'
+- `1` : 'evergreen needleleaf forest'
+- `2` : 'evergreen broadleaf forest'
+- `3` : 'deciduous needleleaf forest'
+- `4` : 'deciduous broadleaf forest'
+- `5` : 'mixed forests'
+- `6` : 'closed shrubland'
+- `7` : 'open shrublands'
+- `8` : 'woody savannas'
+- `9` : 'savannas'
+- `10`: 'grasslands'
+- `11`: 'permanent wetlands'
+- `12`: 'croplands'
+- `13`: 'urban and built-up'
+- `14`: 'cropland/natural vegetation mosaic'
+- `15`: 'snow and ice'
+- `16`: 'barren or sparsely vegetated'
+"""
+function get_pftpar(LC::Int)
   # The PFTpar look up table
   PLUT = [
     0.06 1771 3998 20;   # 1  Evergreen Needleleaf Forest   ------ ENF
@@ -82,6 +84,5 @@ function get_pftpar(LC)
   else
     pftpar = PLUT[Typenum, :]
   end
-
-  return pftpar
+  @LArray pftpar (:β, :D50, :c, :Zr)
 end
