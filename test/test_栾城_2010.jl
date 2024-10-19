@@ -1,4 +1,12 @@
 using Test, SPAC, RTableTools
+using DataFrames
+
+function absmax(d::AbstractDataFrame; fun=maximum)
+  absmax(x) = fun(abs.(x))
+  values = map(j -> absmax(d[:, j]), 1:ncol(d))
+  keys = tuple(names(d)...)
+  NamedTuple{Symbol.(keys)}(values)
+end
 
 function init_param(soil_type=2, PFTi = 22)
   soilpar = get_soilpar(soil_type)
@@ -6,9 +14,9 @@ function init_param(soil_type=2, PFTi = 22)
 
   θ_sat = soilpar.θ_sat
   wa = ones(3) * θ_sat
-  zg = 0.0
+  zgw = 0.0
   snowpack = 0.0
-  state = State(; wa, zg, snowpack)
+  state = State(; wa, zgw, snowpack)
   soilpar, pftpar, state
 end
 
@@ -16,8 +24,7 @@ end
 dir_root = "$(@__DIR__)/.."
 d = fread("$dir_root/data/dat_栾城_ERA5L_2010.csv")
 
-# @testset "SiTHv2_site" 
-begin
+@testset "SiTHv2_site" begin
   soilpar, pftpar, state = init_param()
   topt = 24.0
 
@@ -36,8 +43,12 @@ begin
   SM1 = SM[:, 1]
   SM2 = SM[:, 2]
   SM3 = SM[:, 3]
-  df_out = DataFrame(; ET, Tr, Es, Ei, Esb, RF, GW, SM1, SM2, SM3)
-  fwrite(df_out, "$dir_root/data/OUTPUT_栾城_2010.csv")
+  df_jl = DataFrame(; ET, Tr, Es, Ei, Esb, RF, GW, SM1, SM2, SM3)
+  fwrite(df_jl, "$dir_root/data/OUTPUT_栾城_2010.csv")
+  df_mat = fread("$dir_root/data/OUTPUT_栾城_2010_MATLAB.csv")
+
+  diff = df_mat .- df_jl
+  @test maximum(absmax(diff)) <= 1e-9
 end
 
 # begin

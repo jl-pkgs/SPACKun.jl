@@ -9,24 +9,24 @@ function swc_stress(wa, soilpar, pET, pftpar)
   # S_soil  : Soil moisture stress to soil evaporation
   # --------
   # Stress function for plant transpiration and soil evaporation:
-  #                  (theta_c-theta_wp)
+  #                  (θ_c-θ_wp)
   # wc =  ------------------------------    (about 0.4; Choudhury & Digirolamo, 1998)
-  #                  (theta_fc-theta_wp)
-  # where theta_c : the critical soil water content at which plant stress start
+  #                  (θ_fc-θ_wp)
+  # where θ_c : the critical soil water content at which plant stress start
   # Stree Function (Martens et al., 2017)
-  #                      theta_c-theta
+  #                      θ_c-θ
   # S_plant   =   1- (-------------------)^2   =   1-(1-w/wc)^2
-  #                     theta_c-theta_wp
+  #                     θ_c-θ_wp
   #
-  #                    theta_c-theta
+  #                    θ_c-θ
   # S_soil    =   1- -----------------    =   1-(1-w/wc)=w/wc
-  #                    theta_c-theta_r
+  #                    θ_c-θ_r
   # -------------------------------------------------------------------------
 
   # soil parameters
-  theta_fc = soilpar[5]
-  theta_wp = soilpar[7]
-  # theta_c = soilpar[6]
+  θ_fc = soilpar[5]
+  θ_wp = soilpar[7]
+  # θ_c = soilpar[6]
 
   # Canopy height
   CH = pftpar[4]
@@ -37,44 +37,44 @@ function swc_stress(wa, soilpar, pET, pftpar)
   a = 0.1
   p = 1 / (1 + pET) - a * (1 / (1 + CH))
 
-  theta_wpCH = theta_wp / k
+  θ_wpCH = θ_wp / k
 
   # critical soil moisture for different PFTs
-  theta_c = (1 - p) * (theta_fc - theta_wpCH) + theta_wpCH
-  theta_c = clamp(theta_c, theta_wpCH, theta_fc)
-  # theta_c   = soilpar[6]
+  θ_c = (1 - p) * (θ_fc - θ_wpCH) + θ_wpCH
+  θ_c = clamp(θ_c, θ_wpCH, θ_fc)
+  # θ_c   = soilpar[6]
 
-  if wa <= theta_wpCH
+  if wa <= θ_wpCH
     f_sm = 0
-  elseif wa >= theta_c
+  elseif wa >= θ_c
     f_sm = 1
   else
-    f_sm = 1 - ((theta_c - wa) / (theta_c - theta_wpCH))^k
+    f_sm = 1 - ((θ_c - wa) / (θ_c - θ_wpCH))^k
   end
 
   # constraint for soil evaporation
-  theta_wp_soil = 0
-  if wa <= theta_wp_soil
+  θ_wp_soil = 0
+  if wa <= θ_wp_soil
     f_sm_s = 0
-  elseif wa >= theta_fc
+  elseif wa >= θ_fc
     f_sm_s = 1
   else
-    # f_sm_s = ((wa - theta_wp) / (theta_fc - theta_wp))^1
-    f_sm_s = (wa - theta_wp_soil) / (theta_fc - theta_wp_soil)  # for soil evaporation only
+    # f_sm_s = ((wa - θ_wp) / (θ_fc - θ_wp))^1
+    f_sm_s = (wa - θ_wp_soil) / (θ_fc - θ_wp_soil)  # for soil evaporation only
   end
 
   return f_sm, f_sm_s
 end
 
 # --- old version
-# # wc = (theta_c - theta_wp) / (theta_fc - theta_wp)
-# if wa <= theta_wp
+# # wc = (θ_c - θ_wp) / (θ_fc - θ_wp)
+# if wa <= θ_wp
 #     f_sm = 0
-# elseif wa >= theta_c
+# elseif wa >= θ_c
 #     f_sm = 1
 # else
 # #     f_sm = 1 - (1 - wa / wc)^2
-#     f_sm = 1 - ((theta_c - wa) / (theta_c - theta_wp))^2
+#     f_sm = 1 - ((θ_c - wa) / (θ_c - θ_wp))^2
 # end
 # --- old version
 

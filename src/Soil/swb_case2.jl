@@ -1,4 +1,4 @@
-function swb_case2(wa, IWS, pEc, pEs, s_tem, s_vod, soilpar, pftpar, wet, ZM, zgw)
+function swb_case2(wa, IWS, pEc, pEs, s_tem, s_vod, soilpar, pftpar, wet, zm, zgw)
   # INPUT:
   # wa      -- soil water content, 3 layers
   # IWS     -- total water entering into soil surface (mm)
@@ -11,24 +11,24 @@ function swb_case2(wa, IWS, pEc, pEs, s_tem, s_vod, soilpar, pftpar, wet, ZM, zg
   # zgw     -- groundwater table depth (mm)
 
   # Unsaturated depth in layer #1~2
-  d1 = ZM[1]
+  d1 = zm[1]
   d2 = zgw - d1
 
   wa1, wa2, wa3 = wa
 
   ks = soilpar[1]  # hydraulic conductivity
-  theta_sat = soilpar[3]  # saturated soil water content
-  theta_fc = soilpar[5]  # field capacity
+  θ_sat = soilpar[3]  # saturated soil water content
+  θ_fc = soilpar[5]  # field capacity
   wwp = soilpar[7]  # wilting point
 
   # ====== Water Supplement ====== #
   # Layer #1 - Unsaturated zone
   wa1_unsat = wa1
   wc_s1 = d1 * wa1_unsat
-  wc_m1 = d1 * theta_sat
+  wc_m1 = d1 * θ_sat
 
   if wc_s1 + IWS >= wc_m1
-    wa1 = theta_sat
+    wa1 = θ_sat
     vw1 = wc_s1 + IWS - wc_m1
   else
     wa1 = wa1_unsat + IWS / d1
@@ -36,16 +36,16 @@ function swb_case2(wa, IWS, pEc, pEs, s_tem, s_vod, soilpar, pftpar, wet, ZM, zg
   end
 
   # Layer #2 - Unsaturated zone
-  wa2_unsat = (wa2 * ZM[2] - theta_sat * (ZM[2] - d2)) / d2
+  wa2_unsat = (wa2 * zm[2] - θ_sat * (zm[2] - d2)) / d2
   wc_s2 = d2 * wa2_unsat
-  wc_m2 = d2 * theta_sat
+  wc_m2 = d2 * θ_sat
 
   if wc_s2 + vw1 >= wc_m2
-    wa2_unsat = theta_sat
+    wa2_unsat = θ_sat
     vw2 = wc_s2 + vw1 - wc_m2
   else
     wa2_unsat += vw1 / d2
-    wa2 = (wa2_unsat * d2 + theta_sat * (ZM[2] - d2)) / ZM[2]
+    wa2 = (wa2_unsat * d2 + θ_sat * (zm[2] - d2)) / zm[2]
     vw2 = 0
   end
 
@@ -53,11 +53,11 @@ function swb_case2(wa, IWS, pEc, pEs, s_tem, s_vod, soilpar, pftpar, wet, ZM, zg
 
   # ====== Water Consumption ====== #
   # Evapotranspiration
-  Tr_p1, Tr_p2, Tr_p3 = pTr_partition(pEc, wa1, wa2, wa3, soilpar, pftpar, wet, ZM)
+  Tr_p1, Tr_p2, Tr_p3 = pTr_partition(pEc, wa1, wa2, wa3, soilpar, pftpar, wet, zm)
 
   # Transpiration from unsaturated and saturated zones in layer #2
-  Tr_p2_u = Tr_p2 * (d2 * wa2_unsat) / (d2 * wa2_unsat + (ZM[2] - d2) * theta_sat)
-  Tr_p2_g = Tr_p2 * ((ZM[2] - d2) * theta_sat) / (d2 * wa2_unsat + (ZM[2] - d2) * theta_sat)
+  Tr_p2_u = Tr_p2 * (d2 * wa2_unsat) / (d2 * wa2_unsat + (zm[2] - d2) * θ_sat)
+  Tr_p2_g = Tr_p2 * ((zm[2] - d2) * θ_sat) / (d2 * wa2_unsat + (zm[2] - d2) * θ_sat)
 
   # Moisture constraints
   f_sm1, f_sm_s1 = swc_stress(wa1, soilpar, pEc, pftpar)
@@ -84,15 +84,15 @@ function swb_case2(wa, IWS, pEc, pEs, s_tem, s_vod, soilpar, pftpar, wet, ZM, zg
     Es = d1 * wa1 - Tr1
   end
 
-  f1 = soil_drainage(wa1_unsat, theta_sat, ks, 0.048, 4.8)
+  f1 = soil_drainage(wa1_unsat, θ_sat, ks, 0.048, 4.8)
   wa1 = max((wa1 * d1 - f1 - Es - Tr1) / d1, 0)
 
   # Layer #2
-  f2 = soil_drainage(wa2_unsat, theta_sat, ks, 0.012, 1.2)
+  f2 = soil_drainage(wa2_unsat, θ_sat, ks, 0.012, 1.2)
   wa2_unsat = clamp((wa2_unsat * d2 + f1 - f2 - Tr2_u) / d2, 0, 1)
 
-  ff2 = max((wa2_unsat - theta_sat) * d2, 0)
-  wa2_unsat = min(wa2_unsat, theta_sat)
+  ff2 = max((wa2_unsat - θ_sat) * d2, 0)
+  wa2_unsat = min(wa2_unsat, θ_sat)
 
   # Layer #3 - Fully saturated with groundwater
 
@@ -105,29 +105,29 @@ function swb_case2(wa, IWS, pEc, pEs, s_tem, s_vod, soilpar, pftpar, wet, ZM, zg
   R_sb = R_sb_max * exp(-f * zgw)
 
   delta_w = F1 - Tr_g - R_sb
-  delta_zgw = delta_w / (theta_sat - (wa1 + wa2_unsat) / 2)
+  delta_zgw = delta_w / (θ_sat - (wa1 + wa2_unsat) / 2)
   zgw -= delta_zgw
   uex = 0  # Excess water to soil surface
 
   # Update soil moisture and groundwater table depth
-  if zgw > ZM[1] + ZM[2] + ZM[3]
-    wa2 = (wa2_unsat * d2 + theta_fc * (ZM[2] - d2)) / ZM[2]
-    wa3 = theta_fc
-  elseif zgw > ZM[1] + ZM[2] && zgw <= ZM[1] + ZM[2] + ZM[3]
-    wa2 = (wa2_unsat * d2 + theta_fc * (ZM[2] - d2)) / ZM[2]
-    wa3 = (theta_fc * (zgw - ZM[1] - ZM[2]) + theta_sat * (ZM[1] + ZM[2] + ZM[3] - zgw)) / ZM[3]
-  elseif zgw > ZM[1] && zgw <= ZM[1] + ZM[2]
-    wa2 = (wa2_unsat * (zgw - ZM[1]) + theta_sat * (ZM[1] + ZM[2] - zgw)) / ZM[2]
-    wa3 = theta_sat
-  elseif zgw > 0 && zgw <= ZM[1]
-    wa1 = (wa1 * zgw + theta_sat * (ZM[1] - zgw)) / ZM[1]
-    wa2 = theta_sat
-    wa3 = theta_sat
+  if zgw > zm[1] + zm[2] + zm[3]
+    wa2 = (wa2_unsat * d2 + θ_fc * (zm[2] - d2)) / zm[2]
+    wa3 = θ_fc
+  elseif zgw > zm[1] + zm[2] && zgw <= zm[1] + zm[2] + zm[3]
+    wa2 = (wa2_unsat * d2 + θ_fc * (zm[2] - d2)) / zm[2]
+    wa3 = (θ_fc * (zgw - zm[1] - zm[2]) + θ_sat * (zm[1] + zm[2] + zm[3] - zgw)) / zm[3]
+  elseif zgw > zm[1] && zgw <= zm[1] + zm[2]
+    wa2 = (wa2_unsat * (zgw - zm[1]) + θ_sat * (zm[1] + zm[2] - zgw)) / zm[2]
+    wa3 = θ_sat
+  elseif zgw > 0 && zgw <= zm[1]
+    wa1 = (wa1 * zgw + θ_sat * (zm[1] - zgw)) / zm[1]
+    wa2 = θ_sat
+    wa3 = θ_sat
   elseif zgw <= 0
-    wa1 = theta_sat
-    wa2 = theta_sat
-    wa3 = theta_sat
-    uex = -zgw * theta_fc
+    wa1 = θ_sat
+    wa2 = θ_sat
+    wa3 = θ_sat
+    uex = -zgw * θ_fc
   end
 
   wa = [wa1, wa2, wa3]

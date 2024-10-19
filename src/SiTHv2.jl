@@ -30,7 +30,7 @@ export SiTHv2_site
 
 """
 function SiTHv2(Rn, Ta, Tas, Topt, Pe, Pa, s_VOD, G, LAI, soilpar, pftpar, state::State)
-  (; wa, zg, snowpack) = state
+  (; wa, zgw, snowpack) = state
   # Potential Evaporation allocated to canopy and soil surface
   pEc, pEs = potentialET(Rn, G, LAI, Ta, Pa)
 
@@ -41,17 +41,17 @@ function SiTHv2(Rn, Ta, Tas, Topt, Pe, Pa, s_VOD, G, LAI, soilpar, pftpar, state
   new_Pe = max(Pe - Ei, 0)
   snowpack, Esb, _, Pnet = snp_balance(new_Pe, Ta, Tas, snowpack, pEs)
 
-  srf, IWS, Vmax = runoff_up(Pnet, zg, ZM, wa, soilpar)
+  srf, IWS, Vmax = runoff_up(Pnet, zgw, ZM, wa, soilpar)
 
   # Variables associated with soil water balance
   new_pEs = max(pEs - Esb, 0)
-  wa, zg, Tr, Es, uex = sw_balance(IWS, pEc, new_pEs, Ta, Topt, s_VOD, soilpar, pftpar, fwet, ZM, wa, zg)
+  wa, zgw, Tr, Es, uex = sw_balance(IWS, pEc, new_pEs, Ta, Topt, s_VOD, soilpar, pftpar, fwet, ZM, wa, zgw)
 
   # Total Evapotranspiration
   Et = Tr + Es + Ei + Esb
   srf += uex
 
-  update_state!(state, wa, zg, snowpack)
+  update_state!(state, wa, zgw, snowpack)
   return Et, Tr, Es, Ei, Esb, srf, Pnet, IWS, Vmax
 end
 
@@ -79,7 +79,7 @@ function _run_model(Rni::T, Tai::T, Tasi::T, Prcp::T, Pai::T, Gi::T, LAIii::T, s
     output[:Esbs][i] = Esb
     output[:SM][i, :] = state.wa
     output[:RF][i] = srf
-    output[:GW][i] = state.zg
+    output[:GW][i] = state.zgw
   end
   return output
 end

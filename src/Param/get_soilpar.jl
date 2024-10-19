@@ -6,15 +6,15 @@
   soilpar ::
      1  ks         -- hydraulic conductivity, mm day-1
      2  pha_sat    -- water potential at saturation condition
-     3  theta_sat  -- water content at saturation condition
+     3  θ_sat  -- water content at saturation condition
      4  b          -- an empirical parameter
-     5  theta_fc   -- soil moisture at field capacity
-     6  theta_c    -- soil moisture at critical value
-     7  theta_wp   -- soil moisture at wilting point
+     5  θ_fc   -- soil moisture at field capacity
+     6  θ_c    -- soil moisture at critical value
+     7  θ_wp   -- soil moisture at wilting point
 
  ----------- 3-D rasters that contain the seven soil characteristic parameters ---------------
   1         2           3           4     5         6        7
-  Ksat      pha_sat     theta_sat   b     theta_fc  theta_c  theta_wp   Soil Type
+  Ksat      pha_sat     θ_sat   b     θ_fc  θ_c  θ_wp   Soil Type
 """
 function get_soilpar(SC)
   store = [

@@ -16,22 +16,22 @@ function swb_case1(wa, IWS, pEc, pEs, s_tem, s_vod, soilpar, pftpar, wet, zm, zg
   wa1, wa2, wa3 = wa
 
   ks = soilpar[1]  # hydraulic conductivity
-  theta_sat = soilpar[3]  # saturated soil water content
-  theta_fc = soilpar[5]  # field capacity
+  θ_sat = soilpar[3]  # saturated soil water content
+  θ_fc = soilpar[5]  # field capacity
   wwp = soilpar[7]  # wilting point
 
   # ====== Water supplement ====== #
   # Layer #1 - Unsaturated zone
-  wa1_unsat = (wa1 * zm[1] - theta_sat * (zm[1] - d1)) / d1  # Unsaturated region soil moisture
+  wa1_unsat = (wa1 * zm[1] - θ_sat * (zm[1] - d1)) / d1  # Unsaturated region soil moisture
   wc_s1 = d1 * wa1_unsat  # Current water column (mm)
-  wc_m1 = d1 * theta_sat  # Maximum water column (mm)
+  wc_m1 = d1 * θ_sat  # Maximum water column (mm)
 
   if wc_s1 + IWS >= wc_m1
-    wa1_unsat = theta_sat
+    wa1_unsat = θ_sat
     vw1 = wc_s1 + IWS - wc_m1  # Excess water
   else
     wa1_unsat += IWS / d1
-    wa1 = (wa1_unsat * d1 + theta_sat * (zm[1] - d1)) / zm[1]
+    wa1 = (wa1_unsat * d1 + θ_sat * (zm[1] - d1)) / zm[1]
     vw1 = 0
   end
 
@@ -42,8 +42,8 @@ function swb_case1(wa, IWS, pEc, pEs, s_tem, s_vod, soilpar, pftpar, wet, zm, zg
   Tr_p1, Tr_p2, Tr_p3 = pTr_partition(pEc, wa1, wa2, wa3, soilpar, pftpar, wet, zm)
 
   # Transpiration from unsaturated and saturated zones in layer #1
-  Tr_p1_u = Tr_p1 * (d1 * wa1_unsat) / (d1 * wa1_unsat + (zm[1] - d1) * theta_sat)
-  Tr_p1_g = Tr_p1 * ((zm[1] - d1) * theta_sat) / (d1 * wa1_unsat + (zm[1] - d1) * theta_sat)
+  Tr_p1_u = Tr_p1 * (d1 * wa1_unsat) / (d1 * wa1_unsat + (zm[1] - d1) * θ_sat)
+  Tr_p1_g = Tr_p1 * ((zm[1] - d1) * θ_sat) / (d1 * wa1_unsat + (zm[1] - d1) * θ_sat)
 
   # Moisture constraints
   f_sm1, f_sm_s1 = swc_stress(wa1, soilpar, pEc, pftpar)
@@ -58,10 +58,10 @@ function swb_case1(wa, IWS, pEc, pEs, s_tem, s_vod, soilpar, pftpar, wet, zm, zg
 
   # Actual soil evaporation
   Es = f_sm_s1 * pEs
-  Es_u = clamp(Es * (d1 * wa1_unsat) / (d1 * wa1_unsat + (zm[1] - d1) * theta_sat), 0, d1 * wa1_unsat)
+  Es_u = clamp(Es * (d1 * wa1_unsat) / (d1 * wa1_unsat + (zm[1] - d1) * θ_sat), 0, d1 * wa1_unsat)
 
   # ====== Soil water drainage (unsaturated zone) ====== #
-  f1 = soil_drainage(wa1_unsat, theta_sat, ks, 0.048, 4.8)
+  f1 = soil_drainage(wa1_unsat, θ_sat, ks, 0.048, 4.8)
   wa1_unsat = max((wa1_unsat * d1 - f1 - Es_u - Tr1_u) / d1, 0)
 
   # ====== Groundwater table depth update ====== #
@@ -77,32 +77,32 @@ function swb_case1(wa, IWS, pEc, pEs, s_tem, s_vod, soilpar, pftpar, wet, zm, zg
   delta_w = F1 - Tr_g - R_sb
 
   # Change in groundwater table depth
-  delta_zgw = delta_w / (theta_sat - wa1_unsat)
+  delta_zgw = delta_w / (θ_sat - wa1_unsat)
   zgw -= delta_zgw
   uex = 0  # Excess water to the soil surface
 
   # Update soil moisture and groundwater table depth
   if zgw > zm[1] + zm[2] + zm[3]
-    wa1 = (wa1_unsat * d1 + theta_fc * (zm[1] - d1)) / zm[1]
-    wa2 = theta_fc
-    wa3 = theta_fc
+    wa1 = (wa1_unsat * d1 + θ_fc * (zm[1] - d1)) / zm[1]
+    wa2 = θ_fc
+    wa3 = θ_fc
   elseif zgw > zm[1] + zm[2] && zgw <= zm[1] + zm[2] + zm[3]
-    wa1 = (wa1_unsat * d1 + theta_fc * (zm[1] - d1)) / zm[1]
-    wa2 = theta_fc
-    wa3 = (theta_fc * (zgw - zm[1] - zm[2]) + theta_sat * (zm[1] + zm[2] + zm[3] - zgw)) / zm[3]
+    wa1 = (wa1_unsat * d1 + θ_fc * (zm[1] - d1)) / zm[1]
+    wa2 = θ_fc
+    wa3 = (θ_fc * (zgw - zm[1] - zm[2]) + θ_sat * (zm[1] + zm[2] + zm[3] - zgw)) / zm[3]
   elseif zgw > zm[1] && zgw <= zm[1] + zm[2]
-    wa1 = (wa1_unsat * d1 + theta_fc * (zm[1] - d1)) / zm[1]
-    wa2 = (theta_fc * (zgw - zm[1]) + theta_sat * (zm[1] + zm[2] - zgw)) / zm[2]
-    wa3 = theta_sat
+    wa1 = (wa1_unsat * d1 + θ_fc * (zm[1] - d1)) / zm[1]
+    wa2 = (θ_fc * (zgw - zm[1]) + θ_sat * (zm[1] + zm[2] - zgw)) / zm[2]
+    wa3 = θ_sat
   elseif zgw > 0 && zgw <= zm[1]
-    wa1 = (wa1_unsat * zgw + theta_sat * (zm[1] - zgw)) / zm[1]
-    wa2 = theta_sat
-    wa3 = theta_sat
+    wa1 = (wa1_unsat * zgw + θ_sat * (zm[1] - zgw)) / zm[1]
+    wa2 = θ_sat
+    wa3 = θ_sat
   elseif zgw <= 0
-    wa1 = theta_sat
-    wa2 = theta_sat
-    wa3 = theta_sat
-    uex = -zgw * theta_fc  # Excess water to soil surface
+    wa1 = θ_sat
+    wa2 = θ_sat
+    wa3 = θ_sat
+    uex = -zgw * θ_fc  # Excess water to soil surface
   end
 
   # Updated soil water content

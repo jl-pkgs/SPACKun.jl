@@ -1,4 +1,4 @@
-function soil_drainage(wa_unsat, theta_sat, ks, Dmin, Dmax)
+function soil_drainage(wa_unsat, θ_sat, ks, Dmin, Dmax)
   # Ducharne & Polcher, 1998
   dd = 1.5
   # layer1
@@ -8,7 +8,7 @@ function soil_drainage(wa_unsat, theta_sat, ks, Dmin, Dmax)
   # layer2
   # Dmin = 0.012; # 0.0005*24, mm day-1
   # Dmax = 1.2; # 0.05*24,   mm day-1
-  thx1 = wa_unsat / theta_sat
+  thx1 = wa_unsat / θ_sat
   if thx1 < 0.75
     Perc1 = Dmin * thx1
   else

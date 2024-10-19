@@ -13,8 +13,8 @@ function swb_case0(wa, IWS, pEc, pEs, s_tem, s_vod, soilpar, pftpar, wet, zm, zg
   # Old soil water content in layer 1-3
   wa1, wa2, wa3 = wa
 
-  theta_sat = soilpar[3]  # saturated soil water content
-  theta_fc = soilpar[5]  # field capacity
+  θ_sat = soilpar[3]  # saturated soil water content
+  θ_fc = soilpar[5]  # field capacity
 
   # ====== Water consumption ====== #
   # Evapotranspiration
@@ -40,32 +40,32 @@ function swb_case0(wa, IWS, pEc, pEs, s_tem, s_vod, soilpar, pftpar, wet, zm, zg
   delta_w = F1 - Tr_g - R_sb
 
   # Change in groundwater table depth
-  delta_zgw = delta_w / (theta_sat - theta_fc)
+  delta_zgw = delta_w / (θ_sat - θ_fc)
   zgw -= delta_zgw
   uex = 0  # excess water to soil surface
 
   # Update soil moisture and groundwater table depth
   if zgw > zm[1] + zm[2] + zm[3]
-    wa1 = theta_fc
-    wa2 = theta_fc
-    wa3 = theta_fc
+    wa1 = θ_fc
+    wa2 = θ_fc
+    wa3 = θ_fc
   elseif zgw > zm[1] + zm[2] && zgw <= zm[1] + zm[2] + zm[3]
-    wa1 = theta_fc
-    wa2 = theta_fc
-    wa3 = (theta_fc * (zgw - zm[1] - zm[2]) + theta_sat * (zm[1] + zm[2] + zm[3] - zgw)) / zm[3]
+    wa1 = θ_fc
+    wa2 = θ_fc
+    wa3 = (θ_fc * (zgw - zm[1] - zm[2]) + θ_sat * (zm[1] + zm[2] + zm[3] - zgw)) / zm[3]
   elseif zgw > zm[1] && zgw <= zm[1] + zm[2]
-    wa1 = theta_fc
-    wa2 = (theta_fc * (zgw - zm[1]) + theta_sat * (zm[1] + zm[2] - zgw)) / zm[2]
-    wa3 = theta_sat
+    wa1 = θ_fc
+    wa2 = (θ_fc * (zgw - zm[1]) + θ_sat * (zm[1] + zm[2] - zgw)) / zm[2]
+    wa3 = θ_sat
   elseif zgw > 0 && zgw <= zm[1]
-    wa1 = (theta_fc * zgw + theta_sat * (zm[1] - zgw)) / zm[1]
-    wa2 = theta_sat
-    wa3 = theta_sat
+    wa1 = (θ_fc * zgw + θ_sat * (zm[1] - zgw)) / zm[1]
+    wa2 = θ_sat
+    wa3 = θ_sat
   elseif zgw <= 0
-    wa1 = theta_sat
-    wa2 = theta_sat
-    wa3 = theta_sat
-    uex = -zgw * theta_fc  # excess water to soil surface
+    wa1 = θ_sat
+    wa2 = θ_sat
+    wa3 = θ_sat
+    uex = -zgw * θ_fc  # excess water to soil surface
   end
 
   # Updated soil water content
