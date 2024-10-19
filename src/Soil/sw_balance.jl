@@ -44,15 +44,14 @@ function sw_balance(IWS, pEc, pEs, Ta, Topt, s_VOD, wa, soilpar, pftpar, wet, ZM
 end
 
 # Temperature Constrains for plant growing
+# INPUT:
+# - Topt  : Optimum temperature for plant growing
+# - Ta    : Air temperature
+# 
+# OUTPUT:
+# - St    : Temperature stress
 function temp_stress(Topt, Ta)
-  # INPUT:
-  # - Topt  : Optimum temperature for plant growing
-  # - Ta    : Air temperature
-  # 
-  # OUTPUT:
-  # - St    : Temperature stress
-  St = exp(-((Ta - Topt) / Topt)^2)
-  return St
+  return exp(-((Ta - Topt) / Topt)^2)
 end
 
 export sw_balance

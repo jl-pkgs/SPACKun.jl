@@ -1,5 +1,7 @@
 using Test, SPAC
 
+include("test_栾城_2010.jl")
+
 @testset "potentialET" begin
   Rn = 100.0
   G = 5.0
