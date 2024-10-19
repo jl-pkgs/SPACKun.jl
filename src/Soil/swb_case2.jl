@@ -1,4 +1,4 @@
-function swb_case2(wa, IWS, pEc, pEs, s_tem, s_vod, soilpar, pftpar, wet, zm, zgw)
+function swb_case2(wa, IWS, pEc, pEs, s_tem, s_vod, soilpar, pftpar, wet, ZM, zgw)
   # INPUT:
   # wa      -- soil water content, 3 layers
   # IWS     -- total water enter into soil surface, mm
@@ -7,11 +7,11 @@ function swb_case2(wa, IWS, pEc, pEs, s_tem, s_vod, soilpar, pftpar, wet, zm, zg
   # soilpar -- soil-related parameters
   # pftpar  -- plant-related parameters
   # wet     -- wetness indice
-  # zm      -- soil layer depth, 3 layers
+  # ZM      -- soil layer depth, 3 layers
   # zgw     -- groundwater table depth, mm
 
   # unsaturated depth in layer #2
-  d2 = zgw - zm[1]
+  d2 = zgw - ZM[1]
 
   wa1 = wa[1]
   wa2 = wa[2]
@@ -25,7 +25,7 @@ function swb_case2(wa, IWS, pEc, pEs, s_tem, s_vod, soilpar, pftpar, wet, zm, zg
   # ====== water supplement ====== #
   # layer #2
   # existed water column in the unsaturated zone #2
-  wa2_unsat = (wa2 * zm[2] - theta_sat * (zm[2] - d2)) / d2  # 未饱和区域SM, [m3 m-3]
+  wa2_unsat = (wa2 * ZM[2] - theta_sat * (ZM[2] - d2)) / d2  # 未饱和区域SM, [m3 m-3]
   wc_s2 = d2 * wa2_unsat  # [mm]
   wc_m2 = d2 * theta_sat  # maximum water column in d2, [mm]
 
@@ -36,7 +36,7 @@ function swb_case2(wa, IWS, pEc, pEs, s_tem, s_vod, soilpar, pftpar, wet, zm, zg
     # soil water content in unsaturated zone
     wa2_unsat += IWS / d2
     # calculate the adjusted swc#2 with considering the groundwater depth
-    wa2 = (wa2_unsat * d2 + theta_sat * (zm[2] - d2)) / zm[2]
+    wa2 = (wa2_unsat * d2 + theta_sat * (ZM[2] - d2)) / ZM[2]
     vw2 = 0
   end
 
@@ -46,11 +46,11 @@ function swb_case2(wa, IWS, pEc, pEs, s_tem, s_vod, soilpar, pftpar, wet, zm, zg
   # ====== water consumption ====== #
   # Evapotranspiration
   # distributed the potential Tr to different layers
-  Tr_p1, Tr_p2, Tr_p3 = pTr_partition(pEc, wa1, wa2, wa3, soilpar, pftpar, wet, zm)
+  Tr_p1, Tr_p2, Tr_p3 = pTr_partition(pEc, wa1, wa2, wa3, soilpar, pftpar, wet, ZM)
 
   # divide Tr_p2 into unsaturated zone and saturated zone
-  Tr_p2_u = Tr_p2 * (d2 * wa2_unsat) / (d2 * wa2_unsat + (zm[2] - d2) * theta_sat)
-  Tr_p2_g = Tr_p2 * ((zm[2] - d2) * theta_sat) / (d2 * wa2_unsat + (zm[2] - d2) * theta_sat)
+  Tr_p2_u = Tr_p2 * (d2 * wa2_unsat) / (d2 * wa2_unsat + (ZM[2] - d2) * theta_sat)
+  Tr_p2_g = Tr_p2 * ((ZM[2] - d2) * theta_sat) / (d2 * wa2_unsat + (ZM[2] - d2) * theta_sat)
 
   # calculate the moisture constrains for plant and soil in unsaturated zone
   f_sm2, f_sm_s2 = swc_stress(wa2, soilpar, pEc, pftpar)
@@ -68,7 +68,7 @@ function swb_case2(wa, IWS, pEc, pEs, s_tem, s_vod, soilpar, pftpar, wet, zm, zg
 
   # actual soil evaporation
   Es = f_sm_s2 * pEs  # only consider about the first layer
-  Es_u = Es * (d2 * wa2_unsat) / (d2 * wa2_unsat + (zm[2] - d2) * theta_sat)
+  Es_u = Es * (d2 * wa2_unsat) / (d2 * wa2_unsat + (ZM[2] - d2) * theta_sat)
   Es_u = clamp(Es_u, 0, d2 * wa2_unsat)
 
   # soil water drainage (unsaturated zone)
@@ -104,17 +104,17 @@ function swb_case2(wa, IWS, pEc, pEs, s_tem, s_vod, soilpar, pftpar, wet, zm, zg
   uex = 0  # excess water to soil surface, mm
 
   # update soil moisture and groundwater table depth
-  if zgw > zm[1] + zm[2] + zm[3]
-    wa2 = (wa2_unsat * d2 + theta_fc * (zm[2] - d2)) / zm[2]
+  if zgw > ZM[1] + ZM[2] + ZM[3]
+    wa2 = (wa2_unsat * d2 + theta_fc * (ZM[2] - d2)) / ZM[2]
     wa3 = theta_fc
-  elseif zgw > zm[1] + zm[2] && zgw < zm[1] + zm[2] + zm[3]
-    wa2 = (wa2_unsat * d2 + theta_fc * (zm[2] - d2)) / zm[2]
-    wa3 = (theta_fc * (zgw - zm[1] - zm[2]) + theta_sat * (zm[1] + zm[2] + zm[3] - zgw)) / zm[3]
-  elseif zgw > zm[1] && zgw < zm[1] + zm[2]
-    wa2 = (wa2_unsat * (zgw - zm[1]) + theta_sat * (zm[1] + zm[2] - zgw)) / zm[2]
+  elseif zgw > ZM[1] + ZM[2] && zgw < ZM[1] + ZM[2] + ZM[3]
+    wa2 = (wa2_unsat * d2 + theta_fc * (ZM[2] - d2)) / ZM[2]
+    wa3 = (theta_fc * (zgw - ZM[1] - ZM[2]) + theta_sat * (ZM[1] + ZM[2] + ZM[3] - zgw)) / ZM[3]
+  elseif zgw > ZM[1] && zgw < ZM[1] + ZM[2]
+    wa2 = (wa2_unsat * (zgw - ZM[1]) + theta_sat * (ZM[1] + ZM[2] - zgw)) / ZM[2]
     wa3 = theta_sat
-  elseif zgw > 0 && zgw < zm[1]
-    wa1 = (wa1 * zgw + theta_sat * (zm[1] - zgw)) / zm[1]
+  elseif zgw > 0 && zgw < ZM[1]
+    wa1 = (wa1 * zgw + theta_sat * (ZM[1] - zgw)) / ZM[1]
     wa2 = theta_sat
     wa3 = theta_sat
   elseif zgw <= 0

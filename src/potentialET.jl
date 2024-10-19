@@ -16,7 +16,7 @@ Potential ET partition
 - pEs   : potential Soil evaporation, mm/day
 
 """
-function potentialET(Rn, G, LAI, Ta, Pa)
+function potentialET(Rn::T, G::T, LAI::T, Ta::T, Pa::T) where {T<:Real}
   k = 0.6  # the empirical extinction coefficient set as 0.6
   alpha = 1.26  # PT coefficient for water saturated surface
 

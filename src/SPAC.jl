@@ -1,10 +1,15 @@
-module SITH
+module SPAC
 
 using Parameters
 using LabelledArrays
 
 export State
 export get_pftpar, get_soilpar
+export potentialET, pTr_partition, interception, snp_balance, runoff_up
+export ZM
+
+# Set the soil depth for three soil layers
+const ZM = [50, 1450, 3500]  # mm
 
 include("DataType.jl")
 include("Param/get_pftpar.jl")
@@ -20,8 +25,6 @@ include("runoff_up.jl")
 
 include("Soil/Soil.jl")
 
-# Set the soil depth for three soil layers
-const zm = [50, 1450, 3500]  # mm
 
 
 """
@@ -53,7 +56,8 @@ const zm = [50, 1450, 3500]  # mm
 - snp    : Snow package (new), mm day-1
 
 """
-function SiTHv2(Rn, Ta, Tas, Topt, Pe, Pa, s_VOD, G, LAI, soilpar, pftpar, wa, zgw, snp)
+function SiTHv2(Rn, Ta, Tas, Topt, Pe, Pa, s_VOD, G, LAI, soilpar, pftpar, state::State)
+  (; sm, zg, snowpack) = state
   # Potential Evaporation allocated to canopy and soil surface
   pEc, pEs = potentialET(Rn, G, LAI, Ta, Pa)
 
@@ -62,20 +66,20 @@ function SiTHv2(Rn, Ta, Tas, Topt, Pe, Pa, s_VOD, G, LAI, soilpar, pftpar, wa, z
 
   # Snow sublimation, snow melt
   new_Pe = max(Pe - Ei, 0)
-  snp, Esb, _, Pnet = snp_balance(new_Pe, Ta, Tas, snp, pEs)
+  snowpack, Esb, _, Pnet = snp_balance(new_Pe, Ta, Tas, snowpack, pEs)
 
-  srf, IWS, Vmax = runoff_up(Pnet, zgw, zm, wa, soilpar)
+  srf, IWS, Vmax = runoff_up(Pnet, zg, ZM, sm, soilpar)
 
   # Variables associated with soil water balance
   new_pEs = max(pEs - Esb, 0)
-  wa, zgw, Tr, Es, uex = sw_balance(IWS, pEc, new_pEs, Ta, Topt, s_VOD, wa, soilpar, pftpar, fwet, zm, zgw)
+  sm, zg, Tr, Es, uex = sw_balance(IWS, pEc, new_pEs, Ta, Topt, s_VOD, sm, soilpar, pftpar, fwet, ZM, zg)
 
   # Total Evapotranspiration
   Et = Tr + Es + Ei + Esb
   srf += uex
-  return Et, Tr, Es, Ei, Esb, wa, srf, zgw, snp, Pnet, IWS, Vmax
+  update_state!(state, sm, zg, snowpack)
+  return Et, Tr, Es, Ei, Esb, srf, Pnet, IWS, Vmax
 end
-
 
 
 end # module SiTH

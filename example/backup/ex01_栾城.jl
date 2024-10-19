@@ -1,5 +1,6 @@
-using SITH, Ipaper, Ipaper.sf, ArchGDAL
+using SITH
 using RTableTools, DataFrames, NaNStatistics
+# using Ipaper, Ipaper.sf, ArchGDAL
 # using GLMakie, MakieLayers
 
 function init_param(; soil_type=2, PFTi=22)
@@ -14,12 +15,12 @@ function init_param(; soil_type=2, PFTi=22)
   soilpar, pftpar, state
 end
 
-cellsize = 0.1
-b = bbox(-180, -90, 180, 90)
-lon, lat = bbox2dims(b; cellsize)
-Soil = read_gdal("data/param_Soil_G010.tif", 1) 
-Topt = read_gdal("data/param_Topt_G010.tif", 1) |> x -> Float32.(x)
-st = fread("./data/siteInfo_CRO_6sp.csv")
+# cellsize = 0.1
+# b = bbox(-180, -90, 180, 90)
+# lon, lat = bbox2dims(b; cellsize)
+# Soil = read_gdal("data/param_Soil_G010.tif", 1) 
+# Topt = read_gdal("data/param_Topt_G010.tif", 1) |> x -> Float32.(x)
+# st = fread("./data/siteInfo_CRO_6sp.csv")
 # serialize("data/param_GO10", (; lon, lat, Soil, Topt))
 
 # x, y = (110.23, 20.3)
@@ -55,8 +56,11 @@ s_VODi = (VOD ./ nanmaximum(VOD)) .^ 0.5 # VOD-stress
 ET, Tr, Es, Ei, Esb, SM, RF, GW = 
   cal_SiTHv2_site(Rn, Tavg, Tas, Prcp, Pa, Gi, LAI, s_VODi, topt, soilpar, pftpar, state, false)
 
-begin
-  using Plots
-  gr(framestyle = :box)
-  plot(ET)
-end
+df_out = DataFrame(; ET, Tr, Es, Ei, Esb, SM1, SM2, SM3, RF, GW)
+fwrite(df_out, "data/Output_栾城_2010.csv")
+
+# begin
+#   using Plots
+#   gr(framestyle = :box)
+#   plot(ET)
+# end

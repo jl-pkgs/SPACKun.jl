@@ -9,10 +9,10 @@ export cal_SiTHv2_site;
   + `snp`   : Snow package (old), mm day-1
 - `spinfg`: spin-up flag, 1 for spin-up, 0 for normal calculation. 循环重复跑100次。
 """
-function cal_SiTHv2_site(Rni, Tai, Tasi, Precii, Pai, Gi, LAIii, s_VODi,
+function cal_SiTHv2_site(Rn, Ta, Tas, Prcp, Pa, G, LAI, s_VOD,
   Top, soilpar, pftpar, state, spin::Bool=false)
 
-  ntime = length(Rni)
+  ntime = length(Rn)
   output = Dict(
     :ETs => zeros(ntime),
     :Trs => zeros(ntime),
@@ -26,10 +26,10 @@ function cal_SiTHv2_site(Rni, Tai, Tasi, Precii, Pai, Gi, LAIii, s_VODi,
 
   if spin == 1 # spin-up
     for k in 1:100 # set the spin-up time (100 years)
-      output = run_model(Rni, Tai, Tasi, Precii, Pai, Gi, LAIii, s_VODi, Top, soilpar, pftpar, state, output)
+      output = run_model(Rn, Ta, Tas, Prcp, Pa, G, LAI, s_VOD, Top, soilpar, pftpar, state, output)
     end
   else
-    output = run_model(Rni, Tai, Tasi, Precii, Pai, Gi, LAIii, s_VODi, Top, soilpar, pftpar, state, output)
+    output = run_model(Rn, Ta, Tas, Prcp, Pa, G, LAI, s_VOD, Top, soilpar, pftpar, state, output)
   end
 
   ETs = output[:ETs]
@@ -46,8 +46,6 @@ end
 
 function run_model(Rni::T, Tai::T, Tasi::T, Prcp::T, Pai::T, Gi::T, LAIii::T, s_VODi::T,
   Top::FT, soilpar, pftpar, state::State, output) where {FT<:Real,T<:AbstractVector{FT}}
-
-  (;sm, zg, snowpack) = state
   ntime = size(Rni, 1)
 
   for i in 1:ntime
@@ -60,17 +58,16 @@ function run_model(Rni::T, Tai::T, Tasi::T, Prcp::T, Pai::T, Gi::T, LAIii::T, s_
     LAI = LAIii[i]
     s_VOD = s_VODi[i]
 
-    Et, Tr, Es, Ei, Esb, sm, srf, zg, snowpack, _, _, _ = SiTHv2(Rn, Ta, Tas, Top, Pe, Pa, s_VOD, G, LAI, soilpar, pftpar, sm, zg, snowpack)
+    Et, Tr, Es, Ei, Esb, srf, _, _, _ = SiTHv2(Rn, Ta, Tas, Top, Pe, Pa, s_VOD, G, LAI, soilpar, pftpar, state)
 
     output[:ETs][i] = Et
     output[:Trs][i] = Tr
     output[:Ess][i] = Es
     output[:Eis][i] = Ei
     output[:Esbs][i] = Esb
-    output[:SM][i, :] = sm
+    output[:SM][i, :] = state.sm
     output[:RF][i] = srf
-    output[:GW][i] = zg
+    output[:GW][i] = state.zg
   end
-  update_state!(state, sm, zg, snowpack)
   return output
 end

@@ -1,4 +1,4 @@
-function swb_case3(wa, IWS, pEc, pEs, s_tem, s_vod, soilpar, pftpar, wet, zm, zgw)
+function swb_case3(wa, IWS, pEc, pEs, s_tem, s_vod, soilpar, pftpar, wet, ZM, zgw)
   # INPUT:
   # wa      -- soil water content, 3 layers
   # IWS     -- total water enter into soil surface, mm
@@ -7,13 +7,13 @@ function swb_case3(wa, IWS, pEc, pEs, s_tem, s_vod, soilpar, pftpar, wet, zm, zg
   # soilpar -- soil-related parameters
   # pftpar  -- plant-related parameters
   # wet     -- wetness indice
-  # zm      -- soil layer depth, 3 layers
+  # ZM      -- soil layer depth, 3 layers
   # zgw     -- groundwater table depth, mm
 
   # unsaturated depth in layer #1~3
-  d1 = zm[1]
-  d2 = zm[2]
-  d3 = zgw - zm[1] - zm[2]
+  d1 = ZM[1]
+  d2 = ZM[2]
+  d3 = zgw - ZM[1] - ZM[2]
 
   wa1 = wa[1]
   wa2 = wa[2]
@@ -61,7 +61,7 @@ function swb_case3(wa, IWS, pEc, pEs, s_tem, s_vod, soilpar, pftpar, wet, zm, zg
 
   # layer #3
   # existed water column in the unsaturated zone #3
-  wa3_unsat = (wa3 * zm[3] - theta_sat * (zm[3] - d3)) / d3
+  wa3_unsat = (wa3 * ZM[3] - theta_sat * (ZM[3] - d3)) / d3
   wc_s3 = d3 * wa3_unsat
 
   # maximum water column in d3
@@ -74,7 +74,7 @@ function swb_case3(wa, IWS, pEc, pEs, s_tem, s_vod, soilpar, pftpar, wet, zm, zg
     # soil water content in unsaturated zone
     wa3_unsat = wa3_unsat + vw2 / d3
     # calculate the adjusted swc#3 with considering the groundwater depth
-    wa3 = (wa3_unsat * d3 + theta_sat * (zm[3] - d3)) / zm[3]
+    wa3 = (wa3_unsat * d3 + theta_sat * (ZM[3] - d3)) / ZM[3]
     # no exceeded water
     vw3 = 0
   end
@@ -82,11 +82,11 @@ function swb_case3(wa, IWS, pEc, pEs, s_tem, s_vod, soilpar, pftpar, wet, zm, zg
   # ====== water consumption ====== #
   # Evapotranspiration
   # distributed the potential Tr to different layers
-  Tr_p1, Tr_p2, Tr_p3 = pTr_partition(pEc, wa1, wa2, wa3, soilpar, pftpar, wet, zm)
+  Tr_p1, Tr_p2, Tr_p3 = pTr_partition(pEc, wa1, wa2, wa3, soilpar, pftpar, wet, ZM)
 
   # divide Tr_p3 into unsaturated and saturated zone at the layer #3
-  Tr_p3_u = Tr_p3 * (d3 * wa3_unsat) / (d3 * wa3_unsat + (zm[3] - d3) * theta_sat)
-  Tr_p3_g = Tr_p3 * ((zm[3] - d3) * theta_sat) / (d3 * wa3_unsat + (zm[3] - d3) * theta_sat)
+  Tr_p3_u = Tr_p3 * (d3 * wa3_unsat) / (d3 * wa3_unsat + (ZM[3] - d3) * theta_sat)
+  Tr_p3_g = Tr_p3 * ((ZM[3] - d3) * theta_sat) / (d3 * wa3_unsat + (ZM[3] - d3) * theta_sat)
 
   # calculate the moisture constrains for plant and soil in unsaturated zone
   f_sm1, f_sm_s1 = swc_stress(wa1, soilpar, pEc, pftpar)
@@ -182,15 +182,15 @@ function swb_case3(wa, IWS, pEc, pEs, s_tem, s_vod, soilpar, pftpar, wet, zm, zg
   uex = 0  # excess water to soil surface, mm
 
   # update soil moisture and groundwater table depth
-  if zgw > zm[1] + zm[2] + zm[3]
-    wa3 = (wa3_unsat * d3 + theta_fc * (zm[3] - d3)) / zm[3]
-  elseif zgw > zm[1] + zm[2] && zgw < zm[1] + zm[2] + zm[3]
-    wa3 = (wa3_unsat * (zgw - zm[1] - zm[2]) + theta_sat * (zm[1] + zm[2] + zm[3] - zgw)) / zm[3]
-  elseif zgw > zm[1] && zgw < zm[1] + zm[2]
-    wa2 = (wa2 * (zgw - zm[1]) + theta_sat * (zm[1] + zm[2] - zgw)) / zm[2]
+  if zgw > ZM[1] + ZM[2] + ZM[3]
+    wa3 = (wa3_unsat * d3 + theta_fc * (ZM[3] - d3)) / ZM[3]
+  elseif zgw > ZM[1] + ZM[2] && zgw < ZM[1] + ZM[2] + ZM[3]
+    wa3 = (wa3_unsat * (zgw - ZM[1] - ZM[2]) + theta_sat * (ZM[1] + ZM[2] + ZM[3] - zgw)) / ZM[3]
+  elseif zgw > ZM[1] && zgw < ZM[1] + ZM[2]
+    wa2 = (wa2 * (zgw - ZM[1]) + theta_sat * (ZM[1] + ZM[2] - zgw)) / ZM[2]
     wa3 = theta_sat
-  elseif zgw > 0 && zgw < zm[1]
-    wa1 = (wa1 * zgw + theta_sat * (zm[1] - zgw)) / zm[1]
+  elseif zgw > 0 && zgw < ZM[1]
+    wa1 = (wa1 * zgw + theta_sat * (ZM[1] - zgw)) / ZM[1]
     wa2 = theta_sat
     wa3 = theta_sat
   elseif zgw <= 0

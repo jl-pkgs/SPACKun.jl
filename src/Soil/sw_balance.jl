@@ -1,4 +1,4 @@
-function sw_balance(IWS, pEc, pEs, Ta, Topt, s_VOD, wa, soilpar, pftpar, wet, zm, zgw)
+function sw_balance(IWS, pEc, pEs, Ta, Topt, s_VOD, wa, soilpar, pftpar, wet, ZM, zgw)
   # ----INPUT:
   # IWS     -- total water enter into soil surface, mm
   # pEc     -- potential ET allocate to plant, mm
@@ -10,7 +10,7 @@ function sw_balance(IWS, pEc, pEs, Ta, Topt, s_VOD, wa, soilpar, pftpar, wet, zm
   # soilpar -- soil-related parameters
   # pftpar  -- plant-related parameters
   # wet     -- wetness fraction indice
-  # zm      -- soil layer depth, 3 layers
+  # ZM      -- soil layer depth, 3 layers
   # zgw     -- groundwater table depth, mm
   # ----OUTPUT:
   # Tr      -- actual plant transpiration, mm
@@ -25,19 +25,19 @@ function sw_balance(IWS, pEc, pEs, Ta, Topt, s_VOD, wa, soilpar, pftpar, wet, zm
 
   # Case 0: groundwater overflow
   if zgw <= 0
-    wa, zgw, Tr, Es, uex = swb_case0(wa, IWS, pEc, pEs, s_tem, s_VOD, soilpar, pftpar, wet, zm, zgw)
+    wa, zgw, Tr, Es, uex = swb_case0(wa, IWS, pEc, pEs, s_tem, s_VOD, soilpar, pftpar, wet, ZM, zgw)
     # Case 1: groundwater table in layer 1
-  elseif zgw > 0 && zgw <= zm[1]
-    wa, zgw, Tr, Es, uex = swb_case1(wa, IWS, pEc, pEs, s_tem, s_VOD, soilpar, pftpar, wet, zm, zgw)
+  elseif zgw > 0 && zgw <= ZM[1]
+    wa, zgw, Tr, Es, uex = swb_case1(wa, IWS, pEc, pEs, s_tem, s_VOD, soilpar, pftpar, wet, ZM, zgw)
     # Case 2: groundwater table in layer 2
-  elseif zgw > zm[1] && zgw <= zm[1] + zm[2]
-    wa, zgw, Tr, Es, uex = swb_case2(wa, IWS, pEc, pEs, s_tem, s_VOD, soilpar, pftpar, wet, zm, zgw)
+  elseif zgw > ZM[1] && zgw <= ZM[1] + ZM[2]
+    wa, zgw, Tr, Es, uex = swb_case2(wa, IWS, pEc, pEs, s_tem, s_VOD, soilpar, pftpar, wet, ZM, zgw)
     # Case 3: groundwater table in layer 3
-  elseif zgw > zm[1] + zm[2] && zgw < zm[1] + zm[2] + zm[3]
-    wa, zgw, Tr, Es, uex = swb_case3(wa, IWS, pEc, pEs, s_tem, s_VOD, soilpar, pftpar, wet, zm, zgw)
+  elseif zgw > ZM[1] + ZM[2] && zgw < ZM[1] + ZM[2] + ZM[3]
+    wa, zgw, Tr, Es, uex = swb_case3(wa, IWS, pEc, pEs, s_tem, s_VOD, soilpar, pftpar, wet, ZM, zgw)
     # Case 4: groundwater table below layer 3
   else
-    wa, zgw, Tr, Es, uex = swb_case4(wa, IWS, pEc, pEs, s_tem, s_VOD, soilpar, pftpar, wet, zm, zgw)
+    wa, zgw, Tr, Es, uex = swb_case4(wa, IWS, pEc, pEs, s_tem, s_VOD, soilpar, pftpar, wet, ZM, zgw)
   end
 
   return wa, zgw, Tr, Es, uex

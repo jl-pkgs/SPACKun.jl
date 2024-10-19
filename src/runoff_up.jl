@@ -1,66 +1,52 @@
 """
-INPUT:
-- zm       : Soil depth of different layers (mm)
-- wa       : The antecedent soil water content (mm) expressed as a function of
-  the WHC in that layer
-- soilpar  : Soil parameters according to Soil type
-- Pnet     : Net precipitation = P-I+Snowmelt
-- zgw      : groundwater table depth
-
-OUTPUT:
-- srf      : Surface Runoff, mm
-- IWS      : Water enter into soil surface, mm
-
-Reference:
-1. Choudhury BJ, Digirolamo NE, 1998
-2. SCS (1985). National Engineering Handbook. Section 4: Hydrology. Washington,
-   DC: Soil Conservation Service, U.S. Department of Agriculture.
-3. SCS (1986). Urban Hydrology for Small Watersheds, Technical Release No. 55.
-   Washington, DC: Soil Conservation Service, U.S. Department of Agriculture.
+# INPUT:
+  ZM       : Soil depth of different layers (mm)
+  wa       : The antecedent soil water content (mm)
+             expressed as a function of the WHC in that layer
+  soilpar  : Soil parameters according to Soil type
+  Pnet     : Net precipitation = P-I+Snowmelt
+  zgw      : Groundwater table depth
+  
+# OUTPUT:
+  srf      : Surface Runoff (mm)
+  IWS      : Water that enters into the soil surface (mm)
+  Vmax     : Maximum water retention capacity (mm)
 """
-function runoff_up(Pnet, zgw, zm, wa, soilpar)
-  theta_sat = soilpar[3]  # saturated wa
+function runoff_up(Pnet, zgw, ZM, wa, soilpar)
+  theta_sat = soilpar[3]  # saturated soil moisture
 
   Vmax = 0.0
-  
   if zgw <= 0
-    # exceeded groundwater on the soil surface
-    Vmax = 0
-    srf = 0 - zgw * theta_sat
-    Pnet = 0
+    # Exceeded groundwater on the soil surface
+    Vmax = 0.0
+    srf = -zgw * theta_sat
+    Pnet = 0.0
   else
-    if zgw > 0 && zgw <= zm[1]
-      d1 = zgw  # the thickness of unsaturated soil, (mm)
-
-      # the unsaturated soil water, (mm)
-      wa1_unsat = (wa[1] * zm[1] - theta_sat * (zm[1] - d1)) / d1
-
-      # calculate the overall soil water retention capacity, Vmax
+    if zgw > 0 && zgw <= ZM[1]
+      d1 = zgw  # Thickness of unsaturated soil (mm)
+      # Unsaturated soil water (mm)
+      wa1_unsat = (wa[1] * ZM[1] - theta_sat * (ZM[1] - d1)) / d1
+      # Calculate overall soil water retention capacity (Vmax)
       Vmax = d1 * (theta_sat - wa1_unsat)
-    elseif zgw > zm[1] && zgw <= zm[1] + zm[2]
-      # the thickness of unsaturated soil, (mm)
-      d1 = zm[1]
-      d2 = zgw - zm[1]
-
-      # the unsaturated soil water, (mm)
+    elseif zgw > ZM[1] && zgw <= ZM[1] + ZM[2]
+      d1 = ZM[1]
+      d2 = zgw - ZM[1]
+      # Unsaturated soil water (mm)
       wa1_unsat = wa[1]
-      wa2_unsat = (wa[2] * zm[2] - theta_sat * (zm[2] - d2)) / d2
-
-      # calculate the overall soil water retention capacity, Vmax
+      wa2_unsat = (wa[2] * ZM[2] - theta_sat * (ZM[2] - d2)) / d2
+      # Calculate overall soil water retention capacity (Vmax)
       Vmax = d1 * (theta_sat - wa1_unsat) + d2 * (theta_sat - wa2_unsat)
-    elseif zgw > zm[1] + zm[2]
-      # the thickness of unsaturated soil, (mm)
-      d1 = zm[1]
-      d2 = zm[2]
-
-      # the unsaturated soil water, (mm)
+    elseif zgw > ZM[1] + ZM[2]
+      d1 = ZM[1]
+      d2 = ZM[2]
+      # Unsaturated soil water (mm)
       wa1_unsat = wa[1]
       wa2_unsat = wa[2]
-
-      # calculate the overall soil water retention capacity, Vmax
+      # Calculate overall soil water retention capacity (Vmax)
       Vmax = d1 * (theta_sat - wa1_unsat) + d2 * (theta_sat - wa2_unsat)
     end
 
+    # Calculate surface runoff (srf)
     if Pnet > 0.2 * Vmax
       srf = (Pnet - 0.2 * Vmax)^2 / (Pnet + 0.8 * Vmax)
     else
@@ -68,11 +54,11 @@ function runoff_up(Pnet, zgw, zm, wa, soilpar)
     end
   end
 
-  # actual water enter into the soil surface, (mm)
+  # Actual water entering the soil surface (IWS)
   IWS = min(Vmax, Pnet - srf)
   IWS = max(0, IWS)
 
-  # redundant water --> runoff (balance) # 限定边界条件
+  # Redundant water -> runoff (balance) under boundary conditions
   if IWS == Vmax || Vmax <= 0
     srf = Pnet - Vmax
   end
