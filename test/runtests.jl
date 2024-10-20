@@ -1,4 +1,5 @@
 using Test, SPAC
+include("test_栾城_2010.jl")
 
 @testset "potentialET" begin
   Rn = 100.0
@@ -28,8 +29,6 @@ end
   fwet = 0.5
   soilpar = get_soilpar(2) #|> collect
   pftpar = get_pftpar(22) #|> collect
-  r = pTr_partition(pEc, wa1, wa2, wa3, soilpar, pftpar, fwet, ZM)
+  r = pTr_partition(pEc, fwet, wa1, wa2, wa3, soilpar, pftpar, ZM)
   @test r == (0.004508186497043249, 9.864271368015835, 0.1312204454871218)
 end
-
-include("test_栾城_2010.jl")

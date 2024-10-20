@@ -29,14 +29,13 @@ export SiTHv2_site
 - snp    : Snow package (new), mm day-1
 
 """
-function SiTHv2(Rn, Ta, Tas, Topt, Pe, Pa, s_VOD, G, LAI, soilpar, pftpar, state::State)
+function SiTHv2(Rn, Ta, Tas, Topt, P, Pa, s_VOD, G, LAI, soilpar, pftpar, state::State)
   (; wa, zgw, snowpack) = state
   pEc, pEs = potentialET(Rn, G, LAI, Ta, Pa) # PET allocated to canopy and soil surface
-  Ei, fwet, _ = interception(Pe, pEc, LAI, pftpar)  # Interception evaporation
+  Ei, fwet, PE = interception(P, pEc, LAI, pftpar)  # Interception evaporation
 
   # Snow sublimation, snow melt
-  new_Pe = max(Pe - Ei, 0)
-  state.snowpack, Esb, _, Pnet = snp_balance(new_Pe, Ta, Tas, snowpack, pEs)
+  state.snowpack, Esb, _, Pnet = snp_balance(PE, Ta, Tas, snowpack, pEs)
 
   srf, IWS, Vmax = runoff_up(Pnet, zgw, ZM, wa, soilpar)
 
@@ -50,21 +49,12 @@ function SiTHv2(Rn, Ta, Tas, Topt, Pe, Pa, s_VOD, G, LAI, soilpar, pftpar, state
 end
 
 
-function _run_model(Rni::T, Tai::T, Tasi::T, Prcp::T, Pai::T, Gi::T, LAIii::T, s_VODi::T,
+function _run_model(Rn::T, Ta::T, Tas::T, Prcp::T, Pa::T, G::T, LAI::T, s_VOD::T,
   Top::FT, soilpar, pftpar, state::State, output) where {FT<:Real,T<:AbstractVector{FT}}
-  ntime = size(Rni, 1)
+  ntime = size(Rn, 1)
 
   for i in 1:ntime
-    Rn = Rni[i]
-    Ta = Tai[i]
-    Tas = Tasi[i]
-    Pe = Prcp[i]
-    Pa = Pai[i]
-    G = Gi[i]
-    LAI = LAIii[i]
-    s_VOD = s_VODi[i]
-
-    Et, Tr, Es, Ei, Esb, srf, _, _, _ = SiTHv2(Rn, Ta, Tas, Top, Pe, Pa, s_VOD, G, LAI, soilpar, pftpar, state)
+    Et, Tr, Es, Ei, Esb, srf, _, _, _ = SiTHv2(Rn[i], Ta[i], Tas[i], Top, Prcp[i], Pa[i], s_VOD[i], G[i], LAI[i], soilpar, pftpar, state)
 
     output[:ETs][i] = Et
     output[:Trs][i] = Tr

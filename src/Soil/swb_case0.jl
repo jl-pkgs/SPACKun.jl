@@ -1,4 +1,4 @@
-function swb_case0(wa, IWS, pEc, pEs, s_tem, s_vod, soilpar, pftpar, wet, zm, zgw)
+function swb_case0(wa, IWS, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, zm, zgw)
   # INPUT:
   # wa      -- soil water content, 3 layers
   # IWS     -- total water entering into soil surface (mm)
@@ -16,7 +16,7 @@ function swb_case0(wa, IWS, pEc, pEs, s_tem, s_vod, soilpar, pftpar, wet, zm, zg
 
   # ====== Water consumption ====== #
   # Evapotranspiration
-  Tr_p1, Tr_p2, Tr_p3 = pTr_partition(pEc, wa1, wa2, wa3, soilpar, pftpar, wet, zm)
+  Tr_p1, Tr_p2, Tr_p3 = pTr_partition(pEc, fwet, wa1, wa2, wa3, soilpar, pftpar, zm)
 
   # Actual transpiration
   Tr1 = s_vod * s_tem * Tr_p1

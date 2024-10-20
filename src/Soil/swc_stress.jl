@@ -30,7 +30,7 @@ function swc_stress(wa::T, pET::T, soilpar, pftpar) where {T<:Real}
   (; Hc) = pftpar # canopy height, Zhang 2022
 
   k = Hc^0.5
-  k = 4 * ((k - 0.7) / 4.3) + 1 # scale [1, 25] to [1, 5]
+  k = 4 * ((k - 0.7) / 4.3) + 1 # scale [1, 25] to [1, 5], `CH_scalar`
 
   b = 0.1
   p = 1 / (1 + pET) - b / (1 + Hc) # Zhang 2022, Eq. 9

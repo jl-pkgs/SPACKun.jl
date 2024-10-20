@@ -1,4 +1,4 @@
-function swb_case3(wa, IWS, pEc, pEs, s_tem, s_vod, soilpar, pftpar, wet, zm, zgw)
+function swb_case3(wa, IWS, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, zm, zgw)
   # INPUT:
   # wa      -- soil water content, 3 layers
   # IWS     -- total water enter into soil surface, mm
@@ -60,7 +60,7 @@ function swb_case3(wa, IWS, pEc, pEs, s_tem, s_vod, soilpar, pftpar, wet, zm, zg
   end
 
   # ====== Water Consumption ====== #
-  Tr_p1, Tr_p2, Tr_p3 = pTr_partition(pEc, wa1, wa2, wa3, soilpar, pftpar, wet, zm)
+  Tr_p1, Tr_p2, Tr_p3 = pTr_partition(pEc, fwet, wa1, wa2, wa3, soilpar, pftpar, zm)
   Tr_p3_u = Tr_p3 * (d3 * wa3_unsat) / (d3 * wa3_unsat + (zm[3] - d3) * θ_sat)
   Tr_p3_g = Tr_p3 * ((zm[3] - d3) * θ_sat) / (d3 * wa3_unsat + (zm[3] - d3) * θ_sat)
 

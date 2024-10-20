@@ -1,4 +1,4 @@
-function swb_case4(wa, IWS, pEc, pEs, s_tem, s_vod, soilpar, pftpar, wet, zm, zgw)
+function swb_case4(wa, IWS, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, zm, zgw)
   # INPUT:
   # wa      -- soil water content, 3 layers
   # IWS     -- total water enter into soil surface, mm
@@ -71,7 +71,7 @@ function swb_case4(wa, IWS, pEc, pEs, s_tem, s_vod, soilpar, pftpar, wet, zm, zg
   # Evapotranspiration #
 
   # Distributed the potential T to different layers
-  Tr_p1, Tr_p2, Tr_p3 = pTr_partition(pEc, wa1, wa2, wa3, soilpar, pftpar, wet, zm)
+  Tr_p1, Tr_p2, Tr_p3 = pTr_partition(pEc, fwet, wa1, wa2, wa3, soilpar, pftpar, zm)
 
   # Calculate the moisture constrains for plant and soil in unsaturated zone
   f_sm1, f_sm_s1 = swc_stress(wa1, pEc, soilpar, pftpar)

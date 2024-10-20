@@ -10,7 +10,7 @@ Partition PET into three soil layers
 # OUTPUT:
 - Tr_p :  separate potential Transpiration
 """
-function pTr_partition(pEc, wa1, wa2, wa3, soilpar, pftpar, fwet, ZM)
+function pTr_partition(pEc, fwet, wa1, wa2, wa3, soilpar, pftpar, ZM)
   (; b, θ_sat) = soilpar
   (; D50, D95) = pftpar
   c = -2.944 / log(D95 / D50)
