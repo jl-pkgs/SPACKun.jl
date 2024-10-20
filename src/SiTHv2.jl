@@ -37,7 +37,7 @@ function SiTHv2(Rn, Ta, Tas, Topt, P, Pa, s_VOD, G, LAI, soilpar, pftpar, state:
   # Snow sublimation, snow melt
   state.snowpack, Esb, _, Pnet = snp_balance(PE, Ta, Tas, snowpack, pEs)
 
-  srf, IWS, Vmax = runoff_up(Pnet, zgw, ZM, wa, soilpar)
+  srf, IWS, Vmax = runoff_up(Pnet, wa, zgw, ZM, soilpar)
 
   # Variables associated with soil water balance
   new_pEs = max(pEs - Esb, 0)

@@ -18,7 +18,7 @@ end
   zgw = 1000.0 # mm
   wa = [0.3, 0.3, 0.3]
   soilpar = get_soilpar(2)
-  srf, IWS, Vmax = runoff_up(Pnet, zgw, ZM, wa, soilpar)
+  srf, IWS, Vmax = runoff_up(Pnet, wa, zgw, ZM, soilpar)
   @test Vmax ≈ 129
   @test IWS ≈ 20
 end
