@@ -29,9 +29,9 @@ export SiTHv2_site
 - snp    : Snow package (new), mm day-1
 
 """
-function SiTHv2(Rn, Ta, Tas, Topt, P, Pa, s_VOD, G, LAI, soilpar, pftpar, state::State)
+function SiTHv2(Rn, Ta, Tas, Topt, P, Pa, s_VOD, G, LAI, soilpar, pftpar, state::State; Kc=1.0)
   (; wa, zgw, snowpack) = state
-  pEc, pEs = potentialET(Rn, G, LAI, Ta, Pa) # PET allocated to canopy and soil surface
+  pEc, pEs = potentialET(Rn, G, LAI, Ta, Pa; Kc) # PET allocated to canopy and soil surface
   Ei, fwet, PE = interception(P, pEc, LAI, pftpar)  # Interception evaporation
 
   # Snow sublimation, snow melt
@@ -50,12 +50,13 @@ end
 
 
 function _run_model(Rn::T, Ta::T, Tas::T, Prcp::T, Pa::T, G::T, LAI::T, s_VOD::T,
-  Top::FT, soilpar, pftpar, state::State, output) where {FT<:Real,T<:AbstractVector{FT}}
-  ntime = size(Rn, 1)
+  Top::FT, soilpar, pftpar, state::State, output; Kc=1.0) where {FT<:Real,T<:AbstractVector{FT}}
+  ntime = size(Rn, 1) # 1365
 
   for i in 1:ntime
-    Et, Tr, Es, Ei, Esb, srf, _, _, _ = SiTHv2(Rn[i], Ta[i], Tas[i], Top, Prcp[i], Pa[i], s_VOD[i], G[i], LAI[i], soilpar, pftpar, state)
-
+    _Kc = 180 <= i <= 220 ? Kc : 1.0
+    Et, Tr, Es, Ei, Esb, srf, _, _, _ = SiTHv2(Rn[i], Ta[i], Tas[i], Top, Prcp[i], Pa[i], s_VOD[i], G[i], LAI[i], soilpar, pftpar, state; Kc=_Kc)
+    
     output[:ETs][i] = Et
     output[:Trs][i] = Tr
     output[:Ess][i] = Es
@@ -79,7 +80,7 @@ end
 - `spinfg`: spin-up flag, 1 for spin-up, 0 for normal calculation. 循环重复跑100次。
 """
 function SiTHv2_site(Rn, Ta, Tas, Prcp, Pa, G, LAI, s_VOD,
-  Top, soilpar, pftpar, state, spin::Bool=false)
+  Top, soilpar, pftpar, state, spin::Bool=false; Kc=1.0)
 
   ntime = length(Rn)
   output = Dict(
@@ -94,10 +95,10 @@ function SiTHv2_site(Rn, Ta, Tas, Prcp, Pa, G, LAI, s_VOD,
   )
   if spin == 1 # spin-up
     for k in 1:100 # set the spin-up time (100 years)
-      output = _run_model(Rn, Ta, Tas, Prcp, Pa, G, LAI, s_VOD, Top, soilpar, pftpar, state, output)
+      output = _run_model(Rn, Ta, Tas, Prcp, Pa, G, LAI, s_VOD, Top, soilpar, pftpar, state, output; Kc)
     end
   else
-    output = _run_model(Rn, Ta, Tas, Prcp, Pa, G, LAI, s_VOD, Top, soilpar, pftpar, state, output)
+    output = _run_model(Rn, Ta, Tas, Prcp, Pa, G, LAI, s_VOD, Top, soilpar, pftpar, state, output; Kc)
   end
 
   ETs = output[:ETs]

@@ -46,7 +46,7 @@ function test_LuanCheng(; zgw=0.0)
   SM3 = SM[:, 3]
   df_jl = DataFrame(; ET, Tr, Es, Ei, Esb, RF, GW, SM1, SM2, SM3)
 
-  fwrite(df_jl, "$dir_root/data/OUTPUT_栾城_2010_zgw=$(Int(zgw)).csv")
+  fwrite(df_jl, "$dir_root/data/OUTPUT/OUTPUT_栾城_2010_zgw=$(Int(zgw)).csv")
 end
 
 # const ZM = [50, 1450, 3500]  # mm
@@ -57,7 +57,7 @@ end
   for zgw = zgws
     test_LuanCheng(; zgw)
     
-    f_jl = "$dir_root/data/OUTPUT_栾城_2010_zgw=$(Int(zgw)).csv"
+    f_jl = "$dir_root/data/OUTPUT/OUTPUT_栾城_2010_zgw=$(Int(zgw)).csv"
     f_mat = "$dir_root/data/OUTPUT/OUTPUT_栾城_2010_MATLAB_zgw=$(Int(zgw)).csv"
 
     df_jl = fread(f_jl)

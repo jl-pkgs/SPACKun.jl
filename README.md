@@ -11,3 +11,10 @@
 using Pkg
 Pkg.add(url="https://github.com/CUG-hydro/SPAC.jl")
 ```
+
+## TODO
+
+- [ ] 测试三种土壤水运动方案
+  + [x] SITH
+  + [ ] BEPS
+  + [ ] Bonan2019

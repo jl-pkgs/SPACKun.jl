@@ -15,7 +15,7 @@ Potential ET partition
 - pEc   : potential Transpiration, mm/day
 - pEs   : potential Soil evaporation, mm/day
 """
-function potentialET(Rn::T, G::T, LAI::T, Ta::T, Pa::T) where {T<:Real}
+function potentialET(Rn::T, G::T, LAI::T, Ta::T, Pa::T; Kc::T = 1.0) where {T<:Real}
   k = 0.6  # the empirical extinction coefficient set as 0.6
   # Radiation located into soil and canopy, separately
   Rns = exp(-k * LAI) * Rn
@@ -26,7 +26,7 @@ function potentialET(Rn::T, G::T, LAI::T, Ta::T, Pa::T) where {T<:Real}
   γ = (Cp * Pa) / (ϵ * λ)              # Psychrometric constant (kPa/degC)
 
   # Potential Transpiration and Soil evaporation, mm/day
-  pEc = ET0_PT1972(Rnc, Δ, γ, λ)
+  pEc = ET0_PT1972(Rnc, Δ, γ, λ) * Kc
   pEs = ET0_PT1972(Rns - G, Δ, γ, λ)
   return pEc, pEs
 end
