@@ -1,15 +1,14 @@
+# INPUT:
+# wa      -- soil water content, 3 layers
+# IWS     -- total water entering into soil surface (mm)
+# pEc     -- potential ET allocated to plants (mm)
+# pEs     -- potential ET allocated to soil surface (mm)
+# soilpar -- soil-related parameters
+# pftpar  -- plant-related parameters
+# wet     -- wetness index
+# zm      -- soil layer depth (3 layers)
+# zgw     -- groundwater table depth (mm)
 function swb_case0(wa, IWS, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, zm, zgw)
-  # INPUT:
-  # wa      -- soil water content, 3 layers
-  # IWS     -- total water entering into soil surface (mm)
-  # pEc     -- potential ET allocated to plants (mm)
-  # pEs     -- potential ET allocated to soil surface (mm)
-  # soilpar -- soil-related parameters
-  # pftpar  -- plant-related parameters
-  # wet     -- wetness index
-  # zm      -- soil layer depth (3 layers)
-  # zgw     -- groundwater table depth (mm)
-
   # Old soil water content in layer 1-3
   wa1, wa2, wa3 = wa
   (; θ_sat, θ_fc) = soilpar
