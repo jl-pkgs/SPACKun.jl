@@ -72,7 +72,7 @@ function GW_update!(θ::Vector{T}, zwt::T, ∑::T, sy::T=0.2) where {T<:Real}
   else # 排泄，水位下降
     for j = jwt+1:N
       z1 = z₊ₕ[j]
-      _layer = -clamp(∑, 0, sy * (z1 - zwt)) # 剩余排泄空间
+      _layer = clamp(∑, sy * (zwt - z1), 0) # 剩余排泄空间, Note: ∑ < 0
 
       θ[j] += _layer / Δz[j]   # 可能存在亏损
       zwt -= _layer / sy      # 需要注意单位转换
