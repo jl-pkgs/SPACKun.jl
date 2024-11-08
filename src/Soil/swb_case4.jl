@@ -8,69 +8,26 @@
 # wet     -- wetness indice
 # Δz      -- soil layer depth, 3 layers
 # zwt     -- groundwater table depth, mm
-function swb_case4(θ, IWS, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, Δz, zwt)
+function swb_case4(θ, I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, Δz, zwt)
   # Unsaturated depth in layer #1~3
   d1 = Δz[1]
   d2 = Δz[2]
   d3 = Δz[3]
 
-  wa1, wa2, wa3 = θ
   (; Ksat, θ_sat, θ_wp) = soilpar
   
-  # ====== Water Supplement ====== #
-  # Layer #1
-  # Existed water column in the unsaturated zone #1
-  wa1_unsat = wa1
-  wc_s1 = d1 * wa1_unsat
-
-  # Maximum water column in d1
-  wc_m1 = d1 * θ_sat
-
-  if wc_s1 + IWS >= wc_m1  # saturated
-    wa1 = θ_sat  # current soil water content
-    vw1 = wc_s1 + IWS - wc_m1  # exceeded water
-  else  # unsaturated
-    wa1 = wa1_unsat + IWS / d1  # soil water content in unsaturated zone
-    vw1 = 0
-  end
-
-  # Layer #2
-  # Existed water column in the unsaturated zone #2
-  wa2_unsat = wa2
-  wc_s2 = d2 * wa2_unsat
-
-  # Maximum water column in d2
-  wc_m2 = d2 * θ_sat
-
-  if wc_s2 + vw1 >= wc_m2
-    wa2 = θ_sat  # current soil water content
-    vw2 = wc_s2 + vw1 - wc_m2  # exceeded water to layer #3
-  else
-    wa2 = wa2_unsat + vw1 / d2  # soil water content in unsaturated zone
-    vw2 = 0  # no exceeded water
-  end
-
-  # Layer #3
-  # Existed water column in the unsaturated zone #3
-  wa3_unsat = wa3
-  wc_s3 = d3 * wa3_unsat
-
-  # Maximum water column in d3
-  wc_m3 = d3 * θ_sat
-
-  if wc_s3 + vw2 >= wc_m3
-    wa3 = θ_sat  # current soil water content
-    vw3 = wc_s3 + vw2 - wc_m3  # exceeded water
-  else
-    wa3 = wa3_unsat + vw2 / d3  # soil water content in unsaturated zone
-    vw3 = 0  # no exceeded water
-  end
+  # # ====== Water Supplement ====== #
+  wa1_unsat = θ[1] # 需要更新
+  wa2_unsat = θ[2] # 需要更新
+  wa3_unsat = θ[3] # 需要更新
+  vw3 = SM_recharge!(θ, I; Δz, θ_sat)
+  wa1, wa2, wa3 = θ
 
   # ====== Water Consumption ====== #
   # Evapotranspiration #
 
   # Distributed the potential T to different layers
-  Tr_p1, Tr_p2, Tr_p3 = pTr_partition(pEc, fwet, wa1, wa2, wa3, soilpar, pftpar, Δz)
+  Tr_p1, Tr_p2, Tr_p3 = pTr_partition(pEc, fwet, θ, soilpar, pftpar, Δz)
 
   # Calculate the moisture constrains for plant and soil in unsaturated zone
   f_sm1, f_sm_s1 = swc_stress(wa1, pEc, soilpar, pftpar)

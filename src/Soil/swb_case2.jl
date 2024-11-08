@@ -8,46 +8,23 @@
 # wet     -- wetness index
 # Δz      -- soil layer depths, 3 layers
 # zwt     -- groundwater table depth (mm)
-function swb_case2(θ, IWS, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, Δz, zwt)
+function swb_case2(θ, I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, Δz, zwt)
   # Unsaturated depth in layer #1~2
   d1 = Δz[1]
   d2 = zwt - d1
-  wa1, wa2, wa3 = θ
   (; Ksat, θ_sat, θ_fc, θ_wp) = soilpar
 
-  # ====== Water Supplement ====== #
-  # Layer #1 - Unsaturated zone
-  wa1_unsat = wa1
-  wc_s1 = d1 * wa1_unsat
-  wc_m1 = d1 * θ_sat
-
-  if wc_s1 + IWS >= wc_m1
-    wa1 = θ_sat
-    vw1 = wc_s1 + IWS - wc_m1
-  else
-    wa1 = wa1_unsat + IWS / d1
-    vw1 = 0
-  end
-
-  # Layer #2 - Unsaturated zone
-  wa2_unsat = (wa2 * Δz[2] - θ_sat * (Δz[2] - d2)) / d2
-  wc_s2 = d2 * wa2_unsat
-  wc_m2 = d2 * θ_sat
-
-  if wc_s2 + vw1 >= wc_m2
-    wa2_unsat = θ_sat
-    vw2 = wc_s2 + vw1 - wc_m2
-  else
-    wa2_unsat += vw1 / d2
-    wa2 = (wa2_unsat * d2 + θ_sat * (Δz[2] - d2)) / Δz[2]
-    vw2 = 0
-  end
-
+  # ====== Water Supplement ====== #  
+  wa1_unsat = θ[1] # 需要更新
+  vw2 = SM_recharge!(θ, I; Δz, θ_sat)
+  wa2_unsat, j = find_θ_unsat(θ, zwt; z₊ₕ, Δz, θ_sat)
+  wa1, wa2, wa3 = θ
+  
   # Layer #3 - Fully saturated with groundwater
 
   # ====== Water Consumption ====== #
   # Evapotranspiration
-  Tr_p1, Tr_p2, Tr_p3 = pTr_partition(pEc, fwet, wa1, wa2, wa3, soilpar, pftpar, Δz)
+  Tr_p1, Tr_p2, Tr_p3 = pTr_partition(pEc, fwet, θ, soilpar, pftpar, Δz)
 
   # Transpiration from unsaturated and saturated zones in layer #2
   Tr_p2_u = Tr_p2 * (d2 * wa2_unsat) / (d2 * wa2_unsat + (Δz[2] - d2) * θ_sat)
@@ -107,13 +84,13 @@ function swb_case2(θ, IWS, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, Δz, 
   if zwt > z₊ₕ[3]
     wa2 = (wa2_unsat * d2 + θ_fc * (Δz[2] - d2)) / Δz[2]
     wa3 = θ_fc
-  elseif zwt > z₊ₕ[2] && zwt <= z₊ₕ[3]
+  elseif z₊ₕ[2] < zwt <= z₊ₕ[3]
     wa2 = (wa2_unsat * d2 + θ_fc * (Δz[2] - d2)) / Δz[2]
     wa3 = (θ_fc * (zwt - z₊ₕ[2]) + θ_sat * (z₊ₕ[3] - zwt)) / Δz[3]
-  elseif zwt > Δz[1] && zwt <= z₊ₕ[2]
+  elseif z₊ₕ[1] < zwt <= z₊ₕ[2]
     wa2 = (wa2_unsat * (zwt - z₊ₕ[1]) + θ_sat * (z₊ₕ[2] - zwt)) / Δz[2]
     wa3 = θ_sat
-  elseif zwt > 0 && zwt <= Δz[1]
+  elseif 0 < zwt <= Δz[1]
     wa1 = (wa1 * zwt + θ_sat * (Δz[1] - zwt)) / Δz[1]
     wa2 = θ_sat
     wa3 = θ_sat

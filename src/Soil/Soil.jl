@@ -1,5 +1,15 @@
-export sw_balance
+export sw_balance, Soil
 
+@with_kw mutable struct Soil{FT}
+  N::Int = 3
+  Δz::Vector{FT} = [50.0, 1450.0, 3500.0]  # mm
+  z₊ₕ::Vector{FT} = cumsum(Δz)
+  θ::Vector{FT} = fill(0.3, N)
+  θ_unsat::Vector{FT} = fill(0.3, N)
+  zwt::FT = 0.0  # mm
+end
+
+include("GroundWater.jl")
 
 include("swc_stress.jl")
 include("swb_case0.jl")
@@ -68,9 +78,9 @@ function sw_balance(IWS::T, pEc::T, pEs::T, Ta::T, Topt::T, s_VOD::T,
 
   if zwt <= 0
     fun = swb_case0 # Case 0: groundwater overflow
-  elseif 0 < zwt <= Δz[1]
+  elseif 0 < zwt <= z₊ₕ[1]
     fun = swb_case1 # Case 1: groundwater table in layer 1
-  elseif Δz[1] < zwt <= z₊ₕ[2]
+  elseif z₊ₕ[1] < zwt <= z₊ₕ[2]
     fun = swb_case2 # Case 2: groundwater table in layer 2
   elseif z₊ₕ[2] < zwt < z₊ₕ[3]
     fun = swb_case3 # Case 3: groundwater table in layer 3

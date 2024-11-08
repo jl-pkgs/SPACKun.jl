@@ -27,11 +27,12 @@ end
 
 @testset "pTr_partition" begin
   pEc = 20.0
-  wa1, wa2, wa3 = 0.3, 0.2, 0.1
+  θ = [0.3, 0.2, 0.1]
+  
   fwet = 0.5
   soilpar = get_soilpar(2) #|> collect
   pftpar = get_pftpar(22) #|> collect
-  r = pTr_partition(pEc, fwet, wa1, wa2, wa3, soilpar, pftpar, Δz)
+  r = pTr_partition(pEc, fwet, θ, soilpar, pftpar, Δz)
   @test r == (0.004508186497043249, 9.864271368015835, 0.1312204454871218)
 end
 
