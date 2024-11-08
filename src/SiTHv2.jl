@@ -31,7 +31,9 @@ export SiTHv2_site
 """
 function SiTHv2(Rn, Ta, Tas, Topt, P, Pa, s_VOD, G, LAI, soilpar, pftpar, state::State; Kc=1.0)
   (; wa, zgw, snowpack) = state
-  pEc, pEs = potentialET(Rn, G, LAI, Ta, Pa; Kc) # PET allocated to canopy and soil surface
+  Kc = [1.0, 1.0, 1.0]
+  VPD, U2, doy = 0.0, 0.0, 0
+  pEc, pEs, ET0 = potentialET(Rn, G, LAI, Ta, Pa, VPD, U2, doy; Kc) # PET allocated to canopy and soil surface
   Ei, fwet, PE = interception(P, pEc, LAI, pftpar)  # Interception evaporation
 
   # Snow sublimation, snow melt
@@ -56,7 +58,7 @@ function _run_model(Rn::T, Ta::T, Tas::T, Prcp::T, Pa::T, G::T, LAI::T, s_VOD::T
   for i in 1:ntime
     _Kc = 180 <= i <= 220 ? Kc : 1.0
     Et, Tr, Es, Ei, Esb, srf, _, _, _ = SiTHv2(Rn[i], Ta[i], Tas[i], Top, Prcp[i], Pa[i], s_VOD[i], G[i], LAI[i], soilpar, pftpar, state; Kc=_Kc)
-    
+
     output[:ETs][i] = Et
     output[:Trs][i] = Tr
     output[:Ess][i] = Es

@@ -10,6 +10,7 @@ export ZM
 
 # Set the soil depth for three soil layers
 const ZM = [50.0, 1450.0, 3500.0]  # mm
+const atm = 101.325  # atmospheric pressure (kPa)
 
 include("DataType.jl")
 include("Param/get_pftpar.jl")

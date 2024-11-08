@@ -43,6 +43,7 @@ Tas = cumsum(Tas)
 
 Gi = 0.4 .* Rn .* exp.(-0.5 .* LAI) # G_soil
 s_VODi = (VOD ./ nanmaximum(VOD)) .^ 0.5 # VOD-stress
+topt = 24.0
 
 ET, Tr, Es, Ei, Esb, SM, RF, GW = 
   SiTHv2_site(Rn, Tavg, Tas, Prcp, Pa, Gi, LAI, s_VODi, topt, soilpar, pftpar, state, false)
