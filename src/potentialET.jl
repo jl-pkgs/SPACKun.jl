@@ -49,7 +49,7 @@ function potentialET(Rn::T, G::T, LAI::T, Ta::T, Pa::T,
   ## Potential Transpiration and Soil evaporation, mm/day
   if method == "PT1972"
     ET0 = ET0_PT1972(Rn, Ta, Pa)
-    pEc = ET0_PT1972(Rnc, Ta, Pa) # * _Kc
+    pEc = ET0_PT1972(Rnc, Ta, Pa) * _Kc
     pEs = ET0_PT1972(Rns - G, Ta, Pa)
   elseif method == "Penman48"
     ET0 = ET0_Penman48(Rn, Ta, VPD, U2)             # all

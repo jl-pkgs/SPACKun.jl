@@ -38,7 +38,7 @@ function test_LuanCheng(; zgw=0.0)
   Gi = 0.4 .* Rn .* exp.(-0.5 .* LAI) # G_soil
   s_VODi = (VOD ./ maximum(VOD)) .^ 0.5 # VOD-stress
 
-  @time ET, Tr, Es, Ei, Esb, SM, RF, GW =
+  @time ET, Tr, Es, Ei, Esb, RF, GW, SM =
     SiTHv2_site(Rn, Tavg, Tas, Prcp, Pa, Gi, LAI, s_VODi, topt, soilpar, pftpar, state, false)
 
   SM1 = SM[:, 1]
@@ -56,7 +56,7 @@ end
   zgws = [0, 25, 1000, 2000, 6000]
   for zgw = zgws
     test_LuanCheng(; zgw)
-    
+
     f_jl = "$dir_root/data/OUTPUT/OUTPUT_栾城_2010_zgw=$(Int(zgw)).csv"
     f_mat = "$dir_root/data/OUTPUT/OUTPUT_栾城_2010_MATLAB_zgw=$(Int(zgw)).csv"
 
@@ -70,10 +70,8 @@ end
   end
 end
 
-
 # begin
 #   using Plots
-
 #   function plot_var(var=:ET)
 #     plot(df_mat[:, var], label="MATLAB", title=string(var))
 #     plot!(df_jl[:, var], label="Julia")

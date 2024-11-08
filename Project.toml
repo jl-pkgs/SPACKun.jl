@@ -6,6 +6,7 @@ version = "0.1.0"
 [deps]
 LabelledArrays = "2ee39098-c373-598a-b85f-a56591580800"
 Parameters = "d96e819e-fc66-5662-9728-84c9c7592b0a"
+UnPack = "3a884ed6-31ef-47d7-9d2a-63182c4928ed"
 
 [compat]
 DataFrames = "1.7.0"
@@ -13,10 +14,11 @@ LabelledArrays = "1.16.0"
 Parameters = "0.12.3"
 RTableTools = "0.1.4"
 Test = "1.11.0"
+UnPack = "1.0.2"
 
 [extras]
-RTableTools = "76227a05-389e-44bd-84ad-996dde4b1834"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+RTableTools = "76227a05-389e-44bd-84ad-996dde4b1834"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]

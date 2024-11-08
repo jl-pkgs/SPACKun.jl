@@ -33,5 +33,6 @@ end
   r = pTr_partition(pEc, fwet, wa1, wa2, wa3, soilpar, pftpar, ZM)
   @test r == (0.004508186497043249, 9.864271368015835, 0.1312204454871218)
 end
+
 include("test-PET.jl")
 include("test_栾城_2010.jl")
