@@ -42,11 +42,11 @@ function SiTHv2!(output::SpacOutput{T},
   # Snow sublimation, snow melt
   state.snowpack, Esb, _, Pnet = snp_balance(PE, Ta, Tas, snowpack, pEs)
 
-  RS, IWS, Vmax = runoff_up(Pnet, θ, zwt, Δz, soilpar)
+  RS, I, Vmax = runoff_up(Pnet, θ, zwt, Δz, soilpar)
 
   # Variables associated with soil water balance
   new_pEs = max(pEs - Esb, 0)
-  Tr, Es, uex = sw_balance(IWS, pEc, new_pEs, Ta, Topt, s_VOD, soilpar, pftpar, fwet, Δz, state)
+  Tr, Es, uex = sw_balance(I, pEc, new_pEs, Ta, Topt, s_VOD, soilpar, pftpar, fwet, Δz, state)
 
   ET = Tr + Es + Ei + Esb # Total Evapotranspiration
   RS += uex
@@ -55,7 +55,7 @@ function SiTHv2!(output::SpacOutput{T},
   output.GW = state.zwt
   output.SM .= state.θ
   return nothing
-  # return ET, Tr, Es, Ei, Esb, RS, Pnet, IWS, Vmax
+  # return ET, Tr, Es, Ei, Esb, RS, Pnet, I, Vmax
 end
 
 

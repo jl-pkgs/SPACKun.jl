@@ -1,8 +1,8 @@
 ## 如果exceed依然>0，则补给到地下水
 
 # INPUT:
-# θ      -- soil water content, 3 layers
-# IWS     -- total water enter into soil surface, mm
+# θ       -- soil water content, 3 layers
+# I       -- total water enter into soil surface, mm
 # pEc     -- potential ET allocate to plant, mm
 # pEs     -- potential ET allocate to soil surface, mm
 # soilpar -- soil-related parameters
@@ -88,15 +88,16 @@ function swb_case3(θ, I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, Δz, zw
   f = 1.25e-3
   R_sb = R_sb_max * exp(-f * zwt)
   delta_w = F1 - Tr_g - R_sb
-  delta_zgw = delta_w / (θ_sat - (wa1 + wa2 + wa3_unsat) / 3)
-  zwt = zwt - delta_zgw
+
+  sy = θ_sat - (wa1 + wa2 + wa3_unsat) / 3
+  zwt = zwt - delta_w / sy
   uex = 0
 
   if zwt > z₊ₕ[3]
     wa3 = (wa3_unsat * d3 + θ_fc * (Δz[3] - d3)) / Δz[3]
-  elseif z₊ₕ[2] < zwt <= z₊ₕ[3]
-    wa3 = (wa3_unsat * (zwt - z₊ₕ[2]) + θ_sat * (z₊ₕ[2] + Δz[3] - zwt)) / Δz[3]
-  elseif z₊ₕ[1] < zwt <= z₊ₕ[2]
+  elseif z₊ₕ[2] < zwt <= z₊ₕ[3] # [x]
+    wa3 = (wa3_unsat * (zwt - z₊ₕ[2]) + θ_sat * (z₊ₕ[3] - zwt)) / Δz[3]
+  elseif z₊ₕ[1] < zwt <= z₊ₕ[2] # 水位上升
     wa2 = (wa2 * (zwt - z₊ₕ[1]) + θ_sat * (z₊ₕ[2] - zwt)) / Δz[2]
     wa3 = θ_sat
   elseif 0 < zwt <= Δz[1]
@@ -107,13 +108,10 @@ function swb_case3(θ, I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, Δz, zw
     wa1 = θ_sat
     wa2 = θ_sat
     wa3 = θ_sat
-    uex = -zgw * θ_sat
+    uex = -zwt * θ_sat
   end
 
   θ = [wa1, wa2, wa3]
   zwt = max(0, zwt)
   return θ, zwt, Tr, Es, uex
 end
-
-
-## 判断每一层的饱和

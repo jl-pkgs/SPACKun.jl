@@ -8,7 +8,7 @@
   
 # OUTPUT:
   srf      : Surface Runoff (mm)
-  IWS      : Water that enters into the soil surface (mm)
+  I      : Water that enters into the soil surface (mm)
   Vmax     : Maximum water retention capacity (mm)
 """
 function runoff_up(Pnet, θ, zwt, Δz, soilpar)
@@ -47,10 +47,10 @@ function runoff_up(Pnet, θ, zwt, Δz, soilpar)
     end
   end
 
-  IWS = clamp(Pnet - srf, 0, Vmax) # Actual water entering the soil surface (IWS)
+  I = clamp(Pnet - srf, 0, Vmax) # Actual water entering the soil surface (I)
   # Redundant water -> runoff (balance) under boundary conditions
-  if IWS == Vmax || Vmax <= 0
+  if I == Vmax || Vmax <= 0
     srf = Pnet - Vmax
   end
-  return srf, IWS, Vmax
+  return srf, I, Vmax
 end

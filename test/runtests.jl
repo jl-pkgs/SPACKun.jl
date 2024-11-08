@@ -20,15 +20,15 @@ end
   zwt = 1000.0 # mm
   θ = [0.3, 0.3, 0.3]
   soilpar = get_soilpar(2)
-  srf, IWS, Vmax = runoff_up(Pnet, θ, zwt, Δz, soilpar)
+  srf, I, Vmax = runoff_up(Pnet, θ, zwt, Δz, soilpar)
   @test Vmax ≈ 129
-  @test IWS ≈ 20
+  @test I ≈ 20
 end
 
 @testset "pTr_partition" begin
   pEc = 20.0
   θ = [0.3, 0.2, 0.1]
-  
+
   fwet = 0.5
   soilpar = get_soilpar(2) #|> collect
   pftpar = get_pftpar(22) #|> collect

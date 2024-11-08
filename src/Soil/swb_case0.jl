@@ -1,6 +1,6 @@
 # INPUT:
-# θ      -- soil water content, 3 layers
-# IWS     -- total water entering into soil surface (mm)
+# θ       -- soil water content, 3 layers
+# I       -- total water entering into soil surface (mm)
 # pEc     -- potential ET allocated to plants (mm)
 # pEs     -- potential ET allocated to soil surface (mm)
 # soilpar -- soil-related parameters
@@ -37,8 +37,8 @@ function swb_case0(θ, I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, Δz, zw
   delta_w = F1 - Tr_g - R_sb
 
   # Change in groundwater table depth
-  delta_zgw = delta_w / (θ_sat - θ_fc)
-  zwt -= delta_zgw
+  sy = θ_sat - θ_fc
+  zwt -= delta_w / sy
   uex = 0  # excess water to soil surface
 
   # Update soil moisture and groundwater table depth
@@ -58,11 +58,11 @@ function swb_case0(θ, I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, Δz, zw
     wa1 = (θ_fc * zwt + θ_sat * (Δz[1] - zwt)) / Δz[1]
     wa2 = θ_sat
     wa3 = θ_sat
-  elseif zwt <= 0
+  elseif zwt <= 0 # [x]
     wa1 = θ_sat
     wa2 = θ_sat
     wa3 = θ_sat
-    uex = -zgw * θ_fc  # excess water to soil surface
+    uex = -zwt * θ_fc  # excess water to soil surface
   end
 
   # Updated soil water content

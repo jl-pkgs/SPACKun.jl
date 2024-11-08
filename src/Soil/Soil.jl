@@ -34,23 +34,24 @@ Dmax = 1.2; # 0.05*24,   mm day-1
 # Reference
 1. Ducharne & Polcher, 1998
 """
-function soil_drainage(wa_unsat, θ_sat, ks, Dmin, Dmax; dd=1.5)
-  thx1 = wa_unsat / θ_sat
-  if thx1 < 0.75
-    Perc1 = Dmin * thx1
+function soil_drainage(θ_unsat, θ_sat, ks, Dmin, Dmax; dd=1.5)
+  thx = θ_unsat / θ_sat
+  
+  if thx < 0.75
+    perc = Dmin * thx
   else
-    Perc1 = Dmin * thx1 + (Dmax - Dmin) * thx1^dd
+    perc = Dmin * thx + (Dmax - Dmin) * thx^dd
   end
-  return min(ks, Perc1) # drainage from unsaturated zone
+  return min(ks, perc) # drainage from unsaturated zone
 end
 
 
 """
-    sw_balance(IWS::T, pEc::T, pEs::T, Ta::T, Topt::T, s_VOD::T,
+    sw_balance(I::T, pEc::T, pEs::T, Ta::T, Topt::T, s_VOD::T,
         soilpar, pftpar, wet::::T, Δz::::T, θ, zwt::T) where {T<:Real}
 
 # INPUT
-- `IWS`    : total water enter into soil surface, mm
+- `I`      : total water enter into soil surface, mm
 - `pEc`    : potential ET allocate to plant, mm
 - `pEs`    : potential ET allocate to soil surface, mm
 - `Ta`     : air temperature, C
@@ -70,7 +71,7 @@ end
 - `zwt`    : groundwater table depth, mm
 - `uex`    : goundwater overflow soil surface, mm
 """
-function sw_balance(IWS::T, pEc::T, pEs::T, Ta::T, Topt::T, s_VOD::T,
+function sw_balance(I::T, pEc::T, pEs::T, Ta::T, Topt::T, s_VOD::T,
   soilpar, pftpar, wet, Δz, state::State) where {T<:Real}
   (; θ, zwt) = state
   # s_tem = Temp_stress(Topt, Ta) # Constrains of temperature
@@ -88,7 +89,7 @@ function sw_balance(IWS::T, pEc::T, pEs::T, Ta::T, Topt::T, s_VOD::T,
     fun = swb_case4 # Case 4: groundwater table below layer 3
   end
 
-  state.θ, state.zwt, Tr, Es, uex = fun(θ, IWS, pEc, pEs, s_tem, s_VOD, soilpar, pftpar, wet, Δz, zwt)
+  state.θ, state.zwt, Tr, Es, uex = fun(θ, I, pEc, pEs, s_tem, s_VOD, soilpar, pftpar, wet, Δz, zwt)
   return Tr, Es, uex
 end
 
