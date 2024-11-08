@@ -1,9 +1,9 @@
 # Soil moisture Constrains
 """
-    swc_stress(wa::T, pET::T, soilpar, pftpar) where {T<:Real}
+    swc_stress(θ::T, pET::T, soilpar, pftpar) where {T<:Real}
 
 # INPUT
-- `wa`      : The antecedent soil water content expressed as a function of the WHC in that layer
+- `θ`      : The antecedent soil water content expressed as a function of the WHC in that layer
 - `soilpar` : Soil parameters according to Soil type
 
 # OUTPUT
@@ -25,7 +25,7 @@ S_plant   =   1- (-------------------)^2   =   1-(1-w/wc)^2
 S_soil    =   1- -----------------    =   1-(1-w/wc)=w/wc
                   θ_c-θ_r
 """
-function swc_stress(wa::T, pET::T, soilpar, pftpar) where {T<:Real}
+function swc_stress(θ::T, pET::T, soilpar, pftpar) where {T<:Real}
   (; θ_fc, θ_wp) = soilpar
   (; Hc) = pftpar # canopy height, Zhang 2022
 
@@ -40,37 +40,37 @@ function swc_stress(wa::T, pET::T, soilpar, pftpar) where {T<:Real}
   θ_c = (1 - p) * (θ_fc - θ_wpCH) + θ_wpCH
   θ_c = clamp(θ_c, θ_wpCH, θ_fc)
 
-  if wa <= θ_wpCH
+  if θ <= θ_wpCH
     f_sm = 0.0
-  elseif wa >= θ_c
+  elseif θ >= θ_c
     f_sm = 1.0
   else
-    f_sm = 1.0 - ((θ_c - wa) / (θ_c - θ_wpCH))^k
+    f_sm = 1.0 - ((θ_c - θ) / (θ_c - θ_wpCH))^k
   end
 
   # constraint for soil evaporation
   θ_wp_soil = 0
-  if wa <= θ_wp_soil
+  if θ <= θ_wp_soil
     f_sm_s = 0.0
-  elseif wa >= θ_fc
+  elseif θ >= θ_fc
     f_sm_s = 1.0
   else
-    # f_sm_s = ((wa - θ_wp) / (θ_fc - θ_wp))^1
-    f_sm_s = (wa - θ_wp_soil) / (θ_fc - θ_wp_soil)  # for soil evaporation only
+    # f_sm_s = ((θ - θ_wp) / (θ_fc - θ_wp))^1
+    f_sm_s = (θ - θ_wp_soil) / (θ_fc - θ_wp_soil)  # for soil evaporation only
   end
   return f_sm, f_sm_s
 end
 
 # --- old version
 # # wc = (θ_c - θ_wp) / (θ_fc - θ_wp)
-# if wa <= θ_wp
+# if θ <= θ_wp
 #     f_sm = 0
-# elseif wa >= θ_c
+# elseif θ >= θ_c
 #     f_sm = 1
 # else
-# #     f_sm = 1 - (1 - wa / wc)^2
-#     f_sm = 1 - ((θ_c - wa) / (θ_c - θ_wp))^2
+# #     f_sm = 1 - (1 - θ / wc)^2
+#     f_sm = 1 - ((θ_c - θ) / (θ_c - θ_wp))^2
 # end
 # --- old version
 
-# f_sm_s = wa / wc
+# f_sm_s = θ / wc

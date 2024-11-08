@@ -13,8 +13,8 @@ export SiTHv2_site
 - LAI    : Leaf area index
 - soilpar: Parameters related to Soil types
 - pftpar : Parameters related to PFTs
-- wa     : Soil moisture (last step)
-- zgw    : Groundwater table depth, mm
+- θ     : Soil moisture (last step)
+- zwt    : Groundwater table depth, mm
 - snp    : Snow package (old), mm day-1
 
 # Model output
@@ -23,9 +23,9 @@ export SiTHv2_site
 - Es     : Soil Evaporation, mm day-1
 - Ei     : Intercepted Evaporation, mm day-1
 - Esb    : Snow sublimation, mm day-1
-- wa     : Soil moisture (three layers)
+- θ     : Soil moisture (three layers)
 - srf    : Surface runoff, mm day-1
-- zgw    : Groundwater table depth, mm
+- zwt    : Groundwater table depth, mm
 - snp    : Snow package (new), mm day-1
 
 """
@@ -33,7 +33,7 @@ function SiTHv2!(output::SpacOutput{T},
   Rn::T, Ta::T, Tas::T, Topt::T, P::T, Pa::T, s_VOD::T,
   G::T, LAI::T, soilpar, pftpar, state::State; Kc=1.0) where {T<:Real}
 
-  (; wa, zgw, snowpack) = state
+  (; θ, zwt, snowpack) = state
   Kc = [1.0, 1.0, 1.0]
   VPD, U2, doy = 0.0, 0.0, 0
   pEc, pEs, ET0 = potentialET(Rn, G, LAI, Ta, Pa, VPD, U2, doy; Kc) # PET allocated to canopy and soil surface
@@ -42,18 +42,18 @@ function SiTHv2!(output::SpacOutput{T},
   # Snow sublimation, snow melt
   state.snowpack, Esb, _, Pnet = snp_balance(PE, Ta, Tas, snowpack, pEs)
 
-  RS, IWS, Vmax = runoff_up(Pnet, wa, zgw, ZM, soilpar)
+  RS, IWS, Vmax = runoff_up(Pnet, θ, zwt, Δz, soilpar)
 
   # Variables associated with soil water balance
   new_pEs = max(pEs - Esb, 0)
-  Tr, Es, uex = sw_balance(IWS, pEc, new_pEs, Ta, Topt, s_VOD, soilpar, pftpar, fwet, ZM, state)
+  Tr, Es, uex = sw_balance(IWS, pEc, new_pEs, Ta, Topt, s_VOD, soilpar, pftpar, fwet, Δz, state)
 
   ET = Tr + Es + Ei + Esb # Total Evapotranspiration
   RS += uex
 
   @pack! output = ET, Tr, Es, Ei, Esb, RS
-  output.GW = state.zgw
-  output.SM .= state.wa
+  output.GW = state.zwt
+  output.SM .= state.θ
   return nothing
   # return ET, Tr, Es, Ei, Esb, RS, Pnet, IWS, Vmax
 end
@@ -78,8 +78,8 @@ end
 ## Arguments
 - `Top`   : optimal growth temperature for plant, degC
 - `state`: 
-  + `wa`    : Soil moisture (last step)
-  + `zgw`   : groundwater table depth, mm
+  + `θ`    : Soil moisture (last step)
+  + `zwt`   : groundwater table depth, mm
   + `snp`   : Snow package (old), mm day-1
 - `spinfg`: spin-up flag, 1 for spin-up, 0 for normal calculation. 循环重复跑100次。
 """

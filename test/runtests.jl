@@ -1,4 +1,5 @@
 using Test, SPAC
+import SPAC: Δz
 
 @testset "potentialET" begin
   Rn = 100.0
@@ -16,10 +17,10 @@ end
 
 @testset "runoff_up" begin
   Pnet = 20.0 # mm
-  zgw = 1000.0 # mm
-  wa = [0.3, 0.3, 0.3]
+  zwt = 1000.0 # mm
+  θ = [0.3, 0.3, 0.3]
   soilpar = get_soilpar(2)
-  srf, IWS, Vmax = runoff_up(Pnet, wa, zgw, ZM, soilpar)
+  srf, IWS, Vmax = runoff_up(Pnet, θ, zwt, Δz, soilpar)
   @test Vmax ≈ 129
   @test IWS ≈ 20
 end
@@ -30,9 +31,10 @@ end
   fwet = 0.5
   soilpar = get_soilpar(2) #|> collect
   pftpar = get_pftpar(22) #|> collect
-  r = pTr_partition(pEc, fwet, wa1, wa2, wa3, soilpar, pftpar, ZM)
+  r = pTr_partition(pEc, fwet, wa1, wa2, wa3, soilpar, pftpar, Δz)
   @test r == (0.004508186497043249, 9.864271368015835, 0.1312204454871218)
 end
+
 
 include("test-PET.jl")
 include("test_栾城_2010.jl")

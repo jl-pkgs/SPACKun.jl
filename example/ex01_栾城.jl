@@ -8,10 +8,10 @@ function init_param(; soil_type=2, PFTi=22)
   pftpar = get_pftpar(PFTi)
 
   θ_sat = soilpar.θ_sat
-  wa = ones(3) * θ_sat
-  zgw = 0.0
+  θ = ones(3) * θ_sat
+  zwt = 0.0
   snowpack = 0.0
-  state = State(; wa, zgw, snowpack)
+  state = State(; θ, zwt, snowpack)
   soilpar, pftpar, state
 end
 

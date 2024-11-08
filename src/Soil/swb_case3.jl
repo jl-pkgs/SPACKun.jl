@@ -1,27 +1,29 @@
+## 如果exceed依然>0，则补给到地下水
+
 # INPUT:
-# wa      -- soil water content, 3 layers
+# θ      -- soil water content, 3 layers
 # IWS     -- total water enter into soil surface, mm
 # pEc     -- potential ET allocate to plant, mm
 # pEs     -- potential ET allocate to soil surface, mm
 # soilpar -- soil-related parameters
 # pftpar  -- plant-related parameters
 # wet     -- wetness indice
-# zm      -- soil layer depth, 3 layers
-# zgw     -- groundwater table depth, mm
-function swb_case3(wa, IWS, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, zm, zgw)
+# Δz      -- soil layer depth, 3 layers
+# zwt     -- groundwater table depth, mm
+function swb_case3(θ, IWS, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, Δz, zwt)
   # Unsaturated depth in layer #1~3
-  d1 = zm[1]
-  d2 = zm[2]
-  d3 = zgw - zm[1] - zm[2]
+  d1 = Δz[1]
+  d2 = Δz[2]
+  d3 = zwt - z₊ₕ[2]
   
-  wa1, wa2, wa3 = wa
+  wa1, wa2, wa3 = θ
   (; Ksat, θ_sat, θ_fc, θ_wp) = soilpar
   
   # ====== Water Supplement ====== #
   # Layer #1
   wa1_unsat = wa1
   wc_s1 = d1 * wa1_unsat
-  wc_m1 = d1 * θ_sat
+  wc_m1 = d1 * θ_sat # mm
 
   if wc_s1 + IWS >= wc_m1
     wa1 = θ_sat
@@ -45,7 +47,7 @@ function swb_case3(wa, IWS, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, zm, z
   end
 
   # Layer #3
-  wa3_unsat = (wa3 * zm[3] - θ_sat * (zm[3] - d3)) / d3
+  wa3_unsat = (wa3 * Δz[3] - θ_sat * (Δz[3] - d3)) / d3
   wc_s3 = d3 * wa3_unsat
   wc_m3 = d3 * θ_sat
 
@@ -54,14 +56,14 @@ function swb_case3(wa, IWS, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, zm, z
     vw3 = wc_s3 + vw2 - wc_m3
   else
     wa3_unsat = wa3_unsat + vw2 / d3
-    wa3 = (wa3_unsat * d3 + θ_sat * (zm[3] - d3)) / zm[3]
+    wa3 = (wa3_unsat * d3 + θ_sat * (Δz[3] - d3)) / Δz[3]
     vw3 = 0
   end
 
   # ====== Water Consumption ====== #
-  Tr_p1, Tr_p2, Tr_p3 = pTr_partition(pEc, fwet, wa1, wa2, wa3, soilpar, pftpar, zm)
-  Tr_p3_u = Tr_p3 * (d3 * wa3_unsat) / (d3 * wa3_unsat + (zm[3] - d3) * θ_sat)
-  Tr_p3_g = Tr_p3 * ((zm[3] - d3) * θ_sat) / (d3 * wa3_unsat + (zm[3] - d3) * θ_sat)
+  Tr_p1, Tr_p2, Tr_p3 = pTr_partition(pEc, fwet, wa1, wa2, wa3, soilpar, pftpar, Δz)
+  Tr_p3_u = Tr_p3 * (d3 * wa3_unsat) / (d3 * wa3_unsat + (Δz[3] - d3) * θ_sat)
+  Tr_p3_g = Tr_p3 * ((Δz[3] - d3) * θ_sat) / (d3 * wa3_unsat + (Δz[3] - d3) * θ_sat)
 
   f_sm1, f_sm_s1 = swc_stress(wa1, pEc, soilpar, pftpar)
   f_sm2, _ = swc_stress(wa2, pEc, soilpar, pftpar)
@@ -120,31 +122,34 @@ function swb_case3(wa, IWS, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, zm, z
   Tr_g = Tr3_g
   R_sb_max = 39
   f = 1.25e-3
-  R_sb = R_sb_max * exp(-f * zgw)
+  R_sb = R_sb_max * exp(-f * zwt)
   delta_w = F1 - Tr_g - R_sb
   delta_zgw = delta_w / (θ_sat - (wa1 + wa2 + wa3_unsat) / 3)
-  zgw = zgw - delta_zgw
+  zwt = zwt - delta_zgw
   uex = 0
 
-  if zgw > zm[1] + zm[2] + zm[3]
-    wa3 = (wa3_unsat * d3 + θ_fc * (zm[3] - d3)) / zm[3]
-  elseif zgw > zm[1] + zm[2] && zgw < zm[1] + zm[2] + zm[3]
-    wa3 = (wa3_unsat * (zgw - zm[1] - zm[2]) + θ_sat * (zm[1] + zm[2] + zm[3] - zgw)) / zm[3]
-  elseif zgw > zm[1] && zgw < zm[1] + zm[2]
-    wa2 = (wa2 * (zgw - zm[1]) + θ_sat * (zm[1] + zm[2] - zgw)) / zm[2]
+  if zwt > z₊ₕ[3]
+    wa3 = (wa3_unsat * d3 + θ_fc * (Δz[3] - d3)) / Δz[3]
+  elseif zwt > z₊ₕ[2] && zwt < z₊ₕ[3]
+    wa3 = (wa3_unsat * (zwt - z₊ₕ[2]) + θ_sat * (z₊ₕ[2] + Δz[3] - zwt)) / Δz[3]
+  elseif zwt > Δz[1] && zwt < z₊ₕ[2]
+    wa2 = (wa2 * (zwt - z₊ₕ[1]) + θ_sat * (z₊ₕ[2] - zwt)) / Δz[2]
     wa3 = θ_sat
-  elseif zgw > 0 && zgw < zm[1]
-    wa1 = (wa1 * zgw + θ_sat * (zm[1] - zgw)) / zm[1]
+  elseif zwt > 0 && zwt < Δz[1]
+    wa1 = (wa1 * zwt + θ_sat * (Δz[1] - zwt)) / Δz[1]
     wa2 = θ_sat
     wa3 = θ_sat
-  elseif zgw <= 0
+  elseif zwt <= 0
     wa1 = θ_sat
     wa2 = θ_sat
     wa3 = θ_sat
     uex = -zgw * θ_sat
   end
 
-  wa = [wa1, wa2, wa3]
-  zgw = max(0, zgw)
-  return wa, zgw, Tr, Es, uex
+  θ = [wa1, wa2, wa3]
+  zwt = max(0, zwt)
+  return θ, zwt, Tr, Es, uex
 end
+
+
+## 判断每一层的饱和

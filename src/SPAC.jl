@@ -7,10 +7,12 @@ using UnPack
 export State
 export get_pftpar, get_soilpar
 export potentialET, pTr_partition, interception, snp_balance, runoff_up
-export ZM
+export Δz, z₊ₕ
 
 # Set the soil depth for three soil layers
-const ZM = [50.0, 1450.0, 3500.0]  # mm
+const Δz = [50.0, 1450.0, 3500.0]  # mm
+const z₊ₕ = cumsum(Δz)
+
 const atm = 101.325  # atmospheric pressure (kPa)
 
 include("DataType.jl")

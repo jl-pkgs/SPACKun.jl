@@ -1,21 +1,21 @@
 # INPUT:
-# wa      -- soil water content, 3 layers
+# θ      -- soil water content, 3 layers
 # IWS     -- total water entering into soil surface (mm)
 # pEc     -- potential ET allocated to plants (mm)
 # pEs     -- potential ET allocated to soil surface (mm)
 # soilpar -- soil-related parameters
 # pftpar  -- plant-related parameters
 # wet     -- wetness index
-# zm      -- soil layer depth (3 layers)
-# zgw     -- groundwater table depth (mm)
-function swb_case0(wa, IWS, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, zm, zgw)
+# Δz      -- soil layer depth (3 layers)
+# zwt     -- groundwater table depth (mm)
+function swb_case0(θ, IWS, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, Δz, zwt)
   # Old soil water content in layer 1-3
-  wa1, wa2, wa3 = wa
+  wa1, wa2, wa3 = θ
   (; θ_sat, θ_fc) = soilpar
 
   # ====== Water consumption ====== #
   # Evapotranspiration
-  Tr_p1, Tr_p2, Tr_p3 = pTr_partition(pEc, fwet, wa1, wa2, wa3, soilpar, pftpar, zm)
+  Tr_p1, Tr_p2, Tr_p3 = pTr_partition(pEc, fwet, wa1, wa2, wa3, soilpar, pftpar, Δz)
 
   # Actual transpiration
   Tr1 = s_vod * s_tem * Tr_p1
@@ -31,34 +31,34 @@ function swb_case0(wa, IWS, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, zm, z
   Tr_g = Tr
   R_sb_max = 39  # maximum groundwater discharge (mm day-1)
   f = 1.25e-3    # discharge decay rate (mm-1)
-  R_sb = R_sb_max * exp(-f * zgw)
+  R_sb = R_sb_max * exp(-f * zwt)
 
   # Variation of water stored in the saturated zone
   delta_w = F1 - Tr_g - R_sb
 
   # Change in groundwater table depth
   delta_zgw = delta_w / (θ_sat - θ_fc)
-  zgw -= delta_zgw
+  zwt -= delta_zgw
   uex = 0  # excess water to soil surface
 
   # Update soil moisture and groundwater table depth
-  if zgw > zm[1] + zm[2] + zm[3]
+  if zwt > z₊ₕ[3]
     wa1 = θ_fc
     wa2 = θ_fc
     wa3 = θ_fc
-  elseif zgw > zm[1] + zm[2] && zgw <= zm[1] + zm[2] + zm[3]
+  elseif zwt > z₊ₕ[2] && zwt <= z₊ₕ[3]
     wa1 = θ_fc
     wa2 = θ_fc
-    wa3 = (θ_fc * (zgw - zm[1] - zm[2]) + θ_sat * (zm[1] + zm[2] + zm[3] - zgw)) / zm[3]
-  elseif zgw > zm[1] && zgw <= zm[1] + zm[2]
+    wa3 = (θ_fc * (zwt - z₊ₕ[2]) + θ_sat * (z₊ₕ[3] - zwt)) / Δz[3]
+  elseif zwt > Δz[1] && zwt <= z₊ₕ[2]
     wa1 = θ_fc
-    wa2 = (θ_fc * (zgw - zm[1]) + θ_sat * (zm[1] + zm[2] - zgw)) / zm[2]
+    wa2 = (θ_fc * (zwt - z₊ₕ[1]) + θ_sat * (z₊ₕ[2] - zwt)) / Δz[2]
     wa3 = θ_sat
-  elseif zgw > 0 && zgw <= zm[1]
-    wa1 = (θ_fc * zgw + θ_sat * (zm[1] - zgw)) / zm[1]
+  elseif zwt > 0 && zwt <= Δz[1]
+    wa1 = (θ_fc * zwt + θ_sat * (Δz[1] - zwt)) / Δz[1]
     wa2 = θ_sat
     wa3 = θ_sat
-  elseif zgw <= 0
+  elseif zwt <= 0
     wa1 = θ_sat
     wa2 = θ_sat
     wa3 = θ_sat
@@ -66,8 +66,8 @@ function swb_case0(wa, IWS, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, zm, z
   end
 
   # Updated soil water content
-  wa = [wa1, wa2, wa3]
-  zgw = max(0, zgw)  # ensure groundwater table depth is non-negative
+  θ = [wa1, wa2, wa3]
+  zwt = max(0, zwt)  # ensure groundwater table depth is non-negative
 
-  return wa, zgw, Tr, Es, uex
+  return θ, zwt, Tr, Es, uex
 end

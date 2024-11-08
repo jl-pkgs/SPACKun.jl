@@ -14,19 +14,19 @@ function init_param(soil_type=2, PFTi=22)
   pftpar = get_pftpar(PFTi)
 
   θ_sat = soilpar.θ_sat
-  wa = ones(3) * θ_sat
-  zgw = 0.0
+  θ = ones(3) * θ_sat
+  zwt = 0.0
   snowpack = 0.0
-  state = State(; wa, zgw, snowpack)
+  state = State(; θ, zwt, snowpack)
   soilpar, pftpar, state
 end
 
 dir_root = "$(@__DIR__)/.."
 d = fread("$dir_root/data/dat_栾城_ERA5L_2010.csv")
 
-function test_LuanCheng(; zgw=0.0)
+function test_LuanCheng(; zwt=0.0)
   soilpar, pftpar, state = init_param()
-  state.zgw = zgw
+  state.zwt = zwt
   topt = 24.0
 
   (; Rn, Pa, Prcp, Tavg, LAI, VOD) = d
@@ -46,19 +46,19 @@ function test_LuanCheng(; zgw=0.0)
   SM3 = SM[:, 3]
   df_jl = DataFrame(; ET, Tr, Es, Ei, Esb, RF, GW, SM1, SM2, SM3)
 
-  fwrite(df_jl, "$dir_root/data/OUTPUT/OUTPUT_栾城_2010_zgw=$(Int(zgw)).csv")
+  fwrite(df_jl, "$dir_root/data/OUTPUT/OUTPUT_栾城_2010_zgw=$(Int(zwt)).csv")
 end
 
-# const ZM = [50, 1450, 3500]  # mm
-# @run test_LuanCheng(; zgw=2000.0)
+# const Δz = [50, 1450, 3500]  # mm
+# @run test_LuanCheng(; zwt=2000.0)
 
 @testset "SiTHv2_site" begin
   zgws = [0, 25, 1000, 2000, 6000]
-  for zgw = zgws
-    test_LuanCheng(; zgw)
+  for zwt = zgws
+    test_LuanCheng(; zwt)
 
-    f_jl = "$dir_root/data/OUTPUT/OUTPUT_栾城_2010_zgw=$(Int(zgw)).csv"
-    f_mat = "$dir_root/data/OUTPUT/OUTPUT_栾城_2010_MATLAB_zgw=$(Int(zgw)).csv"
+    f_jl = "$dir_root/data/OUTPUT/OUTPUT_栾城_2010_zgw=$(Int(zwt)).csv"
+    f_mat = "$dir_root/data/OUTPUT/OUTPUT_栾城_2010_MATLAB_zgw=$(Int(zwt)).csv"
 
     df_jl = fread(f_jl)
     df_mat = fread(f_mat)

@@ -10,14 +10,14 @@ Partition PET into three soil layers
 # OUTPUT:
 - Tr_p :  separate potential Transpiration
 """
-function pTr_partition(pEc, fwet, wa1, wa2, wa3, soilpar, pftpar, ZM)
+function pTr_partition(pEc, fwet, wa1, wa2, wa3, soilpar, pftpar, Δz)
   (; b, θ_sat) = soilpar
   (; D50, D95) = pftpar
   c = -2.944 / log(D95 / D50)
 
-  r1 = (1 / (1 + (ZM[1] / D50)^c)) # Zhang 2019, Eq. 21
-  r2 = (1 / (1 + (ZM[2] / D50)^c)) - (1 / (1 + (ZM[1] / D50)^c))
-  r3 = (1 / (1 + (ZM[3] / D50)^c)) - (1 / (1 + (ZM[2] / D50)^c))
+  r1 = (1 / (1 + (Δz[1] / D50)^c)) # Zhang 2019, Eq. 21
+  r2 = (1 / (1 + (Δz[2] / D50)^c)) - (1 / (1 + (Δz[1] / D50)^c))
+  r3 = (1 / (1 + (Δz[3] / D50)^c)) - (1 / (1 + (Δz[2] / D50)^c))
 
   # the maximum transpiration rate of each soil layer, Tr_p
   # Get all available water contents through root distribution
