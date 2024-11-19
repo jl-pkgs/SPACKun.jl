@@ -6,6 +6,20 @@ export sw_balance, Soil
   z₊ₕ::Vector{FT} = cumsum(Δz)
   θ::Vector{FT} = fill(0.3, N)
   θ_unsat::Vector{FT} = fill(0.3, N)
+
+  Q::Vector{FT} = fill(0.0, N)      # drainage, discharge, [mm d-1]
+
+  Ec_pot::Vector{FT} = fill(0.0, N) # potential transpiration
+  Ec_sm::Vector{FT} = fill(0.0, N)  # actual transpiration from unsaturated zone
+  Ec_gw::Vector{FT} = fill(0.0, N)  # actual transpiration from groundwater
+
+  Es_pot::Vector{FT} = fill(0.0, N) # potential soil evaporation
+  Es_sm::Vector{FT} = fill(0.0, N)  # actual transpiration from unsaturated zone
+  Es_gw::Vector{FT} = fill(0.0, N)  # actual transpiration from groundwater
+
+  fSM_Es::Vector{FT} = fill(0.0, N) # constraint factor for soil evaporation
+  fSM_Ec::Vector{FT} = fill(0.0, N) # constraint factor for transpiration
+
   zwt::FT = 0.0  # mm
 end
 
@@ -36,7 +50,7 @@ Dmax = 1.2; # 0.05*24,   mm day-1
 """
 function soil_drainage(θ_unsat, θ_sat, ks, Dmin, Dmax; dd=1.5)
   thx = θ_unsat / θ_sat
-  
+
   if thx < 0.75
     perc = Dmin * thx
   else
