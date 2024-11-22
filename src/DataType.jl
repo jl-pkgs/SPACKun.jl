@@ -1,10 +1,31 @@
 export update_state
 export SpacOutput, SpacOutputs, write_output!
 
+
+# rename to Soil later
 @with_kw mutable struct State{FT}
-  θ::Vector{FT} = ones(3) .* 0.2
-  zwt::FT = 0.0
-  snowpack::FT = 0.0
+  N::Int = 3
+  Δz::Vector{FT} = [50.0, 1450.0, 3500.0]  # mm
+  z₊ₕ::Vector{FT} = cumsum(Δz)
+
+  θ::Vector{FT} = ones(N) .* 0.2
+  θ_unsat::Vector{FT} = fill(0.3, N)
+
+  Q::Vector{FT} = fill(0.0, N)      # drainage, discharge, [mm d-1]
+
+  Ec_pot::Vector{FT} = fill(0.0, N) # potential transpiration
+  Ec_sm::Vector{FT} = fill(0.0, N)  # actual transpiration from unsaturated zone
+  Ec_gw::Vector{FT} = fill(0.0, N)  # actual transpiration from groundwater
+
+  Es_pot::Vector{FT} = fill(0.0, N) # potential soil evaporation
+  Es_sm::Vector{FT} = fill(0.0, N)  # actual transpiration from unsaturated zone
+  Es_gw::Vector{FT} = fill(0.0, N)  # actual transpiration from groundwater
+
+  fsm_Es::Vector{FT} = fill(0.0, N) # SM constraint for soil evaporation
+  fsm_Ec::Vector{FT} = fill(0.0, N) # SM constraint for transpiration
+
+  zwt::FT = 0.0                     # groundwater depths [mm]
+  snowpack::FT = 0.0                # snowpack depth [mm]
 end
 
 # Update state variables
@@ -68,7 +89,7 @@ end
   Ei::Vector{FT} = zeros(ntime)
   Esb::Vector{FT} = zeros(ntime)
   RS::Vector{FT} = zeros(ntime)
-  GW::Vector{FT} = zeros(ntime)  
+  GW::Vector{FT} = zeros(ntime)
 
   SM::Matrix{FT} = zeros(ntime, 3)
 end

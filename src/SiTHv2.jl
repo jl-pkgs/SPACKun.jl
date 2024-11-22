@@ -46,7 +46,7 @@ function SiTHv2!(output::SpacOutput{T},
 
   # Variables associated with soil water balance
   new_pEs = max(pEs - Esb, 0)
-  Tr, Es, uex = sw_balance(I, pEc, new_pEs, Ta, Topt, s_VOD, soilpar, pftpar, fwet, Δz, state)
+  Tr, Es, uex = sw_balance(I, pEc, new_pEs, Ta, Topt, s_VOD, soilpar, pftpar, fwet, state)
 
   ET = Tr + Es + Ei + Esb # Total Evapotranspiration
   RS += uex

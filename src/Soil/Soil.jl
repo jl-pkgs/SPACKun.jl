@@ -1,27 +1,4 @@
-export sw_balance, Soil
-
-@with_kw mutable struct Soil{FT}
-  N::Int = 3
-  Δz::Vector{FT} = [50.0, 1450.0, 3500.0]  # mm
-  z₊ₕ::Vector{FT} = cumsum(Δz)
-  θ::Vector{FT} = fill(0.3, N)
-  θ_unsat::Vector{FT} = fill(0.3, N)
-
-  Q::Vector{FT} = fill(0.0, N)      # drainage, discharge, [mm d-1]
-
-  Ec_pot::Vector{FT} = fill(0.0, N) # potential transpiration
-  Ec_sm::Vector{FT} = fill(0.0, N)  # actual transpiration from unsaturated zone
-  Ec_gw::Vector{FT} = fill(0.0, N)  # actual transpiration from groundwater
-
-  Es_pot::Vector{FT} = fill(0.0, N) # potential soil evaporation
-  Es_sm::Vector{FT} = fill(0.0, N)  # actual transpiration from unsaturated zone
-  Es_gw::Vector{FT} = fill(0.0, N)  # actual transpiration from groundwater
-
-  fSM_Es::Vector{FT} = fill(0.0, N) # constraint factor for soil evaporation
-  fSM_Ec::Vector{FT} = fill(0.0, N) # constraint factor for transpiration
-
-  zwt::FT = 0.0  # mm
-end
+export sw_balance
 
 include("GroundWater.jl")
 
@@ -31,7 +8,6 @@ include("swb_case1.jl")
 include("swb_case2.jl")
 include("swb_case3.jl")
 include("swb_case4.jl")
-
 
 
 """
@@ -86,8 +62,8 @@ end
 - `uex`    : goundwater overflow soil surface, mm
 """
 function sw_balance(I::T, pEc::T, pEs::T, Ta::T, Topt::T, s_VOD::T,
-  soilpar, pftpar, wet, Δz, state::State) where {T<:Real}
-  (; θ, zwt) = state
+  soilpar, pftpar, wet, state::State) where {T<:Real}
+  (; zwt) = state
   # s_tem = Temp_stress(Topt, Ta) # Constrains of temperature
   s_tem = exp(-((Ta - Topt) / Topt)^2)
 
@@ -103,7 +79,7 @@ function sw_balance(I::T, pEc::T, pEs::T, Ta::T, Topt::T, s_VOD::T,
     fun = swb_case4 # Case 4: groundwater table below layer 3
   end
 
-  state.θ, state.zwt, Tr, Es, uex = fun(θ, I, pEc, pEs, s_tem, s_VOD, soilpar, pftpar, wet, Δz, zwt)
+  Tr, Es, uex = fun(I, pEc, pEs, s_tem, s_VOD, soilpar, pftpar, wet, state)
   return Tr, Es, uex
 end
 

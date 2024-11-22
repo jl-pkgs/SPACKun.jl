@@ -8,7 +8,9 @@
 # wet     -- wetness index
 # Δz      -- soil layer depth (3 layers)
 # zwt     -- groundwater table depth (mm)
-function swb_case0(θ, I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, Δz, zwt)
+function swb_case0(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, state::State)
+  (; θ, Δz, zwt) = state
+
   # Old soil water content in layer 1-3
   wa1, wa2, wa3 = θ
   (; θ_sat, θ_fc) = soilpar
@@ -66,8 +68,8 @@ function swb_case0(θ, I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, Δz, zw
   end
 
   # Updated soil water content
-  θ = [wa1, wa2, wa3]
-  zwt = max(0, zwt)  # ensure groundwater table depth is non-negative
+  state.θ .= [wa1, wa2, wa3]
+  state.zwt = max(0, zwt)  # ensure groundwater table depth is non-negative
 
-  return θ, zwt, Tr, Es, uex
+  return Tr, Es, uex
 end

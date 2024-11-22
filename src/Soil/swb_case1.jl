@@ -8,7 +8,8 @@
 # wet     -- wetness index
 # Δz      -- soil layer depths, 3 layers
 # zwt     -- groundwater table depth (mm)
-function swb_case1(θ, I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, Δz, zwt)
+function swb_case1(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, state::State)
+  (; θ, Δz, zwt) = state
   # Unsaturated depth in layer #1
   d1 = zwt
   (; Ksat, θ_sat, θ_fc, θ_wp) = soilpar
@@ -90,8 +91,7 @@ function swb_case1(θ, I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, Δz, zw
   end
 
   # Updated soil water content
-  θ = [wa1, wa2, wa3]
-  zwt = max(0, zwt)
-
-  return θ, zwt, Tr, Es, uex
+  state.θ .= [wa1, wa2, wa3]
+  state.zwt = max(0, zwt)
+  return Tr, Es, uex
 end
