@@ -6,7 +6,7 @@ using UnPack
 
 export State
 export get_pftpar, get_soilpar
-export potentialET, pTr_partition, interception, snp_balance, runoff_up
+export potentialET, pTr_partition!, interception, snp_balance, runoff_up
 export Δz, z₊ₕ
 
 # Set the soil depth for three soil layers

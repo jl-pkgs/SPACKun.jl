@@ -10,12 +10,14 @@ Partition PET into three soil layers
 # OUTPUT:
 - Tr_p :  separate potential Transpiration
 """
-function pTr_partition(pEc::T, fwet::T, θ::Vector{T}, soilpar, pftpar, Δz) where {T<:Real}
+function pTr_partition!(pEc::T, fwet::T, soilpar, pftpar, state::State) where {T<:Real}
+  (; θ, Δz, Ec_pot) = state
+  
   (; b, θ_sat) = soilpar
   (; D50, D95) = pftpar
   c = -2.944 / log(D95 / D50)
 
-  r1 = (1 / (1 + (Δz[1] / D50)^c)) # Zhang 2019, Eq. 21
+  r1 = (1 / (1 + (Δz[1] / D50)^c)) # Zhang 2019, Eq. 21, root depths function
   r2 = (1 / (1 + (Δz[2] / D50)^c)) - (1 / (1 + (Δz[1] / D50)^c))
   r3 = (1 / (1 + (Δz[3] / D50)^c)) - (1 / (1 + (Δz[2] / D50)^c))
 
@@ -24,13 +26,12 @@ function pTr_partition(pEc::T, fwet::T, θ::Vector{T}, soilpar, pftpar, Δz) whe
   wr = r1 * (θ[1] / θ_sat)^b + r2 * (θ[2] / θ_sat)^b + r3 * (θ[3] / θ_sat)^b
 
   # Root distribution adjusted by soil water content
-  beta1 = r1 * (θ[1] / θ_sat)^b / wr
-  beta2 = r2 * (θ[2] / θ_sat)^b / wr
-  beta3 = r3 * (θ[3] / θ_sat)^b / wr
+  β1 = r1 * (θ[1] / θ_sat)^b / wr
+  β2 = r2 * (θ[2] / θ_sat)^b / wr
+  β3 = r3 * (θ[3] / θ_sat)^b / wr
 
   # potential transpiration rate for different layers
-  Tr_p1 = (1 - fwet) * beta1 * pEc
-  Tr_p2 = (1 - fwet) * beta2 * pEc
-  Tr_p3 = (1 - fwet) * beta3 * pEc
-  return Tr_p1, Tr_p2, Tr_p3
+  Ec_pot[1] = (1 - fwet) * β1 * pEc
+  Ec_pot[2] = (1 - fwet) * β2 * pEc
+  Ec_pot[3] = (1 - fwet) * β3 * pEc
 end

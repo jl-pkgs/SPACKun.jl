@@ -57,9 +57,9 @@ end
 # f_sm3::FT = 0
 # s_vod::FT = 0
 # s_tem::FT = 0
-# Tr_p1::FT = 0
-# Tr_p2::FT = 0
-# Tr_p3::FT = 0
+# Ec_pot[1]::FT = 0
+# Ec_pot[2]::FT = 0
+# Ec_pot[3]::FT = 0
 # f_sm_s1::FT = 0
 # f_sm_s2::FT = 0
 # f_sm_s3::FT = 0
