@@ -34,7 +34,8 @@ function find_θ_unsat(θ, zwt; z₊ₕ, Δz, θ_sat)
 
   d_unsat = zwt - z0
   θ_unsat = (θ[j] * Δz[j] - θ_sat * (z1 - zwt)) / d_unsat
-  return θ_unsat, j
+  frac = d_unsat / Δz[j] # 非饱和的比例
+  return θ_unsat
 end
 
 function find_θ_unsat(soil::Soil, θ_sat)

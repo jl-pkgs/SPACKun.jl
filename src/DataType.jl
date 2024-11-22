@@ -22,8 +22,8 @@ export SpacOutput, SpacOutputs, write_output!
   Es_sm::Vector{FT} = fill(0.0, N)  # actual transpiration from unsaturated zone
   Es_gw::Vector{FT} = fill(0.0, N)  # actual transpiration from groundwater
 
-  fsm_Es::Vector{FT} = fill(0.0, N) # SM constraint for soil evaporation
-  fsm_Ec::Vector{FT} = fill(0.0, N) # SM constraint for transpiration
+  fsm_Es::Vector{FT} = fill(1.0, N) # SM constraint for soil evaporation
+  fsm_Ec::Vector{FT} = fill(1.0, N) # SM constraint for transpiration
 
   zwt::FT = 0.0                     # groundwater depths [mm]
   snowpack::FT = 0.0                # snowpack depth [mm]

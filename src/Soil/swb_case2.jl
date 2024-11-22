@@ -19,7 +19,7 @@ function swb_case2(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil::Soil)
   # ====== Water Supplement ====== #  
   wa1_unsat = θ[1] # 需要更新
   vw2 = SM_recharge!(θ, I; Δz, θ_sat)
-  wa2_unsat, j = find_θ_unsat(θ, zwt; z₊ₕ, Δz, θ_sat)
+  wa2_unsat = find_θ_unsat(θ, zwt; z₊ₕ, Δz, θ_sat)
   wa1, wa2, wa3 = θ
   
   # Layer #3 - Fully saturated with groundwater

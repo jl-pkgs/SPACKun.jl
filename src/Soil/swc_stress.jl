@@ -76,7 +76,7 @@ function swc_stress!(soil::Soil, pET::T, soilpar, pftpar) where {T<:Real}
 
   # j是半饱和
   if j <= N
-    θ_unsat = find_θ_unsat(soil, θ_sat)[1] # 这里可能需要求，非饱和的比例（或深度）
+    θ_unsat = find_θ_unsat(soil, θ_sat) # 这里可能需要求，非饱和的比例（或深度）
     fsm_Ec[j], fsm_Es[j] = swc_stress(θ_unsat, pET, soilpar, pftpar)
   end
 
