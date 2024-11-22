@@ -8,6 +8,7 @@ export SpacOutput, SpacOutputs, write_output!
   Δz::Vector{FT} = [50.0, 1450.0, 3500.0]  # mm
   z₊ₕ::Vector{FT} = cumsum(Δz)
 
+  jwt::Int = 0                    # index of groundwater table, 追踪地下水，所在位置的上一层
   θ::Vector{FT} = ones(N) .* 0.2
   θ_unsat::Vector{FT} = fill(0.3, N)
 
@@ -52,15 +53,12 @@ end
 # Tr1::FT = 0
 # Tr2::FT = 0
 # Tr3::FT = 0
-# f_sm1::FT = 0
-# f_sm2::FT = 0
-# f_sm3::FT = 0
 # s_vod::FT = 0
 # s_tem::FT = 0
 # Ec_pot[1]::FT = 0
 # Ec_pot[2]::FT = 0
 # Ec_pot[3]::FT = 0
-# f_sm_s1::FT = 0
+# fsm_Es[1]::FT = 0
 # f_sm_s2::FT = 0
 # f_sm_s3::FT = 0
 # pEc::FT = 0

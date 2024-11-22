@@ -11,7 +11,7 @@
 # Δz      -- soil layer depth, 3 layers
 # zwt     -- groundwater table depth, mm
 function swb_case3(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, state)
-  (; θ, Δz, zwt, Ec_pot) = state
+  (; θ, Δz, zwt, Ec_pot, fsm_Ec, fsm_Es) = state
   # Unsaturated depth in layer #1~3
   d1 = Δz[1]
   d2 = Δz[2]
@@ -27,21 +27,23 @@ function swb_case3(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, state)
 
   # ====== Water Consumption ====== #
   pTr_partition!(pEc, fwet, soilpar, pftpar, state)
+  swc_stress!(pEc, soilpar, pftpar, state)
+  # fsm_Ec[1], fsm_Es[1] = swc_stress(wa1, pEc, soilpar, pftpar)
+  # fsm_Ec[2], _ = swc_stress(wa2, pEc, soilpar, pftpar)
+  # fsm_Ec[3], _ = swc_stress(wa3_unsat, pEc, soilpar, pftpar)
+  
+  Tr1 = fsm_Ec[1] * s_vod * s_tem * Ec_pot[1]
+  Tr2 = fsm_Ec[2] * s_vod * s_tem * Ec_pot[2]
+
   Tr_p3_u = Ec_pot[3] * (d3 * wa3_unsat) / (d3 * wa3_unsat + (Δz[3] - d3) * θ_sat)
   Tr_p3_g = Ec_pot[3] * ((Δz[3] - d3) * θ_sat) / (d3 * wa3_unsat + (Δz[3] - d3) * θ_sat)
 
-  f_sm1, f_sm_s1 = swc_stress(wa1, pEc, soilpar, pftpar)
-  f_sm2, _ = swc_stress(wa2, pEc, soilpar, pftpar)
-  f_sm3, _ = swc_stress(wa3_unsat, pEc, soilpar, pftpar)
-
-  Tr1 = f_sm1 * s_vod * s_tem * Ec_pot[1]
-  Tr2 = f_sm2 * s_vod * s_tem * Ec_pot[2]
-  Tr3_u = f_sm3 * s_vod * s_tem * Tr_p3_u
+  Tr3_u = fsm_Ec[3] * s_vod * s_tem * Tr_p3_u
   Tr3_g = s_vod * s_tem * Tr_p3_g
   Tr3 = Tr3_u + Tr3_g
   Tr = Tr1 + Tr2 + Tr3
 
-  Es = f_sm_s1 * pEs
+  Es = fsm_Es[1] * pEs
 
   # ====== Soil Water Drainage (Unsaturated Zone) ====== #
   Es = max(Es, 0)

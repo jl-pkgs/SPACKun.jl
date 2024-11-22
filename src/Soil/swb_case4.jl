@@ -9,7 +9,7 @@
 # Δz      -- soil layer depth, 3 layers
 # zwt     -- groundwater table depth, mm
 function swb_case4(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, state::State)
-  (; θ, Δz, zwt, Ec_pot) = state
+  (; θ, Δz, zwt, Ec_pot, fsm_Ec, fsm_Es) = state
   # Unsaturated depth in layer #1~3
   d1 = Δz[1]
   d2 = Δz[2]
@@ -31,18 +31,19 @@ function swb_case4(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, state::Stat
   pTr_partition!(pEc, fwet, soilpar, pftpar, state)
 
   # Calculate the moisture constrains for plant and soil in unsaturated zone
-  f_sm1, f_sm_s1 = swc_stress(wa1, pEc, soilpar, pftpar)
-  f_sm2, _ = swc_stress(wa2, pEc, soilpar, pftpar)
-  f_sm3, _ = swc_stress(wa3, pEc, soilpar, pftpar)
+  swc_stress!(pEc, soilpar, pftpar, state)
+  # fsm_Ec[1], fsm_Es[1] = swc_stress(wa1, pEc, soilpar, pftpar)
+  # fsm_Ec[2], _ = swc_stress(wa2, pEc, soilpar, pftpar)
+  # fsm_Ec[3], _ = swc_stress(wa3, pEc, soilpar, pftpar)
 
   # Actual transpiration
-  Tr1 = f_sm1 * s_vod * s_tem * Ec_pot[1]
-  Tr2 = f_sm2 * s_vod * s_tem * Ec_pot[2]
-  Tr3 = f_sm3 * s_vod * s_tem * Ec_pot[3]
+  Tr1 = fsm_Ec[1] * s_vod * s_tem * Ec_pot[1]
+  Tr2 = fsm_Ec[2] * s_vod * s_tem * Ec_pot[2]
+  Tr3 = fsm_Ec[3] * s_vod * s_tem * Ec_pot[3]
   Tr = Tr1 + Tr2 + Tr3
 
   # Actual soil evaporation
-  Es = f_sm_s1 * pEs  # Only consider about the first layer
+  Es = fsm_Es[1] * pEs  # Only consider about the first layer
 
   # ====== Soil Water Drainage (Unsaturated Zone) ====== #
   # ---------------------------------------------------------------- Layer #1

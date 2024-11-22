@@ -1,3 +1,5 @@
+export find_jwt
+
 # 水位为正
 function find_jwt(z₊ₕ::AbstractVector, zwt::Real)
   N = length(z₊ₕ)
@@ -33,6 +35,11 @@ function find_θ_unsat(θ, zwt; z₊ₕ, Δz, θ_sat)
   d_unsat = zwt - z0
   θ_unsat = (θ[j] * Δz[j] - θ_sat * (z1 - zwt)) / d_unsat
   return θ_unsat, j
+end
+
+function find_θ_unsat(soil::State, θ_sat)
+  (; θ, zwt, z₊ₕ, Δz) = soil
+  find_θ_unsat(θ, zwt; z₊ₕ, Δz, θ_sat)
 end
 
 

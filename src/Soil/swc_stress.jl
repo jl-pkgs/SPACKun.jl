@@ -61,6 +61,33 @@ function swc_stress(θ::T, pET::T, soilpar, pftpar) where {T<:Real}
   return f_sm, f_sm_s
 end
 
+
+function swc_stress!(pET::T, soilpar, pftpar, soil::State) where {T<:Real}
+  (; θ_sat) = soilpar
+  (; θ, fsm_Ec, fsm_Es, zwt, z₊ₕ, N) = soil
+
+  jwt = find_jwt(z₊ₕ, zwt)
+  j = jwt + 1
+
+  # 非饱和、半饱和、饱和
+  for i = 1:jwt # 全部非饱和
+    fsm_Ec[i], fsm_Es[i] = swc_stress(θ[i], pET, soilpar, pftpar)
+  end
+
+  # j是半饱和
+  if j <= N
+    θ_unsat = find_θ_unsat(soil, θ_sat)[1] # 这里可能需要求，非饱和的比例（或深度）
+    fsm_Ec[j], fsm_Es[j] = swc_stress(θ_unsat, pET, soilpar, pftpar)
+  end
+
+  # 全部饱和的部分，不受水分限制
+  for i = j+1:N
+    fsm_Ec[i] = 1.0
+    fsm_Es[i] = 1.0
+  end
+end
+
+
 # --- old version
 # # wc = (θ_c - θ_wp) / (θ_fc - θ_wp)
 # if θ <= θ_wp
