@@ -9,7 +9,7 @@
 # Δz      -- soil layer depths, 3 layers
 # zwt     -- groundwater table depth (mm)
 function swb_case1(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil::Soil)
-  (; θ, Δz, zwt, Ec_pot, fsm_Ec, fsm_Es) = soil
+  (; θ, Δz, zwt, Ec_pot, fsm_Ec, fsm_Es, Ec_sm, Ec_gw) = soil
   # Unsaturated depth in layer #1
   d1 = zwt
   (; Ksat, θ_sat, θ_fc, θ_wp) = soilpar
@@ -17,7 +17,7 @@ function swb_case1(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil::Soil)
   # ====== Water supplement ====== #
   # Layer #1 - Unsaturated zone
   vw1 = SM_recharge!(θ, I; Δz, θ_sat)
-  wa1_unsat = find_θ_unsat(θ, zwt; z₊ₕ, Δz, θ_sat)
+  wa1_unsat = find_θ_unsat(θ, zwt; z₊ₕ, Δz, θ_sat)[1]
   wa1, wa2, wa3 = θ
 
   # Layer #2 and #3 - Fully saturated
@@ -25,7 +25,7 @@ function swb_case1(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil::Soil)
   # ====== Water consumption ====== #
   # Evapotranspiration
   pTr_partition!(soil, pEc, fwet, soilpar, pftpar)
-  swc_stress!(soil, pEc, soilpar, pftpar)
+  swc_stress!(soil, pEc, soilpar, pftpar, s_tem * s_vod)
 
   # Transpiration from unsaturated and saturated zones in layer #1
   Tr_p1_u = Ec_pot[1] * (d1 * wa1_unsat) / (d1 * wa1_unsat + (Δz[1] - d1) * θ_sat)
@@ -33,11 +33,13 @@ function swb_case1(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil::Soil)
 
   # Actual transpiration
   Tr1_u = clamp( fsm_Ec[1] * s_vod * s_tem * Tr_p1_u, 0, d1 * (wa1_unsat - θ_wp))
-  Tr1_g = s_vod * s_tem * Tr_p1_g
+  Tr1_g = s_vod * s_tem * Tr_p1_g # 同样，它的蒸发量 也应该限制
+
   Tr1 = Tr1_u + Tr1_g
   Tr2 = s_vod * s_tem * Ec_pot[2]
   Tr3 = s_vod * s_tem * Ec_pot[3]
-  Tr = Tr1 + Tr2 + Tr3
+  Tr = sum(Ec_sm) + sum(Ec_gw)
+  # Tr = Tr1 + Tr2 + Tr3
 
   # Actual soil evaporation
   Es = fsm_Es[1] * pEs

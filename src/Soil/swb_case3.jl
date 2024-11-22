@@ -11,7 +11,7 @@
 # Δz      -- soil layer depth, 3 layers
 # zwt     -- groundwater table depth, mm
 function swb_case3(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil)
-  (; θ, Δz, zwt, Ec_pot, fsm_Ec, fsm_Es) = soil
+  (; θ, Δz, zwt, Ec_pot, fsm_Ec, fsm_Es, Ec_sm, Ec_gw) = soil
   # Unsaturated depth in layer #1~3
   d1 = Δz[1]
   d2 = Δz[2]
@@ -22,12 +22,12 @@ function swb_case3(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil)
   wa1_unsat = θ[1] # 需要更新
   wa2_unsat = θ[2] # 需要更新
   vw3 = SM_recharge!(θ, I; Δz, θ_sat)
-  wa3_unsat = find_θ_unsat(θ, zwt; z₊ₕ, Δz, θ_sat)
+  wa3_unsat = find_θ_unsat(θ, zwt; z₊ₕ, Δz, θ_sat)[1]
   wa1, wa2, wa3 = θ
 
   # ====== Water Consumption ====== #
   pTr_partition!(soil, pEc, fwet, soilpar, pftpar)
-  swc_stress!(soil, pEc, soilpar, pftpar)
+  swc_stress!(soil, pEc, soilpar, pftpar, s_tem * s_vod)
   
   Tr1 = fsm_Ec[1] * s_vod * s_tem * Ec_pot[1]
   Tr2 = fsm_Ec[2] * s_vod * s_tem * Ec_pot[2]
@@ -38,8 +38,9 @@ function swb_case3(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil)
   Tr3_u = fsm_Ec[3] * s_vod * s_tem * Tr_p3_u
   Tr3_g = s_vod * s_tem * Tr_p3_g
   Tr3 = Tr3_u + Tr3_g
-  Tr = Tr1 + Tr2 + Tr3
-
+  # Tr = Tr1 + Tr2 + Tr3
+  Tr = sum(Ec_sm) + sum(Ec_gw)
+  
   Es = fsm_Es[1] * pEs
 
   # ====== Soil Water Drainage (Unsaturated Zone) ====== #

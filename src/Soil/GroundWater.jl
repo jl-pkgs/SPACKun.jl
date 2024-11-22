@@ -1,19 +1,15 @@
 export find_jwt
 
-# 水位为正
+# 水位向下为正，地表为0
 function find_jwt(z₊ₕ::AbstractVector, zwt::Real)
   N = length(z₊ₕ)
-  jwt = N
-  zwt_abs = abs(zwt)
-  for j in 1:N
-    if zwt_abs <= abs(z₊ₕ[j])
-      jwt = j - 1
-      break
-    end
-  end
-  return jwt
-end
+  zwt < 0 && return 0
+  zwt > z₊ₕ[end] && return N + 1
 
+  for j in 1:N
+    zwt <= z₊ₕ[j] && return j
+  end
+end
 
 """
 - 未饱和: z₊ₕ[jwt] ~ zwt
@@ -21,21 +17,20 @@ end
 """
 function find_θ_unsat(θ, zwt; z₊ₕ, Δz, θ_sat)
   N = length(θ)
-  jwt = find_jwt(z₊ₕ, zwt)
-  j = jwt + 1
+  j = find_jwt(z₊ₕ, zwt)
 
-  if jwt == N
-    θ_unsat = θ[jwt]
-    return θ_unsat, j
-  end
+  j == 0 && return 0.0, 0.0         # 全部饱和
+  j == N + 1 && return θ[N], 1.0    # 全部非饱和
 
   z0 = j == 1 ? 0 : z₊ₕ[j-1]
   z1 = z₊ₕ[j]
 
   d_unsat = zwt - z0
   θ_unsat = (θ[j] * Δz[j] - θ_sat * (z1 - zwt)) / d_unsat
-  frac = d_unsat / Δz[j] # 非饱和的比例
-  return θ_unsat
+
+  frac = d_unsat * θ_unsat / (θ[j] * Δz[j]) # 非饱和的比例
+  # frac = d_unsat / Δz[j] # 非饱和的比例
+  return θ_unsat, frac
 end
 
 function find_θ_unsat(soil::Soil, θ_sat)

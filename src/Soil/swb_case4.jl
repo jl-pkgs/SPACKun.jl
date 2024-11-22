@@ -9,7 +9,7 @@
 # Δz      -- soil layer depth, 3 layers
 # zwt     -- groundwater table depth, mm
 function swb_case4(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil::Soil)
-  (; θ, Δz, zwt, Ec_pot, fsm_Ec, fsm_Es) = soil
+  (; θ, Δz, zwt, Ec_pot, fsm_Ec, fsm_Es, Ec_sm, Ec_gw) = soil
   # Unsaturated depth in layer #1~3
   d1 = Δz[1]
   d2 = Δz[2]
@@ -29,13 +29,14 @@ function swb_case4(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil::Soil)
 
   # Distributed the potential T to different layers
   pTr_partition!(soil, pEc, fwet, soilpar, pftpar)
-  swc_stress!(soil, pEc, soilpar, pftpar)
+  swc_stress!(soil, pEc, soilpar, pftpar, s_tem * s_vod)
 
   # Actual transpiration
   Tr1 = fsm_Ec[1] * s_vod * s_tem * Ec_pot[1]
   Tr2 = fsm_Ec[2] * s_vod * s_tem * Ec_pot[2]
   Tr3 = fsm_Ec[3] * s_vod * s_tem * Ec_pot[3]
-  Tr = Tr1 + Tr2 + Tr3
+  # Tr = Tr1 + Tr2 + Tr3
+  Tr = sum(Ec_sm) + sum(Ec_gw)
 
   # Actual soil evaporation
   Es = fsm_Es[1] * pEs  # Only consider about the first layer
