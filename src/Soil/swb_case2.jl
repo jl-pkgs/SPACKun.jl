@@ -29,17 +29,21 @@ function swb_case2(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil::Soil)
   pTr_partition!(soil, pEc, fwet, soilpar, pftpar)
   swc_stress!(soil, pEc, soilpar, pftpar, s_tem * s_vod)
 
-  # Transpiration from unsaturated and saturated zones in layer #2
-  Tr_p2_u = Ec_pot[2] * (d2 * wa2_unsat) / (d2 * wa2_unsat + (Δz[2] - d2) * θ_sat)
-  Tr_p2_g = Ec_pot[2] * ((Δz[2] - d2) * θ_sat) / (d2 * wa2_unsat + (Δz[2] - d2) * θ_sat)
+  # # Transpiration from unsaturated and saturated zones in layer #2
+  # Tr_p2_u = Ec_pot[2] * (d2 * wa2_unsat) / (d2 * wa2_unsat + (Δz[2] - d2) * θ_sat)
+  # Tr_p2_g = Ec_pot[2] * ((Δz[2] - d2) * θ_sat) / (d2 * wa2_unsat + (Δz[2] - d2) * θ_sat)
+  # Tr2_u = clamp(fsm_Ec[2] * s_vod * s_tem * Tr_p2_u, 0, d2 * (wa2_unsat - θ_wp))
+  # Tr2_g = s_vod * s_tem * Tr_p2_g
 
-  # Actual transpiration
-  Tr1 = fsm_Ec[1] * s_vod * s_tem * Ec_pot[1]
-  Tr2_u = clamp(fsm_Ec[2] * s_vod * s_tem * Tr_p2_u, 0, d2 * (wa2_unsat - θ_wp))
-  Tr2_g = s_vod * s_tem * Tr_p2_g
-  Tr2 = Tr2_u + Tr2_g
-  Tr3 = s_vod * s_tem * Ec_pot[3]
+  # # Actual transpiration
+  # Tr1 = fsm_Ec[1] * s_vod * s_tem * Ec_pot[1]
+  # Tr2 = Tr2_u + Tr2_g
+  # Tr3 = s_vod * s_tem * Ec_pot[3]
   # Tr = Tr1 + Tr2 + Tr3
+  Tr1 = Ec_sm[1] + Ec_gw[1]
+  Tr2_u = Ec_sm[2]
+  Tr2_g = Ec_gw[2]
+  Tr3 = Ec_sm[3] + Ec_gw[3]
   Tr = sum(Ec_sm) + sum(Ec_gw)
 
   # Actual soil evaporation

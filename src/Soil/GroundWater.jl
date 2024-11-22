@@ -3,13 +3,14 @@ export find_jwt
 # 水位向下为正，地表为0
 function find_jwt(z₊ₕ::AbstractVector, zwt::Real)
   N = length(z₊ₕ)
-  zwt < 0 && return 0
-  zwt > z₊ₕ[end] && return N + 1
+  zwt <= 0 && return 0
+  zwt >= z₊ₕ[end] && return N + 1
 
   for j in 1:N
     zwt <= z₊ₕ[j] && return j
   end
 end
+
 
 """
 - 未饱和: z₊ₕ[jwt] ~ zwt

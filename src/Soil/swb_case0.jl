@@ -9,7 +9,7 @@
 # Δz      -- soil layer depth (3 layers)
 # zwt     -- groundwater table depth (mm)
 function swb_case0(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil::Soil)
-  (; θ, Δz, zwt, Ec_pot, Ec_gw) = soil
+  (; θ, Δz, zwt, Ec_pot, Ec_gw, Ec_sm, Ec_gw) = soil
 
   # Old soil water content in layer 1-3
   wa1, wa2, wa3 = θ
@@ -18,13 +18,17 @@ function swb_case0(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil::Soil)
   # ====== Water consumption ====== #
   # Evapotranspiration
   pTr_partition!(soil, pEc, fwet, soilpar, pftpar)
-  # swc_stress!(soil, pEc, soilpar, pftpar, s_tem * s_vod)
+  swc_stress!(soil, pEc, soilpar, pftpar, s_tem * s_vod)
   
   # Actual transpiration
-  Tr1 = s_vod * s_tem * Ec_pot[1]
-  Tr2 = s_vod * s_tem * Ec_pot[2]
-  Tr3 = s_vod * s_tem * Ec_pot[3]
-  Tr = Tr1 + Tr2 + Tr3
+  Tr1 = Ec_sm[1] + Ec_gw[1]
+  Tr2 = Ec_sm[2] + Ec_gw[2]
+  Tr3 = Ec_sm[3] + Ec_gw[3]
+  Tr = sum(Ec_sm) + sum(Ec_gw)
+  # Tr1 = s_vod * s_tem * Ec_pot[1]
+  # Tr2 = s_vod * s_tem * Ec_pot[2]
+  # Tr3 = s_vod * s_tem * Ec_pot[3]
+  # Tr = Tr1 + Tr2 + Tr3
   # Tr = sum(Ec_gw)
 
   # Actual soil evaporation (only first layer)

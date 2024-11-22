@@ -29,22 +29,23 @@ function swb_case3(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil)
   pTr_partition!(soil, pEc, fwet, soilpar, pftpar)
   swc_stress!(soil, pEc, soilpar, pftpar, s_tem * s_vod)
   
-  Tr1 = fsm_Ec[1] * s_vod * s_tem * Ec_pot[1]
-  Tr2 = fsm_Ec[2] * s_vod * s_tem * Ec_pot[2]
-
-  Tr_p3_u = Ec_pot[3] * (d3 * wa3_unsat) / (d3 * wa3_unsat + (Δz[3] - d3) * θ_sat)
-  Tr_p3_g = Ec_pot[3] * ((Δz[3] - d3) * θ_sat) / (d3 * wa3_unsat + (Δz[3] - d3) * θ_sat)
-
-  Tr3_u = fsm_Ec[3] * s_vod * s_tem * Tr_p3_u
-  Tr3_g = s_vod * s_tem * Tr_p3_g
-  Tr3 = Tr3_u + Tr3_g
+  # Tr1 = fsm_Ec[1] * s_vod * s_tem * Ec_pot[1]
+  # Tr2 = fsm_Ec[2] * s_vod * s_tem * Ec_pot[2]
+  # Tr_p3_u = Ec_pot[3] * (d3 * wa3_unsat) / (d3 * wa3_unsat + (Δz[3] - d3) * θ_sat)
+  # Tr_p3_g = Ec_pot[3] * ((Δz[3] - d3) * θ_sat) / (d3 * wa3_unsat + (Δz[3] - d3) * θ_sat)
+  # Tr3_u = fsm_Ec[3] * s_vod * s_tem * Tr_p3_u
+  # Tr3_g = s_vod * s_tem * Tr_p3_g
+  # Tr3 = Tr3_u + Tr3_g
   # Tr = Tr1 + Tr2 + Tr3
+  Tr1 = Ec_sm[1] + Ec_gw[1]
+  Tr2 = Ec_sm[2] + Ec_gw[2]
+  Tr3_u = Ec_sm[3]
+  Tr3_g = Ec_gw[3]
   Tr = sum(Ec_sm) + sum(Ec_gw)
   
-  Es = fsm_Es[1] * pEs
+  Es = max(fsm_Es[1] * pEs, 0.0)
 
   # ====== Soil Water Drainage (Unsaturated Zone) ====== #
-  Es = max(Es, 0)
   Tr1 = max(Tr1, 0)
 
   if wa1 > 0 && Es + Tr1 > d1 * wa1
@@ -68,8 +69,8 @@ function swb_case3(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil)
     ff2 = 0
   end
 
-  Tr3_u = max(Tr3_u, 0)
-  Tr3_u = min(Tr3_u, d3 * (wa3_unsat - θ_wp))
+  Tr3_u = clamp(Tr3_u, 0, d3 * (wa3_unsat - θ_wp))
+  
   f3 = soil_drainage(wa3_unsat, θ_sat, Ksat, 0.012, 1.2)
   wa3_unsat = (wa3_unsat * d3 + f2 + ff2 - f3 - Tr3_u) / d3
   wa3_unsat = max(wa3_unsat, 0)

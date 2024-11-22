@@ -70,15 +70,6 @@ function swc_stress!(soil::Soil, pET::T, soilpar, pftpar, f_cons) where {T<:Real
 
   j = find_jwt(z₊ₕ, zwt)
 
-  # 全部饱和
-  if j == 0
-    fsm_Ec[i] = 1.0
-    fsm_Es[i] = 1.0
-    
-    Ec_sm[i] = 0.0
-    Ec_gw[i] = Ec_pot[i] * f_cons
-  end
-
   # 其他情景：非饱和、半饱和、饱和
   for i = 1:min(j, N) # 全部非饱和
     fsm_Ec[i], fsm_Es[i] = swc_stress(θ[i], pET, soilpar, pftpar)
