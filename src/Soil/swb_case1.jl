@@ -27,18 +27,7 @@ function swb_case1(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil::Soil)
   pTr_partition!(soil, pEc, fwet, soilpar, pftpar)
   swc_stress!(soil, pEc, soilpar, pftpar, s_tem * s_vod)
 
-  # # Transpiration from unsaturated and saturated zones in layer #1
-  # Tr_p1_u = Ec_pot[1] * (d1 * wa1_unsat) / (d1 * wa1_unsat + (Δz[1] - d1) * θ_sat)
-  # Tr_p1_g = Ec_pot[1] * ((Δz[1] - d1) * θ_sat) / (d1 * wa1_unsat + (Δz[1] - d1) * θ_sat)
-
-  # # Actual transpiration
-  # Tr1_u = clamp( fsm_Ec[1] * s_vod * s_tem * Tr_p1_u, 0, d1 * (wa1_unsat - θ_wp))
-  # Tr1_g = s_vod * s_tem * Tr_p1_g # 同样，它的蒸发量 也应该限制
-
-  # Tr1 = Tr1_u + Tr1_g
-  # Tr2 = s_vod * s_tem * Ec_pot[2]
-  # Tr3 = s_vod * s_tem * Ec_pot[3]
-  # Tr = Tr1 + Tr2 + Tr3
+  # Transpiration from unsaturated and saturated zones in layer #1
   Tr1_u = Ec_sm[1]
   Tr1_g = Ec_gw[1]
   Tr2 = Ec_sm[2] + Ec_gw[2]

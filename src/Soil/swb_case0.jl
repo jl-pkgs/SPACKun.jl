@@ -25,12 +25,7 @@ function swb_case0(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil::Soil)
   Tr2 = Ec_sm[2] + Ec_gw[2]
   Tr3 = Ec_sm[3] + Ec_gw[3]
   Tr = sum(Ec_sm) + sum(Ec_gw)
-  # Tr1 = s_vod * s_tem * Ec_pot[1]
-  # Tr2 = s_vod * s_tem * Ec_pot[2]
-  # Tr3 = s_vod * s_tem * Ec_pot[3]
-  # Tr = Tr1 + Tr2 + Tr3
-  # Tr = sum(Ec_gw)
-
+  
   # Actual soil evaporation (only first layer)
   Es = pEs
 

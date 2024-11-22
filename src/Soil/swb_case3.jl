@@ -29,14 +29,7 @@ function swb_case3(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil)
   pTr_partition!(soil, pEc, fwet, soilpar, pftpar)
   swc_stress!(soil, pEc, soilpar, pftpar, s_tem * s_vod)
   
-  # Tr1 = fsm_Ec[1] * s_vod * s_tem * Ec_pot[1]
-  # Tr2 = fsm_Ec[2] * s_vod * s_tem * Ec_pot[2]
-  # Tr_p3_u = Ec_pot[3] * (d3 * wa3_unsat) / (d3 * wa3_unsat + (Δz[3] - d3) * θ_sat)
-  # Tr_p3_g = Ec_pot[3] * ((Δz[3] - d3) * θ_sat) / (d3 * wa3_unsat + (Δz[3] - d3) * θ_sat)
-  # Tr3_u = fsm_Ec[3] * s_vod * s_tem * Tr_p3_u
-  # Tr3_g = s_vod * s_tem * Tr_p3_g
-  # Tr3 = Tr3_u + Tr3_g
-  # Tr = Tr1 + Tr2 + Tr3
+  # Evapotranspiration
   Tr1 = Ec_sm[1] + Ec_gw[1]
   Tr2 = Ec_sm[2] + Ec_gw[2]
   Tr3_u = Ec_sm[3]
