@@ -10,8 +10,8 @@
 # wet     -- wetness indice
 # Δz      -- soil layer depth, 3 layers
 # zwt     -- groundwater table depth, mm
-function swb_case3(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, state)
-  (; θ, Δz, zwt, Ec_pot, fsm_Ec, fsm_Es) = state
+function swb_case3(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil)
+  (; θ, Δz, zwt, Ec_pot, fsm_Ec, fsm_Es) = soil
   # Unsaturated depth in layer #1~3
   d1 = Δz[1]
   d2 = Δz[2]
@@ -26,11 +26,8 @@ function swb_case3(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, state)
   wa1, wa2, wa3 = θ
 
   # ====== Water Consumption ====== #
-  pTr_partition!(pEc, fwet, soilpar, pftpar, state)
-  swc_stress!(pEc, soilpar, pftpar, state)
-  # fsm_Ec[1], fsm_Es[1] = swc_stress(wa1, pEc, soilpar, pftpar)
-  # fsm_Ec[2], _ = swc_stress(wa2, pEc, soilpar, pftpar)
-  # fsm_Ec[3], _ = swc_stress(wa3_unsat, pEc, soilpar, pftpar)
+  pTr_partition!(soil, pEc, fwet, soilpar, pftpar)
+  swc_stress!(soil, pEc, soilpar, pftpar)
   
   Tr1 = fsm_Ec[1] * s_vod * s_tem * Ec_pot[1]
   Tr2 = fsm_Ec[2] * s_vod * s_tem * Ec_pot[2]
@@ -114,7 +111,7 @@ function swb_case3(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, state)
     uex = -zwt * θ_sat
   end
 
-  state.θ .= [wa1, wa2, wa3]
-  state.zwt = max(0, zwt)
+  soil.θ .= [wa1, wa2, wa3]
+  soil.zwt = max(0, zwt)
   return Tr, Es, uex
 end

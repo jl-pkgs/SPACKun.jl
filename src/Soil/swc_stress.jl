@@ -62,7 +62,7 @@ function swc_stress(θ::T, pET::T, soilpar, pftpar) where {T<:Real}
 end
 
 
-function swc_stress!(pET::T, soilpar, pftpar, soil::State) where {T<:Real}
+function swc_stress!(soil::Soil, pET::T, soilpar, pftpar) where {T<:Real}
   (; θ_sat) = soilpar
   (; θ, fsm_Ec, fsm_Es, zwt, z₊ₕ, N) = soil
 

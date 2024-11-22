@@ -37,7 +37,7 @@ function find_θ_unsat(θ, zwt; z₊ₕ, Δz, θ_sat)
   return θ_unsat, j
 end
 
-function find_θ_unsat(soil::State, θ_sat)
+function find_θ_unsat(soil::Soil, θ_sat)
   (; θ, zwt, z₊ₕ, Δz) = soil
   find_θ_unsat(θ, zwt; z₊ₕ, Δz, θ_sat)
 end

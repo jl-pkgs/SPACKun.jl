@@ -8,8 +8,8 @@
 # wet     -- wetness indice
 # Δz      -- soil layer depth, 3 layers
 # zwt     -- groundwater table depth, mm
-function swb_case4(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, state::State)
-  (; θ, Δz, zwt, Ec_pot, fsm_Ec, fsm_Es) = state
+function swb_case4(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil::Soil)
+  (; θ, Δz, zwt, Ec_pot, fsm_Ec, fsm_Es) = soil
   # Unsaturated depth in layer #1~3
   d1 = Δz[1]
   d2 = Δz[2]
@@ -28,13 +28,8 @@ function swb_case4(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, state::Stat
   # Evapotranspiration #
 
   # Distributed the potential T to different layers
-  pTr_partition!(pEc, fwet, soilpar, pftpar, state)
-
-  # Calculate the moisture constrains for plant and soil in unsaturated zone
-  swc_stress!(pEc, soilpar, pftpar, state)
-  # fsm_Ec[1], fsm_Es[1] = swc_stress(wa1, pEc, soilpar, pftpar)
-  # fsm_Ec[2], _ = swc_stress(wa2, pEc, soilpar, pftpar)
-  # fsm_Ec[3], _ = swc_stress(wa3, pEc, soilpar, pftpar)
+  pTr_partition!(soil, pEc, fwet, soilpar, pftpar)
+  swc_stress!(soil, pEc, soilpar, pftpar)
 
   # Actual transpiration
   Tr1 = fsm_Ec[1] * s_vod * s_tem * Ec_pot[1]
@@ -138,7 +133,7 @@ function swb_case4(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, state::Stat
   end
 
   # Updated soil water content
-  state.θ .= [wa1, wa2, wa3]
-  state.zwt = max(0, zwt)
+  soil.θ .= [wa1, wa2, wa3]
+  soil.zwt = max(0, zwt)
   return Tr, Es, uex
 end

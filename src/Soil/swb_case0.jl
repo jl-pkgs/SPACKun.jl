@@ -8,8 +8,8 @@
 # wet     -- wetness index
 # Δz      -- soil layer depth (3 layers)
 # zwt     -- groundwater table depth (mm)
-function swb_case0(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, state::State)
-  (; θ, Δz, zwt, Ec_pot) = state
+function swb_case0(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil::Soil)
+  (; θ, Δz, zwt, Ec_pot) = soil
 
   # Old soil water content in layer 1-3
   wa1, wa2, wa3 = θ
@@ -17,7 +17,7 @@ function swb_case0(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, state::Stat
 
   # ====== Water consumption ====== #
   # Evapotranspiration
-  pTr_partition!(pEc, fwet, soilpar, pftpar, state)
+  pTr_partition!(soil, pEc, fwet, soilpar, pftpar)
   
   # Actual transpiration
   Tr1 = s_vod * s_tem * Ec_pot[1]
@@ -68,8 +68,8 @@ function swb_case0(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, state::Stat
   end
 
   # Updated soil water content
-  state.θ .= [wa1, wa2, wa3]
-  state.zwt = max(0, zwt)  # ensure groundwater table depth is non-negative
+  soil.θ .= [wa1, wa2, wa3]
+  soil.zwt = max(0, zwt)  # ensure groundwater table depth is non-negative
 
   return Tr, Es, uex
 end

@@ -62,8 +62,8 @@ end
 - `uex`    : goundwater overflow soil surface, mm
 """
 function sw_balance(I::T, pEc::T, pEs::T, Ta::T, Topt::T, s_VOD::T,
-  soilpar, pftpar, wet, state::State) where {T<:Real}
-  (; zwt) = state
+  soilpar, pftpar, wet, soil::Soil) where {T<:Real}
+  (; zwt) = soil
   # s_tem = Temp_stress(Topt, Ta) # Constrains of temperature
   s_tem = exp(-((Ta - Topt) / Topt)^2)
 
@@ -79,7 +79,7 @@ function sw_balance(I::T, pEc::T, pEs::T, Ta::T, Topt::T, s_VOD::T,
     fun = swb_case4 # Case 4: groundwater table below layer 3
   end
 
-  Tr, Es, uex = fun(I, pEc, pEs, s_tem, s_VOD, soilpar, pftpar, wet, state)
+  Tr, Es, uex = fun(I, pEc, pEs, s_tem, s_VOD, soilpar, pftpar, wet, soil)
   return Tr, Es, uex
 end
 

@@ -17,16 +17,16 @@ function init_param(soil_type=2, PFTi=22)
   θ = ones(3) * θ_sat
   zwt = 0.0
   snowpack = 0.0
-  state = State(; θ, zwt, snowpack)
-  soilpar, pftpar, state
+  soil = Soil(; θ, zwt, snowpack)
+  soilpar, pftpar, soil
 end
 
 dir_root = "$(@__DIR__)/.."
 d = fread("$dir_root/data/dat_栾城_ERA5L_2010.csv")
 
 function test_LuanCheng(; zwt=0.0)
-  soilpar, pftpar, state = init_param()
-  state.zwt = zwt
+  soilpar, pftpar, soil = init_param()
+  soil.zwt = zwt
   topt = 24.0
 
   (; Rn, Pa, Prcp, Tavg, LAI, VOD) = d
@@ -39,7 +39,7 @@ function test_LuanCheng(; zwt=0.0)
   s_VODi = (VOD ./ maximum(VOD)) .^ 0.5 # VOD-stress
 
   @time ET, Tr, Es, Ei, Esb, RF, GW, SM =
-    SiTHv2_site(Rn, Tavg, Tas, Prcp, Pa, Gi, LAI, s_VODi, topt, soilpar, pftpar, state, false)
+    SiTHv2_site(Rn, Tavg, Tas, Prcp, Pa, Gi, LAI, s_VODi, topt, soilpar, pftpar, soil, false)
 
   SM1 = SM[:, 1]
   SM2 = SM[:, 2]

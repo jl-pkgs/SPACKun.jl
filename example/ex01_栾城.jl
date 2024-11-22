@@ -11,8 +11,8 @@ function init_param(; soil_type=2, PFTi=22)
   θ = ones(3) * θ_sat
   zwt = 0.0
   snowpack = 0.0
-  state = State(; θ, zwt, snowpack)
-  soilpar, pftpar, state
+  soil = Soil(; θ, zwt, snowpack)
+  soilpar, pftpar, soil
 end
 
 # begin
@@ -23,13 +23,13 @@ end
 #   soilpar = get_soilpar(soil_type)
 
 #   topt = Float64(Topt[i, j])
-#   soilpar, pftpar, state = init_param(;soil_type, PFTi=22)
+#   soilpar, pftpar, soil = init_param(;soil_type, PFTi=22)
 # end
 # Load necessary data
 df = fread("data/dat_栾城_ERA5L_1982-2019.csv")
 dates = df.date
 
-soilpar, pftpar, state = init_param()
+soilpar, pftpar, soil = init_param()
 
 inds = findall(year.(dates) .== 2000)
 d = df[inds, :]
@@ -46,7 +46,7 @@ s_VODi = (VOD ./ nanmaximum(VOD)) .^ 0.5 # VOD-stress
 topt = 24.0
 
 ET, Tr, Es, Ei, Esb, SM, RF, GW = 
-  SiTHv2_site(Rn, Tavg, Tas, Prcp, Pa, Gi, LAI, s_VODi, topt, soilpar, pftpar, state, false)
+  SiTHv2_site(Rn, Tavg, Tas, Prcp, Pa, Gi, LAI, s_VODi, topt, soilpar, pftpar, soil, false)
 
 # df_out = DataFrame(; ET, Tr, Es, Ei, Esb, SM1, SM2, SM3, RF, GW)
 # fwrite(df_out, "data/Output_栾城_2010.csv")

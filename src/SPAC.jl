@@ -4,7 +4,7 @@ using Parameters
 using LabelledArrays
 using UnPack
 
-export State
+export Soil
 export get_pftpar, get_soilpar
 export potentialET, pTr_partition!, interception, snp_balance, runoff_up
 export Δz, z₊ₕ

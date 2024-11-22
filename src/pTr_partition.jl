@@ -10,8 +10,8 @@ Partition PET into three soil layers
 # OUTPUT:
 - Tr_p :  separate potential Transpiration
 """
-function pTr_partition!(pEc::T, fwet::T, soilpar, pftpar, state::State) where {T<:Real}
-  (; θ, Δz, Ec_pot) = state
+function pTr_partition!(soil::Soil, pEc::T, fwet::T, soilpar, pftpar) where {T<:Real}
+  (; θ, Δz, Ec_pot) = soil
   
   (; b, θ_sat) = soilpar
   (; D50, D95) = pftpar

@@ -1,9 +1,9 @@
-export update_state
+export update_soil
 export SpacOutput, SpacOutputs, write_output!
 
 
 # rename to Soil later
-@with_kw mutable struct State{FT}
+@with_kw mutable struct Soil{FT}
   N::Int = 3
   Δz::Vector{FT} = [50.0, 1450.0, 3500.0]  # mm
   z₊ₕ::Vector{FT} = cumsum(Δz)
@@ -29,11 +29,11 @@ export SpacOutput, SpacOutputs, write_output!
   snowpack::FT = 0.0                # snowpack depth [mm]
 end
 
-# Update state variables
-function update_state!(state, θ, zwt, snowpack)
-  # Create a structure to store state variables
+# Update soil variables
+function update_soil!(soil, θ, zwt, snowpack)
+  # Create a structure to store soil variables
   #
-  # 状态变量需要连续，传递到下一年中；模型对初始状态state敏感。
+  # 状态变量需要连续，传递到下一年中；模型对初始状态soil敏感。
   # - θ: 采用warming-up的方式获取，warming-up period可取3年
   # - zwt: 采用spin-up的方式获取，spin-up period可取100年
   #
@@ -42,10 +42,10 @@ function update_state!(state, θ, zwt, snowpack)
   # - zwt: groundwater depth, [mm]
   # - snowpack: snowpack depth
   θ[θ.<0] .= 0.01  # set the minimum value for soil moisture
-  state.θ = θ
-  state.zwt = zwt
-  state.snowpack = snowpack
-  return state
+  soil.θ = θ
+  soil.zwt = zwt
+  soil.snowpack = snowpack
+  return soil
 end
 
 

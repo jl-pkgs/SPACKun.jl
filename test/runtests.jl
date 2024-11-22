@@ -28,14 +28,14 @@ end
 
 @testset "pTr_partition" begin
   pEc = 20.0
-  state = State()
-  state.θ = [0.3, 0.2, 0.1]
+  soil = Soil()
+  soil.θ = [0.3, 0.2, 0.1]
 
   fwet = 0.5
   soilpar = get_soilpar(2) #|> collect
   pftpar = get_pftpar(22) #|> collect
-  pTr_partition!(pEc, fwet, soilpar, pftpar, state)
-  @test state.Ec_pot == [0.004508186497043249, 9.864271368015835, 0.1312204454871218]
+  pTr_partition!(soil, pEc, fwet, soilpar, pftpar)
+  @test soil.Ec_pot == [0.004508186497043249, 9.864271368015835, 0.1312204454871218]
 end
 
 
