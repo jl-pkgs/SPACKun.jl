@@ -32,20 +32,21 @@ function swb_case3(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil)
   Tr1 = Ec_sm[1] + Ec_gw[1]
   Tr2 = Ec_sm[2] + Ec_gw[2]
   Tr3_u = Ec_sm[3]
-  
-  # ====== Soil Water Drainage (Unsaturated Zone) ====== #
-  Tr1 = max(Tr1, 0)
 
+  # 限制蒸发
+  Tr1 = max(Tr1, 0)
   if wa1 > 0 && Es + Tr1 > d1 * wa1
     Tr1 = d1 * wa1 * Tr1 / (Tr1 + Es)
     Es = d1 * wa1 - Tr1
   end
+  Tr2 = clamp(Tr2, 0, d2 * (wa2 - θ_wp))
+  Tr3_u = clamp(Tr3_u, 0, d3 * (wa3_unsat - θ_wp))
 
+  # ====== Soil Water Drainage (Unsaturated Zone) ====== #  
   f1 = soil_drainage(wa1_unsat, θ_sat, Ksat, 0.048, 4.8)
   wa1 = (wa1 * d1 - f1 - Es - Tr1) / d1
   wa1 = max(wa1, 0)
 
-  Tr2 = clamp(Tr2, 0, d2 * (wa2 - θ_wp))
   f2 = soil_drainage(wa2_unsat, θ_sat, Ksat, 0.012, 1.2)
   wa2 = (wa2 * d2 + f1 - f2 - Tr2) / d2
   wa2 = clamp(wa2, 0, 1)
@@ -56,8 +57,6 @@ function swb_case3(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil)
   else
     ff2 = 0
   end
-
-  Tr3_u = clamp(Tr3_u, 0, d3 * (wa3_unsat - θ_wp))
   
   f3 = soil_drainage(wa3_unsat, θ_sat, Ksat, 0.012, 1.2)
   wa3_unsat = (wa3_unsat * d3 + f2 + ff2 - f3 - Tr3_u) / d3
@@ -69,11 +68,10 @@ function swb_case3(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil)
   else
     ff3 = 0
   end
-
+  exceed = f3 + ff3
+  
   # ====== The Groundwater Table Depth ====== #
-  F1 = f3 + ff3 + vw3
-  # Tr_g = Tr3_g
-  Δw = F1 - sum(Ec_gw) - GW_Rsb(zwt)
+  Δw = exceed + vw3 - sum(Ec_gw) - GW_Rsb(zwt)
 
   sy = θ_sat - (wa1 + wa2 + wa3_unsat) / 3
   zwt = zwt - Δw / sy

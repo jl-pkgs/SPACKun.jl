@@ -33,11 +33,18 @@ function swb_case4(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil::Soil)
   # ---------------------------------------------------------------- Layer #1
   # Update the soil moisture after ET, layer #1
   Tr1 = max(Tr1, 0)
-
   if wa1 > 0 && Es + Tr1 > d1 * wa1  # wilting point
     Tr1 = d1 * wa1 * Tr1 / (Tr1 + Es)
     Es = d1 * wa1 - Tr1
   end
+  Tr2 = clamp(Tr2, 0, d2 * (wa2 - θ_wp))
+  Tr3 = clamp(Tr3, 0, d3 * (wa3 - θ_wp))
+
+  ## 新方案
+  # sink = [Tr1 + Es, Tr2, Tr3]
+  # θ_unsat = [wa1_unsat, wa2_unsat, wa3_unsat]
+  # _exceed = SM_discharge!(soil, θ_unsat, sink, soilpar)
+  # _wa1, _wa2, _wa3_unsat = θ_unsat
 
   # Drainage from unsaturated zone, #1
   f1 = soil_drainage(wa1_unsat, θ_sat, Ksat, 0.048, 4.8)
@@ -45,10 +52,6 @@ function swb_case4(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil::Soil)
   # Update the soil moisture after drainage, layer #1
   wa1 = (wa1 * d1 - f1 - Es - Tr1) / d1
   wa1 = clamp(wa1, 0, 1)
-
-  # ---------------------------------------------------------------- Layer #2
-  # Update the soil moisture after ET, layer #2
-  Tr2 = clamp(Tr2, 0, d2 * (wa2 - θ_wp))
 
   # Drainage from unsaturated zone, #2
   f2 = soil_drainage(wa2_unsat, θ_sat, Ksat, 0.012, 1.2)
@@ -64,17 +67,13 @@ function swb_case4(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil::Soil)
     ff2 = 0
   end
 
-  # ---------------------------------------------------------------- Layer #3
-  # Update the soil moisture after ET, layer #3, unsat-zone
-  Tr3 = clamp(Tr3, 0, d3 * (wa3 - θ_wp))
-
   # Drainage from unsaturated zone, #3
   f3 = soil_drainage(wa3_unsat, θ_sat, Ksat, 0.012, 1.2)
 
   # Update the soil moisture after drainage, layer #3
   wa3 = (wa3 * d3 + f2 + ff2 - f3 - Tr3) / d3
-
   wa3 = clamp(wa3, 0, 1)
+
   if wa3 > θ_sat
     ff3 = max((wa3 - θ_sat) * d3, 0)
     wa3_unsat = θ_sat
@@ -83,10 +82,15 @@ function swb_case4(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil::Soil)
     wa3_unsat = wa3
   end
 
+  exceed = f3 + ff3
+
+  # if exceed != _exceed
+  #   @show exceed, _exceed
+  # end
+
   # ====== The Groundwater Table Depth ====== #
-  F1 = f3 + ff3 + vw3 # Total water recharge to groundwater
   Tr_g = 0 # Total transpiration from groundwater
-  Δw = F1 - Tr_g - GW_Rsb(zwt)
+  Δw = exceed + vw3 - Tr_g - GW_Rsb(zwt)
 
   # Changes in groundwater table depth
   sy = 0.2 # specific yield as 0.2

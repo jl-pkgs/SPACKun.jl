@@ -50,10 +50,10 @@ function test_LuanCheng(; zwt=0.0)
 end
 
 
-# @run test_LuanCheng(; zwt=2000.0)
-@testset "SiTHv2_site" begin
+# @run test_LuanCheng(; zwt=6000.0)
+@testset "SPAC.jl" begin
   zgws = [0, 25, 1000, 2000, 6000]
-  for zwt = zgws
+  for zwt = zgws[1:5]
     test_LuanCheng(; zwt)
 
     f_jl = "$dir_root/data/OUTPUT/OUTPUT_栾城_2010_zgw=$(Int(zwt)).csv"
