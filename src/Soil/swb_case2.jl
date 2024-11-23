@@ -9,10 +9,9 @@
 # Δz      -- soil layer depths, 3 layers
 # zwt     -- groundwater table depth (mm)
 function swb_case2(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil::Soil)
-  (; θ, Δz, zwt, Ec_sm, Ec_gw, sink) = soil
-  (; Ksat, θ_sat, θ_fc, θ_wp) = soilpar
+  (; θ, Δz, zwt, Ec_gw, sink) = soil
+  (; θ_sat, θ_fc) = soilpar
 
-  # Unsaturated depth in layer #1~2
   d1 = Δz[1]
   d2 = zwt - d1
 

@@ -7,8 +7,8 @@
 # pftpar  -- plant-related parameters
 # fwet     -- wetness index
 function swb_case1(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil::Soil)
-  (; θ, Δz, zwt, Ec_sm, Ec_gw, sink) = soil
-  (; Ksat, θ_sat, θ_fc, θ_wp) = soilpar
+  (; θ, Δz, zwt, Ec_gw, sink) = soil
+  (; θ_sat, θ_fc) = soilpar
   d1 = zwt  # Unsaturated depth in layer #1
 
   # ====== Water supplement ====== #
