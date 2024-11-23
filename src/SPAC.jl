@@ -28,8 +28,9 @@ include("snp_balance.jl")
 include("runoff_up.jl")
 
 include("GroundWater/GroundWater.jl")
-
 include("Soil_Kun/sw_balance.jl")
+include("Soil_CoLM/CoLM.jl")
+
 include("SiTHv2.jl")
 
 
