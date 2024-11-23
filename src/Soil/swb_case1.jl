@@ -16,7 +16,7 @@ function swb_case1(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil::Soil)
   # ====== Water supplement ====== #
   # Layer #1 - Unsaturated zone
   vw1 = SM_recharge!(θ, I; Δz, θ_sat)
-  wa1_unsat = find_θ_unsat(θ, zwt; z₊ₕ, Δz, θ_sat)[1]
+  wa1_unsat, frac_unsat = find_θ_unsat(θ, zwt; z₊ₕ, Δz, θ_sat)#[1]
   wa1, wa2, wa3 = θ
 
   # Layer #2 and #3 - Fully saturated
@@ -24,7 +24,7 @@ function swb_case1(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil::Soil)
   Tr, Es = Evapotranspiration!(soil, pEc, pEs, fwet, f_cons, soilpar, pftpar)
 
   Tr1_u = Ec_sm[1]
-  Es_u = clamp(Es * (d1 * wa1_unsat) / (d1 * wa1_unsat + (Δz[1] - d1) * θ_sat), 0, d1 * wa1_unsat)
+  Es_u = clamp(Es * frac_unsat, 0, d1 * wa1_unsat)
 
   # ====== Soil water drainage (unsaturated zone) ====== #
   f1 = soil_drainage(wa1_unsat, θ_sat, Ksat, 0.048, 4.8)

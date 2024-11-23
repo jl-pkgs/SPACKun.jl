@@ -29,18 +29,15 @@ function swb_case2(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil::Soil)
   Tr, Es = Evapotranspiration!(soil, pEc, pEs, fwet, f_cons, soilpar, pftpar)
 
   # Transpiration from unsaturated and saturated zones in layer #2
-  Tr1 = Ec_sm[1] + Ec_gw[1]
-  Tr2_u = Ec_sm[2]
-
-  # ====== Soil Water Drainage (Unsaturated Zone) ====== #
-  # Layer #1
-  Tr1 = max(Tr1, 0)
-
+  Tr1 = max(Ec_sm[1] + Ec_gw[1], 0.0)
   if wa1 > 0 && Es + Tr1 > d1 * wa1
     Tr1 = d1 * wa1 * Tr1 / (Tr1 + Es)
     Es = d1 * wa1 - Tr1
   end
+  Tr2_u = Ec_sm[2]
 
+  # ====== Soil Water Drainage (Unsaturated Zone) ====== #
+  # Layer #1
   f1 = soil_drainage(wa1_unsat, θ_sat, Ksat, 0.048, 4.8)
   wa1 = max((wa1 * d1 - f1 - Es - Tr1) / d1, 0)
 

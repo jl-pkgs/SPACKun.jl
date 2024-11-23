@@ -48,15 +48,11 @@ function swb_case4(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil::Soil)
 
   # Drainage from unsaturated zone, #1
   f1 = soil_drainage(wa1_unsat, θ_sat, Ksat, 0.048, 4.8)
-
-  # Update the soil moisture after drainage, layer #1
   wa1 = (wa1 * d1 - f1 - Es - Tr1) / d1
   wa1 = clamp(wa1, 0, 1)
 
   # Drainage from unsaturated zone, #2
   f2 = soil_drainage(wa2_unsat, θ_sat, Ksat, 0.012, 1.2)
-
-  # Update the soil moisture after drainage, layer #2
   wa2 = (wa2 * d2 + f1 - f2 - Tr2) / d2
   wa2 = clamp(wa2, 0, 1)  # > wwp 0
 
@@ -69,8 +65,6 @@ function swb_case4(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil::Soil)
 
   # Drainage from unsaturated zone, #3
   f3 = soil_drainage(wa3_unsat, θ_sat, Ksat, 0.012, 1.2)
-
-  # Update the soil moisture after drainage, layer #3
   wa3 = (wa3 * d3 + f2 + ff2 - f3 - Tr3) / d3
   wa3 = clamp(wa3, 0, 1)
 
