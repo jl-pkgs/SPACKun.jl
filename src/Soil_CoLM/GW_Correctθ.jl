@@ -1,9 +1,10 @@
 # drainage < 0, [m s-1]
-function GW_Correctθ!(soil::Soil{T}, θ::AbstractVector{T}, zwt, wa, Δt, drainage) where {T<:Real}
-  (; N, Δz, z₊ₕ, Sy) = soil
-  (; θ_sat) = soil.param
+function GW_Correctθ!(soil::Soil{T}, θ::AbstractVector{T}, zwt, wa, Δt, drainage; θ_sat=0.4) where {T<:Real}
+  (; N, Δz, Sy) = soil
+  θ_sat = fill(θ_sat, N)
+  # (; θ_sat) = soil.param
 
-  jwt = find_jwt(z₊ₕ, zwt)
+  # jwt = find_jwt(z₊ₕ, zwt)
   zwt = clamp(zwt, 0.0, 80.0) # 地下水水位在[0, 80m]
   # 强制限制水位，不考虑水量平衡是否合适？
 
@@ -37,8 +38,9 @@ function GW_Correctθ!(soil::Soil{T}, θ::AbstractVector{T}, zwt, wa, Δt, drain
   drainage = drainage + ∑_neg / Δt * 1000 # [mm s-1] or [kg s-1]
   if drainage < 0
     wa = wa + drainage * Δt
-    zwt = zwt + drainage * Δt / Sy[N] / 1000
+    zwt = zwt - drainage * Δt / Sy[N] / 1000 # 地下水变深
     drainage = 0.0
   end
-  (; wa, uex, drainage)
+  @pack! soil = zwt, wa, uex, drainage
+  (; zwt, wa, uex, drainage)
 end

@@ -37,39 +37,39 @@ end
 end
 
 
-# @testset "GW_UpdateDrainage!" begin
-#   θ = fill(0.3, N)
-#   jwt = find_jwt(z₊ₕ, -0.5)
-#   jwt2 = find_jwt(z₊ₕ, -1.0)
-#   r = GW_UpdateDrainage!(soil, θ, -0.5, 4000.0, Δt, 600 / 3600)
+@testset "GW_UpdateDrainage!" begin
+  θ = fill(0.3, N)
+  jwt = find_jwt(z₊ₕ, 0.5)
+  jwt2 = find_jwt(z₊ₕ, 1.0)
+  r = GW_UpdateDrainage!(soil, θ, 0.5, 4000.0, Δt, 600 / 3600)
 
-#   @test r == (zwt=-1.0, wa=3990.0)
-#   @test all(θ[jwt+1:jwt2+1] .< 0.3)
+  @test r == (zwt=1.0, wa=3990.0)
+  @test all(θ[jwt:jwt2] .< 0.3)
 
-#   @test GW_UpdateDrainage!(soil, θ, -2.5, 4000.0, Δt, 1 / 3600) ==
-#         (zwt=-2.5008333333333335, wa=3999.983333333333)
-# end
+  @test GW_UpdateDrainage!(soil, θ, 2.5, 4000.0, Δt, 1 / 3600) ==
+        (zwt=2.5008333333333335, wa=3999.983333333333)
+end
 
 
-# @testset "GW_Correctθ!" begin
-#   # 亏损
-#   θ = fill(0.3, N)
-#   @test GW_Correctθ!(soil, θ, -0.5, 4000.0, 60, 600 / 3600) == (wa=4000.0, uex=0.0, drainage=0.16666666666666666)
+@testset "GW_Correctθ!" begin
+  # 亏损
+  θ = fill(0.3, N)
+  @test GW_Correctθ!(soil, θ, 0.5, 4000.0, 60, 600 / 3600) == (zwt=0.5, wa = 4000.0, uex=0.0, drainage=0.16666666666666666)
 
-#   θ[2:3] .= -0.1
-#   @test GW_Correctθ!(soil, θ, -0.5, 4000.0, 60, 600 / 3600) == (wa=4000.0, uex=0.0, drainage=0.09999999999999999)
+  θ[2:3] .= -0.1
+  @test GW_Correctθ!(soil, θ, 0.5, 4000.0, 60, 600 / 3600) == (zwt=0.5, wa=4000.0, uex=0.0, drainage=0.09999999999999999)
 
-#   θ[2:3] .= -10.0 # [m3 m-3]
-#   @test GW_Correctθ!(soil, θ, -0.5, 4000.0, 60, 600 / 3600) == (wa=3610.0, uex=0.0, drainage=0.0)
+  θ[2:3] .= -10.0 # [m3 m-3]
+  @test GW_Correctθ!(soil, θ, 0.5, 4000.0, 60, 600 / 3600) == (zwt = 20, wa=3610.0, uex=0.0, drainage=0.0)
   
-#   # 超饱和
-#   θ = fill(0.3, N)
-#   θ[2:3] .= 0.6
-#   @test GW_Correctθ!(soil, θ, -0.5, 4000.0, 60, 600 / 3600) == (wa=4000.0, uex=5.999999999999998, drainage=0.16666666666666666)
+  # 超饱和
+  θ = fill(0.3, N)
+  θ[2:3] .= 0.6
+  @test GW_Correctθ!(soil, θ, 0.5, 4000.0, 60, 600 / 3600) == (zwt = 0.5, wa=4000.0, uex=5.999999999999998, drainage=0.16666666666666666)
 
-#   θ = fill(0.3, N)
-#   θ[100] = 12.0
-#   r = GW_Correctθ!(soil, θ, -0.5, 4000.0, 60, 600 / 3600) 
-#   @test all(θ .== 0.4)
-#   @test r == (wa=4000.0, uex=33.999999999999986, drainage=0.16666666666666666)
-# end
+  θ = fill(0.3, N)
+  θ[100] = 12.0
+  r = GW_Correctθ!(soil, θ, 0.5, 4000.0, 60, 600 / 3600) 
+  @test all(θ .== 0.4)
+  @test r == (zwt=0.5, wa = 4000.0, uex=33.999999999999986, drainage=0.16666666666666666)
+end
