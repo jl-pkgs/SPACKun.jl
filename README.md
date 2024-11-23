@@ -3,7 +3,7 @@
 <!-- [![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://CUG-hydro.github.io/SPACKun.jl/stable) -->
 [![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://CUG-hydro.github.io/SPACKun.jl/dev)
 [![CI](https://github.com/CUG-hydro/SPACKun.jl/actions/workflows/CI.yml/badge.svg)](https://github.com/CUG-hydro/SPACKun.jl/actions/workflows/CI.yml)
-[![Codecov](https://codecov.io/gh/CUG-hydro/SPACKun.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/CUG-hydro/SPACKun.jl/tree/master)
+[![codecov](https://codecov.io/gh/CUG-hydro/SPACKun.jl/branch/master/graph/badge.svg?token=5fEvxRsJdT)](https://codecov.io/gh/CUG-hydro/SPACKun.jl/tree/master)
 
 ## Installation
 
