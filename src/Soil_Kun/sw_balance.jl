@@ -2,8 +2,9 @@ export sw_balance
 
 # include("GroundWater.jl")
 # include("SM_discharge.jl")
-
+include("soil_drainage.jl")
 include("swc_stress.jl")
+
 include("swb_case0.jl")
 include("swb_case1.jl")
 include("swb_case2.jl")
