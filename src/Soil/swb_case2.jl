@@ -9,37 +9,31 @@
 # Δz      -- soil layer depths, 3 layers
 # zwt     -- groundwater table depth (mm)
 function swb_case2(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil::Soil)
-  (; θ, Δz, zwt, fsm_Es, Ec_sm, Ec_gw) = soil
-  # Unsaturated depth in layer #1~2
+  (; θ, Δz, zwt, Ec_sm, Ec_gw) = soil
+  (; Ksat, θ_sat, θ_fc, θ_wp) = soilpar
 
+  # Unsaturated depth in layer #1~2
   d1 = Δz[1]
   d2 = zwt - d1
-  (; Ksat, θ_sat, θ_fc, θ_wp) = soilpar
 
   # ====== Water Supplement ====== #  
   wa1_unsat = θ[1] # 需要更新
   vw2 = SM_recharge!(θ, I; Δz, θ_sat)
   wa2_unsat = find_θ_unsat(θ, zwt; z₊ₕ, Δz, θ_sat)[1]
   wa1, wa2, wa3 = θ
-  
+
   # Layer #3 - Fully saturated with groundwater
 
   # ====== Water Consumption ====== #
-  # Evapotranspiration
-  pTr_partition!(soil, pEc, fwet, soilpar, pftpar)
-  swc_stress!(soil, pEc, soilpar, pftpar, s_tem * s_vod)
+  f_cons = s_tem * s_vod
+  Tr, Es = Evapotranspiration!(soil, pEc, pEs, fwet, f_cons, soilpar, pftpar)
 
   # Transpiration from unsaturated and saturated zones in layer #2
   Tr1 = Ec_sm[1] + Ec_gw[1]
   Tr2_u = Ec_sm[2]
-  Tr = sum(Ec_sm) + sum(Ec_gw)
-
-  # Actual soil evaporation
-  Es = fsm_Es[1] * pEs
 
   # ====== Soil Water Drainage (Unsaturated Zone) ====== #
   # Layer #1
-  Es = max(Es, 0)
   Tr1 = max(Tr1, 0)
 
   if wa1 > 0 && Es + Tr1 > d1 * wa1
@@ -61,10 +55,10 @@ function swb_case2(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil::Soil)
 
   # ====== Groundwater Table Depth Update ====== #
   F1 = f2 + ff2 + vw2
-  delta_w = F1 - sum(Ec_gw) - GW_Rsb(zwt)
-  
+  Δw = F1 - sum(Ec_gw) - GW_Rsb(zwt)
+
   sy = θ_sat - (wa1 + wa2_unsat) / 2
-  zwt -= delta_w / sy
+  zwt -= Δw / sy
   uex = 0  # Excess water to soil surface
 
   # Update soil moisture and groundwater table depth

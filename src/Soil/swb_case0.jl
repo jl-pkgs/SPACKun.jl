@@ -9,27 +9,19 @@
 # Δz      -- soil layer depth (3 layers)
 # zwt     -- groundwater table depth (mm)
 function swb_case0(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil::Soil)
-  (; θ, Δz, zwt, Ec_pot, Ec_gw, Ec_sm, Ec_gw) = soil
-
-  # Old soil water content in layer 1-3
-  wa1, wa2, wa3 = θ
+  (; θ, Δz, zwt, Ec_gw, Ec_gw) = soil
   (; θ_sat, θ_fc) = soilpar
 
-  # ====== Water consumption ====== #
-  # Evapotranspiration
-  pTr_partition!(soil, pEc, fwet, soilpar, pftpar)
-  swc_stress!(soil, pEc, soilpar, pftpar, s_tem * s_vod)
-  
-  
-  Tr = sum(Ec_sm) + sum(Ec_gw)  # Actual transpiration
-  Es = pEs                      # Actual soil evaporation (only first layer)
+  wa1, wa2, wa3 = θ  # Old soil water content in layer 1-3
 
-  delta_w = I - sum(Ec_gw) - GW_Rsb(zwt)
+  f_cons = s_tem * s_vod
+  Tr, Es = Evapotranspiration!(soil, pEc, pEs, fwet, f_cons, soilpar, pftpar)
 
   # Change in groundwater table depth
+  Δw = I - sum(Ec_gw) - GW_Rsb(zwt)
   sy = θ_sat - θ_fc
-  zwt -= delta_w / sy
-  uex = 0  # excess water to soil surface
+  zwt -= Δw / sy
+  uex = 0             # excess water to soil surface
 
   # Update soil moisture and groundwater table depth
   if zwt > z₊ₕ[3]

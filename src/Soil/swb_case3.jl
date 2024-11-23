@@ -11,12 +11,12 @@
 # Δz      -- soil layer depth, 3 layers
 # zwt     -- groundwater table depth, mm
 function swb_case3(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil)
-  (; θ, Δz, zwt, fsm_Es, Ec_sm, Ec_gw) = soil
+  (; θ, Δz, zwt, Ec_sm, Ec_gw) = soil
+  (; Ksat, θ_sat, θ_fc, θ_wp) = soilpar
   # Unsaturated depth in layer #1~3
   d1 = Δz[1]
   d2 = Δz[2]
   d3 = zwt - z₊ₕ[2]
-  (; Ksat, θ_sat, θ_fc, θ_wp) = soilpar
 
   # ====== Water Supplement ====== #
   wa1_unsat = θ[1] # 需要更新
@@ -26,17 +26,13 @@ function swb_case3(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil)
   wa1, wa2, wa3 = θ
 
   # ====== Water Consumption ====== #
-  pTr_partition!(soil, pEc, fwet, soilpar, pftpar)
-  swc_stress!(soil, pEc, soilpar, pftpar, s_tem * s_vod)
-  
-  # Evapotranspiration
+  f_cons = s_tem * s_vod
+  Tr, Es = Evapotranspiration!(soil, pEc, pEs, fwet, f_cons, soilpar, pftpar)
+
   Tr1 = Ec_sm[1] + Ec_gw[1]
   Tr2 = Ec_sm[2] + Ec_gw[2]
   Tr3_u = Ec_sm[3]
-  Tr = sum(Ec_sm) + sum(Ec_gw)
   
-  Es = max(fsm_Es[1] * pEs, 0.0)
-
   # ====== Soil Water Drainage (Unsaturated Zone) ====== #
   Tr1 = max(Tr1, 0)
 
@@ -77,10 +73,10 @@ function swb_case3(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil)
   # ====== The Groundwater Table Depth ====== #
   F1 = f3 + ff3 + vw3
   # Tr_g = Tr3_g
-  delta_w = F1 - sum(Ec_gw) - GW_Rsb(zwt)
+  Δw = F1 - sum(Ec_gw) - GW_Rsb(zwt)
 
   sy = θ_sat - (wa1 + wa2 + wa3_unsat) / 3
-  zwt = zwt - delta_w / sy
+  zwt = zwt - Δw / sy
   uex = 0
 
   if zwt > z₊ₕ[3]

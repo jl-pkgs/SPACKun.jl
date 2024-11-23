@@ -9,31 +9,25 @@
 # Δz      -- soil layer depth, 3 layers
 # zwt     -- groundwater table depth, mm
 function swb_case4(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil::Soil)
-  (; θ_prev, θ, Δz, zwt, 
-    fsm_Es, Ec_sm, Ec_gw) = soil
+  (; θ_prev, θ, Δz, zwt, Ec_sm, Ec_gw) = soil
+  (; Ksat, θ_sat, θ_wp) = soilpar
   # Unsaturated depth in layer #1~3
   d1 = Δz[1]
   d2 = Δz[2]
   d3 = Δz[3]
 
-  (; Ksat, θ_sat, θ_wp) = soilpar
-  
   # # ====== Water Supplement ====== #
   # θ_prev .= θ
   wa1_unsat, wa2_unsat, wa3_unsat = θ # 需要更新
   vw3 = SM_recharge!(θ, I; Δz, θ_sat)
   wa1, wa2, wa3 = θ
 
-  pTr_partition!(soil, pEc, fwet, soilpar, pftpar)
-  swc_stress!(soil, pEc, soilpar, pftpar, s_tem * s_vod)
+  f_cons = s_tem * s_vod
+  Tr, Es = Evapotranspiration!(soil, pEc, pEs, fwet, f_cons, soilpar, pftpar)
 
-  # Evapotranspiration
   Tr1 = Ec_sm[1] + Ec_gw[1]
   Tr2 = Ec_sm[2] + Ec_gw[2]
   Tr3 = Ec_sm[3] + Ec_gw[3]
-  Tr = sum(Ec_sm) + sum(Ec_gw)
-
-  Es = max(fsm_Es[1] * pEs, 0.0)  # Only consider about the first layer
 
   # ====== Soil Water Drainage (Unsaturated Zone) ====== #
   # ---------------------------------------------------------------- Layer #1
@@ -90,24 +84,13 @@ function swb_case4(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil::Soil)
   end
 
   # ====== The Groundwater Table Depth ====== #
-  # Total water recharge to groundwater
-  F1 = f3 + ff3 + vw3
-
-  # Total transpiration from groundwater
-  Tr_g = 0
-
-  # R_sb groundwater discharge
-  R_sb = GW_Rsb(zwt)
-  R_sb_max = 39  # mm day-1
-  f = 1.25e-3  # mm-1
-  R_sb = R_sb_max * exp(-f * zwt)
-
-  # Variation of water stored in the saturated zone
-  delta_w = F1 - Tr_g - R_sb
+  F1 = f3 + ff3 + vw3 # Total water recharge to groundwater
+  Tr_g = 0 # Total transpiration from groundwater
+  Δw = F1 - Tr_g - GW_Rsb(zwt)
 
   # Changes in groundwater table depth
   sy = 0.2 # specific yield as 0.2
-  zwt = zwt - delta_w / sy
+  zwt = zwt - Δw / sy
   uex = 0  # excess water to soil surface, mm
 
   # Update soil moisture and groundwater table depth
