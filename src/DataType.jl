@@ -1,8 +1,7 @@
-export update_soil
-export SpacOutput, SpacOutputs, write_output!
+export Soil, update_soil
+export SpacOutput, SpacOutputs
 
 
-# rename to Soil later
 @with_kw mutable struct Soil{FT}
   N::Int = 3
   Δz::Vector{FT} = [50.0, 1450.0, 3500.0]  # mm
@@ -35,6 +34,7 @@ export SpacOutput, SpacOutputs, write_output!
   Dmin::Vector{FT} = [0.048, 0.012, 0.012]  # drainage Parameters
   Dmax::Vector{FT} = [4.8, 1.2, 1.2]
 end
+
 
 # Update soil variables
 function update_soil!(soil, θ, zwt, snowpack)

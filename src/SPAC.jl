@@ -16,8 +16,8 @@ const z₊ₕ = cumsum(Δz)
 const atm = 101.325  # atmospheric pressure (kPa)
 
 include("DataType.jl")
-include("Param/get_pftpar.jl")
-include("Param/get_soilpar.jl")
+include("get_pftpar.jl")
+include("get_soilpar.jl")
 
 include("pTr_partition.jl")
 # include("ultilize.jl")
@@ -27,9 +27,7 @@ include("interception.jl")
 include("snp_balance.jl")
 include("runoff_up.jl")
 
-include("Soil/find_θ_unsat.jl")
-include("Soil/GroundWater.jl")
-include("Soil/SM_discharge.jl")
+include("GroundWater/GroundWater.jl")
 
 include("Soil_Kun/sw_balance.jl")
 include("SiTHv2.jl")
