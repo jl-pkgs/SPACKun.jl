@@ -17,7 +17,7 @@ function swb_case4(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil::Soil)
   d3 = Δz[3]
 
   # # ====== Water Supplement ====== #
-  # θ_prev .= θ
+  θ_prev .= θ
   wa1_unsat, wa2_unsat, wa3_unsat = θ # 需要更新
   vw3 = SM_recharge!(θ, I; Δz, θ_sat)
   wa1, wa2, wa3 = θ
@@ -41,10 +41,12 @@ function swb_case4(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil::Soil)
   Tr3 = clamp(Tr3, 0, d3 * (wa3 - θ_wp))
 
   ## 新方案
-  # sink = [Tr1 + Es, Tr2, Tr3]
-  # θ_unsat = [wa1_unsat, wa2_unsat, wa3_unsat]
-  # _exceed = SM_discharge!(soil, θ_unsat, sink, soilpar)
-  # _wa1, _wa2, _wa3_unsat = θ_unsat
+  sink = [Tr1 + Es, Tr2, Tr3]
+  θ_unsat = [wa1_unsat, wa2_unsat, wa3_unsat]
+  _exceed = SM_discharge!(soil, θ_unsat, sink, soilpar)
+  _wa1, _wa2, _wa3_unsat = θ_unsat
+
+  # 最后一层的土壤含水量，有了较大的变化
 
   # Drainage from unsaturated zone, #1
   f1 = soil_drainage(wa1_unsat, θ_sat, Ksat, 0.048, 4.8)
@@ -79,6 +81,8 @@ function swb_case4(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil::Soil)
   exceed = f3 + ff3
 
   # if exceed != _exceed
+  #   Q = [f1, f2, f3]
+  #   _Q = soil.Q
   #   @show exceed, _exceed
   # end
 
