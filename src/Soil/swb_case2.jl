@@ -37,22 +37,13 @@ function swb_case2(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil::Soil)
   Tr2_u = Ec_sm[2]
 
   # ====== Soil Water Drainage (Unsaturated Zone) ====== #
-  # Layer #1
-  f1 = soil_drainage(wa1_unsat, θ_sat, Ksat, 0.048, 4.8)
-  wa1 = max((wa1 * d1 - f1 - Es - Tr1) / d1, 0)
-
-  # Layer #2
-  f2 = soil_drainage(wa2_unsat, θ_sat, Ksat, 0.012, 1.2)
-  wa2_unsat = clamp((wa2_unsat * d2 + f1 - f2 - Tr2_u) / d2, 0, 1)
-
-  ff2 = max((wa2_unsat - θ_sat) * d2, 0)
-  wa2_unsat = min(wa2_unsat, θ_sat)
-
-  # Layer #3 - Fully saturated with groundwater
+  sink = [Tr1 + Es, Tr2_u, 0.0]
+  θ_unsat = [wa1_unsat, wa2_unsat, θ[3]]
+  exceed = SM_discharge!(soil, θ_unsat, sink, soilpar)
+  wa1, wa2_unsat, _ = θ_unsat
 
   # ====== Groundwater Table Depth Update ====== #
-  F1 = f2 + ff2 + vw2
-  Δw = F1 - sum(Ec_gw) - GW_Rsb(zwt)
+  Δw = exceed + vw2 - sum(Ec_gw) - GW_Rsb(zwt)
 
   sy = θ_sat - (wa1 + wa2_unsat) / 2
   zwt -= Δw / sy

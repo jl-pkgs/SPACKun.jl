@@ -26,13 +26,19 @@ function swb_case1(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil::Soil)
   Tr1_u = Ec_sm[1]
   Es_u = clamp(Es * frac_unsat, 0, d1 * wa1_unsat)
 
+  # ====== Soil Water Drainage (Unsaturated Zone) ====== #
+  sink = [Tr1_u + Es_u, 0.0, 0.0]
+  θ_unsat = [wa1_unsat, θ[2], θ[3]]
+  exceed = SM_discharge!(soil, θ_unsat, sink, soilpar)
+  wa1_unsat = θ_unsat[1]
+
   # ====== Soil water drainage (unsaturated zone) ====== #
-  f1 = soil_drainage(wa1_unsat, θ_sat, Ksat, 0.048, 4.8)
-  wa1_unsat = max((wa1_unsat * d1 - f1 - Es_u - Tr1_u) / d1, 0)
+  # f1 = soil_drainage(wa1_unsat, θ_sat, Ksat, 0.048, 4.8)
+  # wa1_unsat = max((wa1_unsat * d1 - f1 - Es_u - Tr1_u) / d1, 0)
+  # exceed = f1
 
   # ====== Groundwater table depth update ====== #
-  F1 = f1 + vw1  # Total water recharge to groundwater
-  Δw = F1 - sum(Ec_gw) - GW_Rsb(zwt)
+  Δw = exceed + vw1 - sum(Ec_gw) - GW_Rsb(zwt)
 
   # Change in groundwater table depth
   sy = θ_sat - wa1_unsat
