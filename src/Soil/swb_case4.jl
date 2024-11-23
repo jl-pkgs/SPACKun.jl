@@ -72,6 +72,7 @@ function swb_case4(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil::Soil)
 
   if wa3 > θ_sat
     ff3 = max((wa3 - θ_sat) * d3, 0)
+    wa3 = θ_sat
     wa3_unsat = θ_sat
   else
     ff3 = 0
@@ -96,12 +97,14 @@ function swb_case4(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil::Soil)
   uex = 0  # excess water to soil surface, mm
 
   # Update soil moisture and groundwater table depth
-  if z₊ₕ[2] < zwt < z₊ₕ[3]
+  if zwt > z₊ₕ[3]
+    # "nothing"
+  elseif z₊ₕ[2] < zwt <= z₊ₕ[3]
     wa3 = (wa3_unsat * (zwt - z₊ₕ[2]) + θ_sat * (z₊ₕ[3] - zwt)) / Δz[3]
-  elseif z₊ₕ[1] < zwt < z₊ₕ[2]
+  elseif z₊ₕ[1] < zwt <= z₊ₕ[2]
     wa2 = (wa2 * (zwt - z₊ₕ[1]) + θ_sat * (z₊ₕ[2] - zwt)) / Δz[2]
     wa3 = θ_sat
-  elseif 0 < zwt < z₊ₕ[1]
+  elseif 0 < zwt <= z₊ₕ[1]
     wa1 = (wa1 * zwt + θ_sat * (Δz[1] - zwt)) / Δz[1]
     wa2 = θ_sat
     wa3 = θ_sat

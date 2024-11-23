@@ -65,6 +65,7 @@ function swb_case3(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil)
   if wa3_unsat > θ_sat
     ff3 = max((wa3_unsat - θ_sat) * d3, 0)
     wa3_unsat = θ_sat
+    wa3 = θ_sat
   else
     ff3 = 0
   end
