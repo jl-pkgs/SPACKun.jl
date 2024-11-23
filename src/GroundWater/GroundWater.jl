@@ -4,7 +4,6 @@ export find_jwt, GW_Rsb, SM_recharge!
 include("find_θ_unsat.jl")
 include("SM_discharge.jl")
 include("SM_recharge.jl")
-include("GW_update.jl")
 
 
 # 水位向下为正，地表为0
