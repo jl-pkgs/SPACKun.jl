@@ -4,7 +4,8 @@ function Evapotranspiration!(soil::Soil, pEc::T, pEs::T, fwet::T, f_cons::T,
   pTr_partition!(soil, pEc, fwet, soilpar, pftpar) # EC_POT划分
 
   (; θ_sat, θ_wp) = soilpar
-  (; θ, Ec_pot, fsm_Ec, fsm_Es, Ec_sm, Ec_gw,
+  (; θ, Ec_pot, fsm_Ec, fsm_Es, 
+    Ec_sm, Ec_gw, sink, 
     zwt, z₊ₕ, N) = soil
 
   j = find_jwt(z₊ₕ, zwt)
@@ -44,5 +45,24 @@ function Evapotranspiration!(soil::Soil, pEc::T, pEs::T, fwet::T, f_cons::T,
 
   Es = max(fsm_Es[1] * pEs, 0.0)
   Tr = sum(Ec_sm) + sum(Ec_gw)
+
+  # 土壤蒸发中的[地下水蒸发]，处理的不妥当
+  if j == 1
+    d1 = zwt
+    θ_unsat, frac_unsat = find_θ_unsat(soil, θ_sat) # 这里可能需要求，非饱和的比例（或深度）
+    Tr1_u = Ec_sm[1]
+    Es_u = clamp(Es * frac_unsat, 0, d1 * θ_unsat) # TODO: update Es?
+    sink[1] = Tr1_u + Es_u
+  else
+    Tr1 = Ec_sm[1] + Ec_gw[1]
+    # TODO: 第一层能否蒸发掉所有水？
+    if θ[1] > 0 && Es + Tr1 > Δz[1] * θ[1]
+      Tr1 = Δz[1] * θ[1] * Tr1 / (Tr1 + Es) # update Tr1 and Tr
+      Es = Δz[1] * θ[1] - Tr1
+    end
+    sink[1] = Tr1 + Es
+  end
+
+  ## 对第一层蒸发进行限制和调整
   return Tr, Es
 end

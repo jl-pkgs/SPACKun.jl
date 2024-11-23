@@ -9,15 +9,11 @@
 # Δz      -- soil layer depth, 3 layers
 # zwt     -- groundwater table depth, mm
 function swb_case4(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil::Soil)
-  (; θ_prev, θ, Δz, zwt, Ec_sm, Ec_gw) = soil
-  (; Ksat, θ_sat, θ_wp) = soilpar
-  # Unsaturated depth in layer #1~3
-  d1 = Δz[1]
-  d2 = Δz[2]
-  d3 = Δz[3]
-
+  (; θ_prev, θ, Δz, zwt, Ec_sm, Ec_gw, sink) = soil
+  (; θ_sat, θ_wp) = soilpar
+  d1, d2, d3 = Δz
+  
   # # ====== Water Supplement ====== #
-  θ_prev .= θ
   wa1_unsat, wa2_unsat, wa3_unsat = θ # 需要更新
   vw3 = SM_recharge!(θ, I; Δz, θ_sat)
   wa1, wa2, wa3 = θ
@@ -25,34 +21,19 @@ function swb_case4(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil::Soil)
   f_cons = s_tem * s_vod
   Tr, Es = Evapotranspiration!(soil, pEc, pEs, fwet, f_cons, soilpar, pftpar)
 
-  Tr1 = Ec_sm[1] + Ec_gw[1]
-  Tr2 = Ec_sm[2] + Ec_gw[2]
-  Tr3 = Ec_sm[3] + Ec_gw[3]
-
   # ====== Soil Water Drainage (Unsaturated Zone) ====== #
-  # ---------------------------------------------------------------- Layer #1
-  # Update the soil moisture after ET, layer #1
-  Tr1 = max(Tr1, 0)
-  if wa1 > 0 && Es + Tr1 > d1 * wa1  # wilting point
-    Tr1 = d1 * wa1 * Tr1 / (Tr1 + Es)
-    Es = d1 * wa1 - Tr1
-  end
-  Tr2 = clamp(Tr2, 0, d2 * (wa2 - θ_wp))
-  Tr3 = clamp(Tr3, 0, d3 * (wa3 - θ_wp))
+  sink[2] = clamp(Ec_sm[2] + Ec_gw[2], 0, d2 * (wa2 - θ_wp))
+  sink[3] = clamp(Ec_sm[3] + Ec_gw[3], 0, d3 * (wa3 - θ_wp))
 
-  ## 新方案
-  sink = [Tr1 + Es, Tr2, Tr3]
+  ## 新方案  
   θ_unsat = [wa1_unsat, wa2_unsat, wa3_unsat]
   exceed = SM_discharge!(soil, θ_unsat, sink, soilpar)
   wa1, wa2, wa3_unsat = θ_unsat
   wa3 = wa3_unsat
 
   # ====== The Groundwater Table Depth ====== #
-  Tr_g = 0 # Total transpiration from groundwater
-  Δw = exceed + vw3 - Tr_g - GW_Rsb(zwt)
-
-  # Changes in groundwater table depth
   sy = 0.2 # specific yield as 0.2
+  Δw = exceed + vw3 - sum(Ec_gw) - GW_Rsb(zwt)
   zwt = zwt - Δw / sy
   uex = 0  # excess water to soil surface, mm
 

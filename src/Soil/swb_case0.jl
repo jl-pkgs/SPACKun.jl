@@ -18,8 +18,8 @@ function swb_case0(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil::Soil)
   Tr, Es = Evapotranspiration!(soil, pEc, pEs, fwet, f_cons, soilpar, pftpar)
 
   # Change in groundwater table depth
-  Δw = I - sum(Ec_gw) - GW_Rsb(zwt)
   sy = θ_sat - θ_fc
+  Δw = I - sum(Ec_gw) - GW_Rsb(zwt)
   zwt -= Δw / sy
   uex = 0             # excess water to soil surface
 

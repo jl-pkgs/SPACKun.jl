@@ -11,7 +11,7 @@
 # Δz      -- soil layer depth, 3 layers
 # zwt     -- groundwater table depth, mm
 function swb_case3(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil)
-  (; θ, Δz, zwt, Ec_sm, Ec_gw) = soil
+  (; θ, Δz, zwt, Ec_sm, Ec_gw, sink) = soil
   (; Ksat, θ_sat, θ_fc, θ_wp) = soilpar
   # Unsaturated depth in layer #1~3
   d1 = Δz[1]
@@ -29,21 +29,11 @@ function swb_case3(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil)
   f_cons = s_tem * s_vod
   Tr, Es = Evapotranspiration!(soil, pEc, pEs, fwet, f_cons, soilpar, pftpar)
 
-  Tr1 = max(Ec_sm[1] + Ec_gw[1], 0)
-  Tr2 = Ec_sm[2] + Ec_gw[2]
-  Tr3_u = Ec_sm[3]
-
-  # 限制蒸发
-  if wa1 > 0 && Es + Tr1 > d1 * wa1
-    Tr1 = d1 * wa1 * Tr1 / (Tr1 + Es)
-    Es = d1 * wa1 - Tr1
-  end
-  Tr2 = clamp(Tr2, 0, d2 * (wa2 - θ_wp))
-  Tr3_u = clamp(Tr3_u, 0, d3 * (wa3_unsat - θ_wp))
+  sink[2] = clamp(Ec_sm[2] + Ec_gw[2], 0, d2 * (wa2 - θ_wp))
+  sink[3] = clamp(Ec_sm[3], 0, d3 * (wa3_unsat - θ_wp))
 
   # 新版
   # # ====== Soil Water Drainage (Unsaturated Zone) ====== #  
-  sink = [Tr1 + Es, Tr2, Tr3_u]
   θ_unsat = [wa1_unsat, wa2_unsat, wa3_unsat]
   exceed = SM_discharge!(soil, θ_unsat, sink, soilpar)
   wa1, wa2, wa3_unsat = θ_unsat
@@ -51,7 +41,6 @@ function swb_case3(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil)
   
   # ====== The Groundwater Table Depth ====== #
   Δw = exceed + vw3 - sum(Ec_gw) - GW_Rsb(zwt)
-
   sy = θ_sat - (wa1 + wa2 + wa3_unsat) / 3
   zwt = zwt - Δw / sy
   uex = 0
@@ -78,4 +67,3 @@ function swb_case3(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil)
   soil.zwt = max(0, zwt)
   return Tr, Es, uex
 end
-
