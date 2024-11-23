@@ -14,7 +14,7 @@ function swb_case1(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil::Soil)
   # ====== Water supplement ====== #
   # Layer #1 - Unsaturated zone
   vw1 = SM_recharge!(θ, I; Δz, θ_sat)
-  wa1_unsat, frac_unsat = find_θ_unsat(θ, zwt; z₊ₕ, Δz, θ_sat)#[1]
+  wa1_unsat = find_θ_unsat(θ, zwt; z₊ₕ, Δz, θ_sat)[1]
   wa1, wa2, wa3 = θ
 
   # Layer #2 and #3 - Fully saturated

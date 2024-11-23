@@ -1,7 +1,7 @@
 export sw_balance
 
-include("GroundWater.jl")
-include("SM_discharge.jl")
+# include("GroundWater.jl")
+# include("SM_discharge.jl")
 
 include("swc_stress.jl")
 include("swb_case0.jl")
@@ -80,8 +80,7 @@ function sw_balance(I::T, pEc::T, pEs::T, Ta::T, Topt::T, s_VOD::T,
     fun = swb_case4 # Case 4: groundwater table below layer 3
   end
 
-  Tr, Es, uex = fun(I, pEc, pEs, s_tem, s_VOD, soilpar, pftpar, wet, soil)
-  return Tr, Es, uex
+  return fun(I, pEc, pEs, s_tem, s_VOD, soilpar, pftpar, wet, soil) # Tr, Es, uex
 end
 
 # # Temperature Constrains for plant growing

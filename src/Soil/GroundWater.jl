@@ -22,7 +22,7 @@ end
 # sy = 0.02 # 给水度
 # TODO: jwt有待矫正
 function GW_update!(θ::Vector{T}, zwt::T, ∑::T, sy::T=0.2) where {T<:Real}
-  
+
   uex = 0.0 # exceed water to soil surface
   if ∑ > 0 # 补给，水位上升
     ## 从地下水所在的水位开始补给

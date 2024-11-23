@@ -26,7 +26,12 @@ include("Evapotranspiration.jl")
 include("interception.jl")
 include("snp_balance.jl")
 include("runoff_up.jl")
-include("Soil/sw_balance.jl")
+
+include("Soil/find_θ_unsat.jl")
+include("Soil/GroundWater.jl")
+include("Soil/SM_discharge.jl")
+
+include("Soil_Kun/sw_balance.jl")
 include("SiTHv2.jl")
 
 

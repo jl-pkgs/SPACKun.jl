@@ -9,7 +9,6 @@
 function swb_case3(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil)
   (; θ, Δz, zwt, Ec_gw, sink) = soil
   (; θ_sat, θ_fc) = soilpar
-  # Unsaturated depth in layer #1~3
   d3 = zwt - z₊ₕ[2]
 
   # ====== Water Supplement ====== #
