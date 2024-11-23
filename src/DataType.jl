@@ -10,6 +10,7 @@ export SpacOutput, SpacOutputs, write_output!
 
   jwt::Int = 0                    # index of groundwater table, 追踪地下水，所在位置的上一层
   θ::Vector{FT} = ones(N) .* 0.2
+  θ_prev::Vector{FT} = fill(0.2, N) # previous soil water content
   θ_unsat::Vector{FT} = fill(0.3, N)
 
   Q::Vector{FT} = fill(0.0, N)      # drainage, discharge, [mm d-1]
@@ -27,6 +28,10 @@ export SpacOutput, SpacOutputs, write_output!
 
   zwt::FT = 0.0                     # groundwater depths [mm]
   snowpack::FT = 0.0                # snowpack depth [mm]
+
+  ## Parameters
+  Dmin::Vector{FT} = [0.048, 0.012, 0.012]  # drainage Parameters
+  Dmax::Vector{FT} = [4.8, 1.2, 1.2]
 end
 
 # Update soil variables

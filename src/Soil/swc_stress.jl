@@ -3,27 +3,26 @@
     swc_stress(θ::T, pET::T, soilpar, pftpar) where {T<:Real}
 
 # INPUT
-- `θ`      : The antecedent soil water content expressed as a function of the WHC in that layer
-- `soilpar` : Soil parameters according to Soil type
+- `θ`      : The antecedent soil water content expressed as a function of the
+  WHC in that layer
+- `soilpar`: Soil parameters according to Soil type
 
 # OUTPUT
-- `S_plant` : Soil moisture stress to plant transpiration
-- `S_soil`  : Soil moisture stress to soil evaporation
+- `S_plant`: Soil moisture stress to plant transpiration
+- `S_soil` : Soil moisture stress to soil evaporation
  
 --------
 Stress function for plant transpiration and soil evaporation:
-                (θ_c-θ_wp)
-wc =  ------------------------------    (about 0.4; Choudhury & Digirolamo, 1998)
-                (θ_fc-θ_wp)
-where θ_c : the critical soil water content at which plant stress start
-Stree Function (Martens et al., 2017)
-                    θ_c-θ
-S_plant   =   1- (-------------------)^2   =   1-(1-w/wc)^2
-                    θ_c-θ_wp
 
-                  θ_c-θ
-S_soil    =   1- -----------------    =   1-(1-w/wc)=w/wc
-                  θ_c-θ_r
+wc =  \frac{(θ_c-θ_wp)}{(θ_fc-θ_wp)} % (about 0.4; Choudhury & Digirolamo, 1998)
+
+where `θ_c` : the critical soil water content at which plant stress start Stree
+Function (Martens et al., 2017)
+
+```math
+S_plant = 1 - \frac{θ_c-θ}{θ_c-θ_wp}^2 = 1-(1-w/wc)^2
+S_soil  = 1 - \frac{θ_c-θ}{θ_c-θ_r}    = 1-(1-w/wc)=w/wc
+```
 """
 function swc_stress(θ::T, pET::T, soilpar, pftpar) where {T<:Real}
   (; θ_fc, θ_wp) = soilpar

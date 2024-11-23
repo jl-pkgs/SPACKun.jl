@@ -20,24 +20,11 @@ function swb_case0(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil::Soil)
   pTr_partition!(soil, pEc, fwet, soilpar, pftpar)
   swc_stress!(soil, pEc, soilpar, pftpar, s_tem * s_vod)
   
-  # Actual transpiration
-  Tr1 = Ec_sm[1] + Ec_gw[1]
-  Tr2 = Ec_sm[2] + Ec_gw[2]
-  Tr3 = Ec_sm[3] + Ec_gw[3]
-  Tr = sum(Ec_sm) + sum(Ec_gw)
   
-  # Actual soil evaporation (only first layer)
-  Es = pEs
+  Tr = sum(Ec_sm) + sum(Ec_gw)  # Actual transpiration
+  Es = pEs                      # Actual soil evaporation (only first layer)
 
-  # Groundwater recharge and discharge calculations
-  F1 = I
-  Tr_g = Tr
-  R_sb_max = 39  # maximum groundwater discharge (mm day-1)
-  f = 1.25e-3    # discharge decay rate (mm-1)
-  R_sb = R_sb_max * exp(-f * zwt)
-
-  # Variation of water stored in the saturated zone
-  delta_w = F1 - Tr_g - R_sb
+  delta_w = I - sum(Ec_gw) - GW_Rsb(zwt)
 
   # Change in groundwater table depth
   sy = θ_sat - θ_fc

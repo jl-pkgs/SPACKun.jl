@@ -25,7 +25,7 @@ include("potentialET.jl")
 include("interception.jl")
 include("snp_balance.jl")
 include("runoff_up.jl")
-include("Soil/Soil.jl")
+include("Soil/sw_balance.jl")
 include("SiTHv2.jl")
 
 

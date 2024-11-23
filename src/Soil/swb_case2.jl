@@ -9,7 +9,7 @@
 # Δz      -- soil layer depths, 3 layers
 # zwt     -- groundwater table depth (mm)
 function swb_case2(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil::Soil)
-  (; θ, Δz, zwt, Ec_pot, fsm_Ec, fsm_Es, Ec_sm, Ec_gw) = soil
+  (; θ, Δz, zwt, fsm_Es, Ec_sm, Ec_gw) = soil
   # Unsaturated depth in layer #1~2
 
   d1 = Δz[1]
@@ -32,8 +32,6 @@ function swb_case2(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil::Soil)
   # Transpiration from unsaturated and saturated zones in layer #2
   Tr1 = Ec_sm[1] + Ec_gw[1]
   Tr2_u = Ec_sm[2]
-  Tr2_g = Ec_gw[2]
-  Tr3 = Ec_sm[3] + Ec_gw[3]
   Tr = sum(Ec_sm) + sum(Ec_gw)
 
   # Actual soil evaporation
@@ -63,13 +61,7 @@ function swb_case2(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil::Soil)
 
   # ====== Groundwater Table Depth Update ====== #
   F1 = f2 + ff2 + vw2
-  Tr_g = Tr2_g + Tr3
-
-  R_sb_max = 39  # mm day-1
-  f = 1.25e-3  # mm-1
-  R_sb = R_sb_max * exp(-f * zwt)
-
-  delta_w = F1 - Tr_g - R_sb
+  delta_w = F1 - sum(Ec_gw) - GW_Rsb(zwt)
   
   sy = θ_sat - (wa1 + wa2_unsat) / 2
   zwt -= delta_w / sy

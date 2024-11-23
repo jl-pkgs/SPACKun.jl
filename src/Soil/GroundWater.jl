@@ -57,6 +57,13 @@ function SM_recharge!(θ, I; Δz, θ_sat)
 end
 
 
+function GW_Rsb(zwt::Real)
+  R_sb_max = 39.0 # mm day-1
+  f = 1.25e-3     # mm-1
+  return R_sb_max * exp(-f * zwt)
+end
+
+
 # sy = 0.02 # 给水度
 function GW_update!(θ::Vector{T}, zwt::T, ∑::T, sy::T=0.2) where {T<:Real}
   uex = 0.0 # exceed water to soil surface

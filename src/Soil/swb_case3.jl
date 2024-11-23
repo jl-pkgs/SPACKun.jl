@@ -11,7 +11,7 @@
 # Δz      -- soil layer depth, 3 layers
 # zwt     -- groundwater table depth, mm
 function swb_case3(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil)
-  (; θ, Δz, zwt, Ec_pot, fsm_Ec, fsm_Es, Ec_sm, Ec_gw) = soil
+  (; θ, Δz, zwt, fsm_Es, Ec_sm, Ec_gw) = soil
   # Unsaturated depth in layer #1~3
   d1 = Δz[1]
   d2 = Δz[2]
@@ -33,7 +33,6 @@ function swb_case3(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil)
   Tr1 = Ec_sm[1] + Ec_gw[1]
   Tr2 = Ec_sm[2] + Ec_gw[2]
   Tr3_u = Ec_sm[3]
-  Tr3_g = Ec_gw[3]
   Tr = sum(Ec_sm) + sum(Ec_gw)
   
   Es = max(fsm_Es[1] * pEs, 0.0)
@@ -77,11 +76,8 @@ function swb_case3(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil)
 
   # ====== The Groundwater Table Depth ====== #
   F1 = f3 + ff3 + vw3
-  Tr_g = Tr3_g
-  R_sb_max = 39
-  f = 1.25e-3
-  R_sb = R_sb_max * exp(-f * zwt)
-  delta_w = F1 - Tr_g - R_sb
+  # Tr_g = Tr3_g
+  delta_w = F1 - sum(Ec_gw) - GW_Rsb(zwt)
 
   sy = θ_sat - (wa1 + wa2 + wa3_unsat) / 3
   zwt = zwt - delta_w / sy
@@ -109,3 +105,4 @@ function swb_case3(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil)
   soil.zwt = max(0, zwt)
   return Tr, Es, uex
 end
+
