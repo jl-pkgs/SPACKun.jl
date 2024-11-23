@@ -5,9 +5,7 @@
 # pEs     -- potential ET allocate to soil surface, mm
 # soilpar -- soil-related parameters
 # pftpar  -- plant-related parameters
-# wet     -- wetness indice
-# Δz      -- soil layer depth, 3 layers
-# zwt     -- groundwater table depth, mm
+# fwet     -- wetness indice
 function swb_case4(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil::Soil)
   (; θ_prev, θ, Δz, zwt, Ec_sm, Ec_gw, sink) = soil
   (; θ_sat, θ_wp) = soilpar
@@ -22,9 +20,6 @@ function swb_case4(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil::Soil)
   Tr, Es = Evapotranspiration!(soil, pEc, pEs, fwet, f_cons, soilpar, pftpar)
 
   # ====== Soil Water Drainage (Unsaturated Zone) ====== #
-  sink[2] = clamp(Ec_sm[2] + Ec_gw[2], 0, d2 * (wa2 - θ_wp))
-  sink[3] = clamp(Ec_sm[3] + Ec_gw[3], 0, d3 * (wa3 - θ_wp))
-
   ## 新方案  
   θ_unsat = [wa1_unsat, wa2_unsat, wa3_unsat]
   exceed = SM_discharge!(soil, θ_unsat, sink, soilpar)

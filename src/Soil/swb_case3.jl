@@ -1,5 +1,3 @@
-## 如果exceed依然>0，则补给到地下水
-
 # INPUT:
 # θ       -- soil water content, 3 layers
 # I       -- total water enter into soil surface, mm
@@ -7,9 +5,7 @@
 # pEs     -- potential ET allocate to soil surface, mm
 # soilpar -- soil-related parameters
 # pftpar  -- plant-related parameters
-# wet     -- wetness indice
-# Δz      -- soil layer depth, 3 layers
-# zwt     -- groundwater table depth, mm
+# fwet     -- wetness indice
 function swb_case3(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil)
   (; θ, Δz, zwt, Ec_sm, Ec_gw, sink) = soil
   (; Ksat, θ_sat, θ_fc, θ_wp) = soilpar
@@ -29,15 +25,10 @@ function swb_case3(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil)
   f_cons = s_tem * s_vod
   Tr, Es = Evapotranspiration!(soil, pEc, pEs, fwet, f_cons, soilpar, pftpar)
 
-  sink[2] = clamp(Ec_sm[2] + Ec_gw[2], 0, d2 * (wa2 - θ_wp))
-  sink[3] = clamp(Ec_sm[3], 0, d3 * (wa3_unsat - θ_wp))
-
-  # 新版
-  # # ====== Soil Water Drainage (Unsaturated Zone) ====== #  
+  # ====== Soil Water Drainage (Unsaturated Zone) ====== #  
   θ_unsat = [wa1_unsat, wa2_unsat, wa3_unsat]
   exceed = SM_discharge!(soil, θ_unsat, sink, soilpar)
   wa1, wa2, wa3_unsat = θ_unsat
-  # wa3 = wa3_unsat
   
   # ====== The Groundwater Table Depth ====== #
   Δw = exceed + vw3 - sum(Ec_gw) - GW_Rsb(zwt)

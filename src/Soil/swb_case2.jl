@@ -25,7 +25,6 @@ function swb_case2(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil::Soil)
   # ====== Water Consumption ====== #
   f_cons = s_tem * s_vod
   Tr, Es = Evapotranspiration!(soil, pEc, pEs, fwet, f_cons, soilpar, pftpar)
-  sink[2] = Ec_sm[2]
 
   # ====== Soil Water Drainage (Unsaturated Zone) ====== #
   θ_unsat = [wa1_unsat, wa2_unsat, θ[3]]

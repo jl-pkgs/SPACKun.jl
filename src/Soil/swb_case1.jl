@@ -5,9 +5,7 @@
 # pEs     -- potential ET allocated to soil surface (mm)
 # soilpar -- soil-related parameters
 # pftpar  -- plant-related parameters
-# wet     -- wetness index
-# Δz      -- soil layer depths, 3 layers
-# zwt     -- groundwater table depth (mm)
+# fwet     -- wetness index
 function swb_case1(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil::Soil)
   (; θ, Δz, zwt, Ec_sm, Ec_gw, sink) = soil
   (; Ksat, θ_sat, θ_fc, θ_wp) = soilpar

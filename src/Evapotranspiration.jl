@@ -9,6 +9,7 @@ function Evapotranspiration!(soil::Soil, pEc::T, pEs::T, fwet::T, f_cons::T,
     zwt, z₊ₕ, N) = soil
 
   j = find_jwt(z₊ₕ, zwt)
+  _θ_unsat, frac_unsat = find_θ_unsat(soil, θ_sat) # 这里可能需要求，非饱和的比例（或深度）
 
   # 非饱和
   for i = 1:max(j - 1, 0) # 全部非饱和
@@ -22,14 +23,13 @@ function Evapotranspiration!(soil::Soil, pEc::T, pEs::T, fwet::T, f_cons::T,
   # 半饱和
   if 1 <= j <= N
     i = j
-    θ_unsat, frac_unsat = find_θ_unsat(soil, θ_sat) # 这里可能需要求，非饱和的比例（或深度）
-    fsm_Ec[i], fsm_Es[i] = swc_stress(θ_unsat, pEc, soilpar, pftpar)
+    fsm_Ec[i], fsm_Es[i] = swc_stress(_θ_unsat, pEc, soilpar, pftpar)
 
     _Ec_pot_sat = Ec_pot[i] * (1 - frac_unsat) # GW
     _Ec_pot_unsat = Ec_pot[i] * frac_unsat     # SM
 
     Ec_sm[i] = _Ec_pot_unsat * f_cons * fsm_Ec[i]
-    Ec_sm[i] = clamp(Ec_sm[i], 0, Δz[i] * (θ_unsat - θ_wp) * frac_unsat) # 限制最大蒸发量
+    Ec_sm[i] = clamp(Ec_sm[i], 0, Δz[i] * (_θ_unsat - θ_wp) * frac_unsat) # 限制最大蒸发量
 
     Ec_gw[i] = _Ec_pot_sat * f_cons
   end
@@ -46,16 +46,15 @@ function Evapotranspiration!(soil::Soil, pEc::T, pEs::T, fwet::T, f_cons::T,
   Es = max(fsm_Es[1] * pEs, 0.0)
   Tr = sum(Ec_sm) + sum(Ec_gw)
 
-  # 土壤蒸发中的[地下水蒸发]，处理的不妥当
+  ## 分离出土壤蒸发 -> sink 只考虑非饱和部分的土壤蒸发
   if j == 1
     d1 = zwt
-    θ_unsat, frac_unsat = find_θ_unsat(soil, θ_sat) # 这里可能需要求，非饱和的比例（或深度）
     Tr1_u = Ec_sm[1]
-    Es_u = clamp(Es * frac_unsat, 0, d1 * θ_unsat) # TODO: update Es?
+    Es_u = clamp(Es * frac_unsat, 0, d1 * _θ_unsat) # TODO: update Es?
     sink[1] = Tr1_u + Es_u
   else
     Tr1 = Ec_sm[1] + Ec_gw[1]
-    # TODO: 第一层能否蒸发掉所有水？
+    # TODO: 第一层能蒸发掉所有水？
     if θ[1] > 0 && Es + Tr1 > Δz[1] * θ[1]
       Tr1 = Δz[1] * θ[1] * Tr1 / (Tr1 + Es) # update Tr1 and Tr
       Es = Δz[1] * θ[1] - Tr1
@@ -63,6 +62,11 @@ function Evapotranspiration!(soil::Soil, pEc::T, pEs::T, fwet::T, f_cons::T,
     sink[1] = Tr1 + Es
   end
 
-  ## 对第一层蒸发进行限制和调整
+  for i = 2:N
+    _θ = i == j ? _θ_unsat : θ[i]
+    depth = i == j ? zwt - z₊ₕ[i-1] : Δz[i]
+    sink[i] = clamp(Ec_sm[i], 0, depth * (_θ - θ_wp))
+  end
+
   return Tr, Es
 end

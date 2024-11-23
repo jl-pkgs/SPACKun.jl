@@ -76,5 +76,7 @@ function SM_discharge!(soil::Soil, θ_unsat::Vector{T}, sink::Vector{T},
       θ_unsat[i] = θ_sat
     end
   end
+
+  ## 在排泄过程中，水位会下降，也会上升
   return Q_in # exceed
 end
