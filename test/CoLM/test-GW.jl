@@ -8,7 +8,7 @@ begin
   z₊ₕ = soil.z₊ₕ
 
   wa = 4000.0 # [mm]
-  zwt = -0.5
+  zwt = 0.5
   Δt = 60 # [s]
   recharge = 1 / 3600 # [mm s-1], namely [1 mm h-1]
 end
@@ -24,13 +24,13 @@ end
 
 @testset "GW_UpdateRecharge!" begin
   @test GW_UpdateRecharge!(soil, wa, 0.5, Δt, recharge) == # 1 mm h-1
-        (zwt=-0.49916666666666665, wa=4000.016666666667, uex=0.0)
+        (zwt=0.49916666666666665, wa=4000.016666666667, uex=0.0)
 
   @test GW_UpdateRecharge!(soil, wa, 0.5, Δt, 1000 / 3600) == # 1000 mm h-1
         (zwt=0.0, wa=4016.6666666666665, uex=6.666666666666663)
 
   @test GW_UpdateRecharge!(soil, wa, 0.5, Δt, -recharge) == # -1 mm h-1
-        (zwt=-0.5008333333333334, wa=3999.983333333333, uex=0.0)
+        (zwt=0.5008333333333334, wa=3999.983333333333, uex=0.0)
 
   @test GW_UpdateRecharge!(soil, wa, 0.5, Δt, -10000 / 3600) == # -10,000 mm h-1
         (zwt=8.833333333333291, wa=3833.3333333333335, uex=0.0)

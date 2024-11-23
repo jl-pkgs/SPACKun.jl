@@ -13,6 +13,7 @@
 end
 
 @testset "runoff_up" begin
+  Δz = SPAC.Δz
   Pnet = 20.0 # mm
   zwt = 1000.0 # mm
   θ = [0.3, 0.3, 0.3]
