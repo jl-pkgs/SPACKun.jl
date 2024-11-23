@@ -66,8 +66,7 @@ function swb_case3(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil)
   
   f3 = soil_drainage(wa3_unsat, θ_sat, Ksat, 0.012, 1.2)
   wa3_unsat = (wa3_unsat * d3 + f2 + ff2 - f3 - Tr3_u) / d3
-  wa3_unsat = max(wa3_unsat, 0)
-  wa3_unsat = min(wa3_unsat, 1)
+  wa3_unsat = clamp(wa3_unsat, 0, 1)
 
   if wa3_unsat > θ_sat
     ff3 = max((wa3_unsat - θ_sat) * d3, 0)

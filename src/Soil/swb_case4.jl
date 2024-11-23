@@ -18,9 +18,7 @@ function swb_case4(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil::Soil)
   (; Ksat, θ_sat, θ_wp) = soilpar
   
   # # ====== Water Supplement ====== #
-  wa1_unsat = θ[1] # 需要更新
-  wa2_unsat = θ[2] # 需要更新
-  wa3_unsat = θ[3] # 需要更新
+  wa1_unsat, wa2_unsat, wa3_unsat = θ # 需要更新
   vw3 = SM_recharge!(θ, I; Δz, θ_sat)
   wa1, wa2, wa3 = θ
 
