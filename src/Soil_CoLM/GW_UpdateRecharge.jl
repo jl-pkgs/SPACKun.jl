@@ -52,6 +52,8 @@ function GW_UpdateDrainage!(soil::Soil{T}, θ::AbstractVector{T}, zwt, wa, Δt, 
   wa = wa + ∑ * 1000
 
   for j = jwt:N # 混合 + 饱和带
+    # 补充给水度的计算方法
+    
     _sy = Sy[j] # unitless
     _drainage = clamp(∑, -_sy * (z₊ₕ[j] - zwt), 0) # 排泄量，负值, [m]
     θ[j] = θ[j] + _drainage / Δz[j]

@@ -19,9 +19,9 @@ function find_θ_unsat(θ, zwt; z₊ₕ, Δz, θ_sat)
   # frac = d_unsat / Δz[j] # 非饱和的比例
   return θ_unsat, frac
 end
-
-
-function find_θ_unsat(soil::Soil, θ_sat)
+# θ_unsat, frac = find_θ_unsat(soil)
+function find_θ_unsat(soil::Soil, θ_sat=NaN)
   (; θ, zwt, z₊ₕ, Δz) = soil
+  isnan(θ_sat) && (θ_sat = soil.θ_sat)
   find_θ_unsat(θ, zwt; z₊ₕ, Δz, θ_sat)
 end
