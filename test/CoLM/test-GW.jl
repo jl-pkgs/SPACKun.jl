@@ -10,7 +10,7 @@ begin
   wa = 4000.0 # [mm]
   zwt = 0.5
   Δt = 60 # [s]
-  recharge = 1 / 3600 # [mm s-1], namely [1 mm h-1]
+  recharge = 1 / 3600 * Δt # [mm s-1], namely [1 mm h-1]
 end
 
 @testset "find_jwt" begin
@@ -23,16 +23,16 @@ end
 
 
 @testset "GW_UpdateRecharge!" begin
-  @test GW_UpdateRecharge!(soil, wa, 0.5, Δt, recharge) == # 1 mm h-1
+  @test GW_UpdateRecharge!(soil, 0.5, wa, recharge) == # 1 mm h-1
         (zwt=0.49916666666666665, wa=4000.016666666667, uex=0.0)
 
-  @test GW_UpdateRecharge!(soil, wa, 0.5, Δt, 1000 / 3600) == # 1000 mm h-1
+  @test GW_UpdateRecharge!(soil, 0.5, wa, 1000 / 60) == # 1000 mm h-1
         (zwt=0.0, wa=4016.6666666666665, uex=6.666666666666663)
 
-  @test GW_UpdateRecharge!(soil, wa, 0.5, Δt, -recharge) == # -1 mm h-1
+  @test GW_UpdateRecharge!(soil, 0.5, wa, -recharge) == # -1 mm h-1
         (zwt=0.5008333333333334, wa=3999.983333333333, uex=0.0)
 
-  @test GW_UpdateRecharge!(soil, wa, 0.5, Δt, -10000 / 3600) == # -10,000 mm h-1
+  @test GW_UpdateRecharge!(soil, 0.5, wa, -10000 / 60) == # -10,000 mm h-1
         (zwt=8.833333333333291, wa=3833.3333333333335, uex=0.0)
 end
 
@@ -41,12 +41,12 @@ end
   θ = fill(0.3, N)
   jwt = find_jwt(z₊ₕ, 0.5)
   jwt2 = find_jwt(z₊ₕ, 1.0)
-  r = GW_UpdateDrainage!(soil, θ, 0.5, 4000.0, Δt, 600 / 3600)
+  r = GW_UpdateDrainage!(soil, 0.5, 4000.0, 600 / 60; θ)
 
   @test r == (zwt=1.0, wa=3990.0)
   @test all(θ[jwt:jwt2] .< 0.3)
 
-  @test GW_UpdateDrainage!(soil, θ, 2.5, 4000.0, Δt, 1 / 3600) ==
+  @test GW_UpdateDrainage!(soil, 2.5, 4000.0, 1 / 60; θ) ==
         (zwt=2.5008333333333335, wa=3999.983333333333)
 end
 

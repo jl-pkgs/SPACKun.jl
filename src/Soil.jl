@@ -37,6 +37,11 @@ export Soil, update_soil
   ## Parameters
   Dmin::Vector{FT} = [0.048, 0.012, 0.012]  # drainage Parameters
   Dmax::Vector{FT} = [4.8, 1.2, 1.2]
+  
+  soiltype::Int = 4
+  LC::Int = 22
+  soilpar::LArray{Float64,1} = get_soilpar(soiltype)
+  pftpar::LArray{Float64,1} = get_pftpar(LC)
 end
 
 
