@@ -2,14 +2,14 @@
 # zwt: 地下水水位，[m]
 # Δt: 时间步长，[s]
 # recharge: 补给量，[mm s-1]
-function GW_UpdateRecharge!(soil::Soil{T}, zwt, wa, recharge; 
+function GW_Update_zwtθ!(soil::Soil{T}, zwt, wa, recharge;
   θ::Union{AbstractVector{T},Nothing}=nothing,
   wa_max=5000.0) where {T<:Real}
 
   update_θ = !isnothing(θ)
   constrain_wa = wa_max > 0
 
-  (; N, z₊ₕ, Sy) = soil
+  (; N, z₊ₕ, Δz, Sy) = soil
   (; θ_sat, θ_wp) = soil.soilpar
 
   jwt = find_jwt(z₊ₕ, zwt) # 地下水所在层
@@ -27,9 +27,10 @@ function GW_UpdateRecharge!(soil::Soil{T}, zwt, wa, recharge;
 
       # 补给量，正值
       if update_θ
-        left = max(min((θ_sat - θ[i]) * Δz[i], _sy * (zwt - z0)), 0.0)
+        left = i == N + 1 ? _sy * (zwt - z0) :
+               max(min((θ_sat - θ[i]) * Δz[i], _sy * (zwt - z0)), 0.0)
         _recharge = clamp(∑, 0, left)
-        θ[j] = θ[j] + _recharge / Δz[j]
+        i <= N && (θ[i] = θ[i] + _recharge / Δz[i])
       else
         _recharge = clamp(∑, 0, _sy * (zwt - z0))
       end
@@ -42,13 +43,15 @@ function GW_UpdateRecharge!(soil::Soil{T}, zwt, wa, recharge;
   else
     # 水位下降
     for i = jwt:N
-      _sy = Sy[i] # unitless
+      _sy = i == 0 ? Sy[1] : Sy[i] # unitless
       _θ_wp = i == 1 ? 0.01 : θ_wp # 土壤蒸发可超越凋萎含水量的限制
 
       if update_θ
-        _left = max(min((θ[i] - _θ_wp) * Δz[i], _sy * (z₊ₕ[i] - zwt)), 0.0)
-        _discharge = clamp(∑, -_left, 0) # 排泄量，负值
-        update_θ && (θ[j] = θ[j] + _drainage / Δz[j])
+        left = i == 0 ? _sy * (z₊ₕ[i] - zwt) :
+               max(min((θ[i] - _θ_wp) * Δz[i], _sy * (z₊ₕ[i] - zwt)), 0.0)
+        _discharge = clamp(∑, -left, 0) # 排泄量，负值
+        
+        i >= 1 && (θ[i] = θ[i] + _discharge / Δz[i])
       else
         _discharge = clamp(∑, -_sy * (z₊ₕ[i] - zwt), 0) # 排泄量，负值
       end
@@ -60,13 +63,13 @@ function GW_UpdateRecharge!(soil::Soil{T}, zwt, wa, recharge;
     _sy = Sy[N]
     ∑ < 0 && (zwt = zwt - ∑ / Sy[N])
   end
-  
+
   if constrain_wa && wa > wa_max
     # 超出的部分，放到土壤水中，[10^3 kg m-2], [m^3 m-2]
     wa = wa_max
     update_θ && (θ[N] = θ[N] + (wa - wa_max) / 1000 / Δz[N])
   end
-  
+
   @pack! soil = zwt, wa, uex
   (; zwt, wa, uex)
 end
