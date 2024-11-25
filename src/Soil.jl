@@ -28,6 +28,7 @@ export Soil, update_soil
 
   zwt::FT = 0.0                      # groundwater depths [mm]
   Sy::Vector{FT} = fill(0.02, N)     # specific yield, [m3 m-3]
+  Syₙ::FT = 0.2                      # specific yield of `N+1` layer, [m3 m-3] 
   wa::FT = 0.0                       # water amount in aquifer, [mm]，潜水含水层
   uex::FT = 0.0                      # 超出地表的水量, [mm], [kg m-2] 以地表径流的形式排放
   recharge::FT = 0.0                 # recharge rate, [mm/s]

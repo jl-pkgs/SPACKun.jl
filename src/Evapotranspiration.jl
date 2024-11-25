@@ -29,7 +29,7 @@ function Evapotranspiration!(soil::Soil, pEc::T, pEs::T, fwet::T, f_cons::T,
     _Ec_pot_unsat = Ec_pot[i] * frac_unsat     # SM
 
     Ec_sm[i] = _Ec_pot_unsat * f_cons * fsm_Ec[i]
-    Ec_sm[i] = clamp(Ec_sm[i], 0, Δz[i] * (_θ_unsat - θ_wp) * frac_unsat) # 限制最大蒸发量
+    Ec_sm[i] = clamp(Ec_sm[i], 0, max(Δz[i] * (_θ_unsat - θ_wp) * frac_unsat, 0)) # 限制最大蒸发量
 
     Ec_gw[i] = _Ec_pot_sat * f_cons
   end
@@ -45,7 +45,7 @@ function Evapotranspiration!(soil::Soil, pEc::T, pEs::T, fwet::T, f_cons::T,
 
   Es = max(fsm_Es[1] * pEs, 0.0)
   Tr = sum(Ec_sm) + sum(Ec_gw)
-
+  
   ## 分离出土壤蒸发 -> sink 只考虑非饱和部分的土壤蒸发
   if j == 1
     d1 = zwt

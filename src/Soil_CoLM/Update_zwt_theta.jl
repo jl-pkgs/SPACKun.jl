@@ -1,3 +1,29 @@
+function cal_specific_yield(soil::Soil)
+  (; N, z₊ₕ, Δz, zwt, θ) = soil
+  (; θ_sat, θ_fc) = soil.soilpar
+
+  jwt = find_jwt(z₊ₕ, zwt) # 地下水所在层  
+
+  jwt == 0 && return θ_sat - θ_fc
+  jwt == N + 1 && return 0.2 # Kun, 2019
+
+  ∑ = 0.0    # 孔隙度
+  ∑_d = 0.0  # depth
+  
+  for i = 1:jwt
+    z0 = i == 1 ? 0.0 : z₊ₕ[i-1]
+    z1 = z₊ₕ[i]
+
+    depth = i == jwt ? zwt - z0 : Δz[i]
+    ∑_d += depth
+
+    _θ = i == jwt ? (θ[i] * Δz[i] - θ_sat * (z1 - zwt)) / depth : θ[i]
+    ∑ += max(θ_sat - _θ, 0.0) * depth
+  end
+  sy = ∑ / ∑_d
+  return clamp(sy, 0.0, 0.3) # sy, 对每一层的孔隙度进行加权。
+end
+
 # wa: 地下水量，[m]
 # zwt: 地下水水位，[m]
 # Δt: 时间步长，[s]
@@ -10,7 +36,7 @@ function Update_zwt_theta!(soil::Soil{T}, zwt, wa, recharge;
   update_θ = !isnothing(θ)
   constrain_wa = wa_max > 0
 
-  (; N, z₊ₕ, Δz, Sy) = soil
+  (; N, z₊ₕ, Δz, Sy, Syₙ) = soil
   (; θ_sat, θ_wp) = soil.soilpar
 
   jwt = find_jwt(z₊ₕ, zwt) # 地下水所在层
@@ -23,7 +49,8 @@ function Update_zwt_theta!(soil::Soil{T}, zwt, wa, recharge;
   if ∑ > 0
     # 半饱和 + 非饱和；水位上升，从下至上补给
     for i = jwt:-1:1
-      _sy = i == N + 1 ? Sy[N] : Sy[i] # unitless
+      # _sy = i == N + 1 ? Sy[N] : Sy[i] # unitless
+      _sy = cal_specific_yield(soil)
       z0 = i == 1 ? 0.0 : z₊ₕ[i-1]
 
       # 补给量，正值
@@ -44,8 +71,9 @@ function Update_zwt_theta!(soil::Soil{T}, zwt, wa, recharge;
   else
     # 水位下降，排泄
     for i = jwt:N
-      _sy = i == 0 ? Sy[1] : Sy[i] # unitless
+      _sy = cal_specific_yield(soil)
       _θ_wp = i == 1 ? 0.01 : θ_wp # 土壤蒸发可超越凋萎含水量的限制
+      @show i, _sy
 
       if update_θ
         left = i == 0 ? _sy * (0 - zwt) :
@@ -61,8 +89,7 @@ function Update_zwt_theta!(soil::Soil{T}, zwt, wa, recharge;
       ∑ >= 0 && break # 只可能等于0，不可能大于0
     end
     # 到最后一层，仍然有剩余排泄能力
-    _sy = Sy[N]
-    ∑ < 0 && (zwt = zwt - ∑ / Sy[N])
+    ∑ < 0 && (zwt = zwt - ∑ / Syₙ)
   end
 
   if constrain_wa && wa > wa_max
