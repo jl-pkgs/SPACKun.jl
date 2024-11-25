@@ -6,7 +6,7 @@
 # soilpar -- soil-related parameters
 # pftpar  -- plant-related parameters
 # fwet     -- wetness indice
-function swb_case3(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil)
+function swb_case3(soil, I, pEc, pEs, fwet, s_tem, s_vod, soilpar, pftpar)
   (; θ, Δz, zwt, Ec_gw, sink) = soil
   (; θ_sat, θ_fc) = soilpar
   d3 = zwt - z₊ₕ[2]

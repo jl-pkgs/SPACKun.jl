@@ -37,8 +37,8 @@ include("swb_case4.jl")
 - `zwt`    : groundwater table depth, mm
 - `uex`    : goundwater overflow soil surface, mm
 """
-function sw_balance(I::T, pEc::T, pEs::T, Ta::T, Topt::T, s_VOD::T,
-  soilpar, pftpar, wet, soil::Soil) where {T<:Real}
+function sw_balance(soil::Soil, I::T, pEc::T, pEs::T, Ta::T, Topt::T, fwet, s_VOD::T,
+  soilpar, pftpar) where {T<:Real}
   (; zwt) = soil
   # s_tem = Temp_stress(Topt, Ta) # Constrains of temperature
   s_tem = exp(-((Ta - Topt) / Topt)^2)
@@ -55,7 +55,7 @@ function sw_balance(I::T, pEc::T, pEs::T, Ta::T, Topt::T, s_VOD::T,
     fun = swb_case4 # Case 4: groundwater table below layer 3
   end
 
-  return fun(I, pEc, pEs, s_tem, s_VOD, soilpar, pftpar, wet, soil) # Tr, Es, uex
+  return fun(soil, I, pEc, pEs, fwet, s_tem, s_VOD, soilpar, pftpar) # Tr, Es, uex
 end
 
 # # Temperature Constrains for plant growing

@@ -8,7 +8,7 @@
 # wet     -- wetness index
 # Δz      -- soil layer depths, 3 layers
 # zwt     -- groundwater table depth (mm)
-function swb_case2(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil::Soil)
+function swb_case2(soil::Soil, I, pEc, pEs, fwet, s_tem, s_vod, soilpar, pftpar)
   (; θ, Δz, zwt, Ec_gw, sink) = soil
   (; θ_sat, θ_fc) = soilpar
 

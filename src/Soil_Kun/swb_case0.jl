@@ -6,7 +6,7 @@
 # soilpar -- soil-related parameters
 # pftpar  -- plant-related parameters
 # fwet     -- wetness index
-function swb_case0(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil::Soil)
+function swb_case0(soil::Soil, I, pEc, pEs, fwet, s_tem, s_vod, soilpar, pftpar)
   (; θ, Δz, zwt, Ec_gw, Ec_gw) = soil
   (; θ_sat, θ_fc) = soilpar
 

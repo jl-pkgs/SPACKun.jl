@@ -2,7 +2,8 @@
 # zwt: 地下水水位，[m]
 # Δt: 时间步长，[s]
 # recharge: 补给量，[mm s-1]
-function GW_Update_zwtθ!(soil::Soil{T}, zwt, wa, recharge;
+# GW_Update_zwtθ!(soil, zwt, wa, recharge; θ=nothing, wa_max=5000.0)
+function Update_zwt_theta!(soil::Soil{T}, zwt, wa, recharge;
   θ::Union{AbstractVector{T},Nothing}=nothing,
   wa_max=5000.0) where {T<:Real}
 
@@ -41,7 +42,7 @@ function GW_Update_zwtθ!(soil::Soil{T}, zwt, wa, recharge;
     end
     ∑ > 0 && (uex = ∑ * 1000) # excess water to soil surface, [m]
   else
-    # 水位下降
+    # 水位下降，排泄
     for i = jwt:N
       _sy = i == 0 ? Sy[1] : Sy[i] # unitless
       _θ_wp = i == 1 ? 0.01 : θ_wp # 土壤蒸发可超越凋萎含水量的限制

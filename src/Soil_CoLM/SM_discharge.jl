@@ -4,6 +4,7 @@
 > 按照CoLM的方式进行修改
 
 Kun的做法是合理的，非饱和带和饱和带应该分开，否则地下水层会出现镂空。
+
 该函数仅处理非饱和带的土壤移动，非饱和带土壤水分的变化不会引起地下水水位的变化。
 饱和带的水分移动，会引起地下水水位的变化。
 
@@ -33,6 +34,7 @@ function SM_discharge!(soil::Soil, soilpar; Q_in::T=0.0) where {T<:Real}
       _θ = _θ_unsat
     end
 
+    # Q = K (∂ψ/∂z + 1)
     Q[i] = soil_drainage(_θ, θ_sat, Ksat, Dmin[i], Dmax[i]) # 向下排泄量, [mm/d]
     ΔQ = Q_in - Q[i]
 

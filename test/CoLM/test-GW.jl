@@ -22,30 +22,30 @@ end
 end
 
 
-@testset "GW_Update_zwtθ! with θ" begin
+@testset "Update_zwt_theta! with θ" begin
   θ = fill(0.3, N)
-  GW_Update_zwtθ!(soil, 0.5, wa, recharge; θ) == # # 1 mm h-1
+  Update_zwt_theta!(soil, 0.5, wa, recharge; θ) == # # 1 mm h-1
   (zwt=0.49916666666666665, wa=4000.016666666667, uex=0.0)
   @test θ[25] == 0.30083333333333334
 
   θ = fill(0.3, N)
-  @test GW_Update_zwtθ!(soil, 0.5, wa, -recharge; θ) == # # 1 mm h-1
+  @test Update_zwt_theta!(soil, 0.5, wa, -recharge; θ) == # # 1 mm h-1
         (zwt=0.5008333333333334, wa=3999.983333333333, uex=0.0)
   @test θ[26] == 0.29916666666666675
 end
 
 
-@testset "GW_Update_zwtθ!" begin
-  @test GW_Update_zwtθ!(soil, 0.5, wa, recharge) == # 1 mm h-1
+@testset "Update_zwt_theta!" begin
+  @test Update_zwt_theta!(soil, 0.5, wa, recharge) == # 1 mm h-1
         (zwt=0.49916666666666665, wa=4000.016666666667, uex=0.0)
 
-  @test GW_Update_zwtθ!(soil, 0.5, wa, 1000 / 60) == # 1000 mm h-1
+  @test Update_zwt_theta!(soil, 0.5, wa, 1000 / 60) == # 1000 mm h-1
         (zwt=0.0, wa=4016.6666666666665, uex=6.666666666666663)
 
-  @test GW_Update_zwtθ!(soil, 0.5, wa, -recharge) == # -1 mm h-1
+  @test Update_zwt_theta!(soil, 0.5, wa, -recharge) == # -1 mm h-1
         (zwt=0.5008333333333334, wa=3999.983333333333, uex=0.0)
 
-  @test GW_Update_zwtθ!(soil, 0.5, wa, -10000 / 60) == # -10,000 mm h-1
+  @test Update_zwt_theta!(soil, 0.5, wa, -10000 / 60) == # -10,000 mm h-1
         (zwt=8.833333333333291, wa=3833.3333333333335, uex=0.0)
 end
 

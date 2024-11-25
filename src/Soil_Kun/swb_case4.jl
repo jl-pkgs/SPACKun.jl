@@ -6,10 +6,10 @@
 # soilpar -- soil-related parameters
 # pftpar  -- plant-related parameters
 # fwet     -- wetness indice
-function swb_case4(I, pEc, pEs, s_tem, s_vod, soilpar, pftpar, fwet, soil::Soil)
+function swb_case4(soil::Soil, I, pEc, pEs, fwet, s_tem, s_vod, soilpar, pftpar)
   (; θ_prev, θ, Δz, zwt, Ec_gw, sink) = soil
   (; θ_sat) = soilpar
-  
+
   # # ====== Water Supplement ====== #
   wa1_unsat, wa2_unsat, wa3_unsat = θ # 需要更新
   vw3 = SM_recharge!(θ, I; Δz, θ_sat)

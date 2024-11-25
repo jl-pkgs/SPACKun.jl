@@ -31,7 +31,8 @@ export SiTHv2_site
 """
 function SiTHv2!(output::SpacOutput{T},
   Rn::T, Ta::T, Tas::T, Topt::T, P::T, Pa::T, s_VOD::T,
-  G::T, LAI::T, soilpar, pftpar, soil::Soil; Kc=1.0) where {T<:Real}
+  G::T, LAI::T, soilpar, pftpar, soil::Soil; 
+  Kc=1.0, method="Kun") where {T<:Real}
 
   (; θ, zwt, snowpack) = soil
   Kc = [1.0, 1.0, 1.0]
@@ -45,8 +46,8 @@ function SiTHv2!(output::SpacOutput{T},
   RS, I, Vmax = runoff_up(Pnet, θ, zwt, Δz, soilpar)
 
   # Variables associated with soil water balance
-  new_pEs = max(pEs - Esb, 0)
-  Tr, Es, uex = sw_balance(I, pEc, new_pEs, Ta, Topt, s_VOD, soilpar, pftpar, fwet, soil)
+  _pEs = max(pEs - Esb, 0)
+  Tr, Es, uex = sw_balance(soil, I, pEc, _pEs, Ta, Topt, fwet, s_VOD, soilpar, pftpar)
 
   ET = Tr + Es + Ei + Esb # Total Evapotranspiration
   RS += uex
