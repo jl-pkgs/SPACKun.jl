@@ -48,7 +48,7 @@ function Update_zwt_theta!(soil::Soil{T}, zwt, wa, recharge;
       _θ_wp = i == 1 ? 0.01 : θ_wp # 土壤蒸发可超越凋萎含水量的限制
 
       if update_θ
-        left = i == 0 ? _sy * (z₊ₕ[i] - zwt) :
+        left = i == 0 ? _sy * (0 - zwt) :
                max(min((θ[i] - _θ_wp) * Δz[i], _sy * (z₊ₕ[i] - zwt)), 0.0)
         _discharge = clamp(∑, -left, 0) # 排泄量，负值
         

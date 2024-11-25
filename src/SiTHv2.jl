@@ -33,7 +33,12 @@ function SiTHv2!(output::SpacOutput{T},
   Rn::T, Ta::T, Tas::T, Topt::T, P::T, Pa::T, s_VOD::T,
   G::T, LAI::T, soilpar, pftpar, soil::Soil; 
   Kc=1.0, method="Kun") where {T<:Real}
-
+  
+  funcs = Dict(
+    "Kun" => sw_balance,
+    "CoLM" => sw_balance_CoLM)
+  _sw_balance = funcs[method]
+  
   (; θ, zwt, snowpack) = soil
   Kc = [1.0, 1.0, 1.0]
   VPD, U2, doy = 0.0, 0.0, 0
@@ -47,7 +52,7 @@ function SiTHv2!(output::SpacOutput{T},
 
   # Variables associated with soil water balance
   _pEs = max(pEs - Esb, 0)
-  Tr, Es, uex = sw_balance(soil, I, pEc, _pEs, Ta, Topt, fwet, s_VOD, soilpar, pftpar)
+  Tr, Es, uex = _sw_balance(soil, I, pEc, _pEs, Ta, Topt, fwet, s_VOD, soilpar, pftpar)
 
   ET = Tr + Es + Ei + Esb # Total Evapotranspiration
   RS += uex
@@ -61,14 +66,14 @@ end
 
 
 function _run_model!(res::SpacOutputs{FT}, Rn::T, Ta::T, Tas::T, Prcp::T, Pa::T, G::T, LAI::T, s_VOD::T,
-  Top::FT, soilpar, pftpar, soil::Soil; Kc=1.0) where {FT<:Real,T<:AbstractVector{FT}}
+  Top::FT, soilpar, pftpar, soil::Soil; Kc=1.0, method="Kun") where {FT<:Real,T<:AbstractVector{FT}}
   ntime = size(Rn, 1) # 1365
 
   output = SpacOutput{FT}()
   for i in 1:ntime
     _Kc = 180 <= i <= 220 ? Kc : 1.0
     SiTHv2!(output, Rn[i], Ta[i], Tas[i], Top, Prcp[i], Pa[i], s_VOD[i], G[i], LAI[i],
-      soilpar, pftpar, soil; Kc=_Kc)
+      soilpar, pftpar, soil; Kc=_Kc, method)
     res[i] = output
   end
   return res
@@ -85,17 +90,17 @@ end
 - `spinfg`: spin-up flag, 1 for spin-up, 0 for normal calculation. 循环重复跑100次。
 """
 function SiTHv2_site(Rn, Ta, Tas, Prcp, Pa, G, LAI, s_VOD,
-  Top, soilpar, pftpar, soil, spin::Bool=false; Kc=1.0)
+  Top, soilpar, pftpar, soil, spin::Bool=false; Kc=1.0, method="Kun")
 
   ntime = length(Rn)
   res = SpacOutputs{Float64}(; ntime)
 
   if spin == 1 # spin-up
     for k in 1:100 # set the spin-up time (100 years)
-      _run_model!(res, Rn, Ta, Tas, Prcp, Pa, G, LAI, s_VOD, Top, soilpar, pftpar, soil; Kc)
+      _run_model!(res, Rn, Ta, Tas, Prcp, Pa, G, LAI, s_VOD, Top, soilpar, pftpar, soil; Kc, method)
     end
   else
-    _run_model!(res, Rn, Ta, Tas, Prcp, Pa, G, LAI, s_VOD, Top, soilpar, pftpar, soil; Kc)
+    _run_model!(res, Rn, Ta, Tas, Prcp, Pa, G, LAI, s_VOD, Top, soilpar, pftpar, soil; Kc, method)
   end
 
   (; ET, Tr, Es, Ei, Esb, RS, GW, SM) = res

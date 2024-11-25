@@ -12,7 +12,7 @@ Kun的做法是合理的，非饱和带和饱和带应该分开，否则地下�
 1. `soil_drainage`存在bug，土壤的厚度影响排泄量, 需要重新率定参数，以解决该问题；
 """
 function SM_discharge!(soil::Soil, soilpar; Q_in::T=0.0) where {T<:Real}
-  (; z₊ₕ, Δz, zwt, θ, Q, Dmin, Dmax, N) = soil
+  (; z₊ₕ, Δz, zwt, θ, Q, sink, Dmin, Dmax, N) = soil
   (; θ_sat, θ_wp, Ksat) = soilpar
 
   j = find_jwt(z₊ₕ, zwt)

@@ -9,7 +9,7 @@
 function sw_balance_CoLM(soil::Soil, I::T, pEc::T, pEs::T, Ta::T, Topt::T, fwet, s_VOD::T,
   soilpar, pftpar) where {T<:Real}
 
-  (; θ, Δz, zwt, Ec_gw) = soil
+  (; θ, Δz, zwt, wa, Ec_gw) = soil
   (; θ_sat) = soilpar
 
   s_tem = exp(-((Ta - Topt) / Topt)^2)
