@@ -1,16 +1,31 @@
 export sw_balance
+export find_jwt, GW_Rsb, SM_recharge!
 
-# include("GroundWater.jl")
-# include("SM_discharge.jl")
-include("update_wa.jl")
+
+include("find_θ_unsat.jl")
+include("SM_discharge.jl")
+include("SM_recharge.jl")
 include("soil_drainage.jl")
+include("update_wa.jl")
 include("swc_stress.jl")
 
-include("swb_case0.jl")
-include("swb_case1.jl")
-include("swb_case2.jl")
-include("swb_case3.jl")
-include("swb_case4.jl")
+
+# 水位向下为正，地表为0
+function find_jwt(z₊ₕ::AbstractVector, zwt::Real)
+  N = length(z₊ₕ)
+  zwt <= 0 && return 0
+  zwt >= z₊ₕ[end] && return N + 1
+
+  for j in 1:N
+    zwt <= z₊ₕ[j] && return j
+  end
+end
+
+function GW_Rsb(zwt::Real)
+  R_sb_max = 39.0 # mm day-1
+  f = 1.25e-3     # mm-1
+  return R_sb_max * exp(-f * zwt)
+end
 
 
 """
@@ -38,31 +53,36 @@ include("swb_case4.jl")
 - `zwt`    : groundwater table depth, mm
 - `uex`    : goundwater overflow soil surface, mm
 """
-function sw_balance(soil::Soil, I::T, pEc::T, pEs::T, Ta::T, Topt::T, fwet, s_VOD::T,
+function sw_balance(soil::Soil, I::T, pEc::T, pEs::T, Ta::T, Topt::T, fwet, s_vod::T,
   soilpar, pftpar) where {T<:Real}
-  (; zwt) = soil
-  # s_tem = Temp_stress(Topt, Ta) # Constrains of temperature
   s_tem = exp(-((Ta - Topt) / Topt)^2)
+  
+  (; θ_unsat, θ, N, Δz, zwt, Ec_gw, sink) = soil
+  (; θ_sat, θ_fc) = soilpar
 
-  if zwt <= 0
-    fun = swb_case0 # Case 0: groundwater overflow
-  elseif 0 < zwt <= z₊ₕ[1]
-    fun = swb_case1 # Case 1: groundwater table in layer 1
-  elseif z₊ₕ[1] < zwt <= z₊ₕ[2]
-    fun = swb_case2 # Case 2: groundwater table in layer 2
-  elseif z₊ₕ[2] < zwt < z₊ₕ[3]
-    fun = swb_case3 # Case 3: groundwater table in layer 3
-  else
-    fun = swb_case4 # Case 4: groundwater table below layer 3
-  end
+  θ_unsat .= θ
+  extra = SM_recharge!(θ, I; Δz, θ_sat)
 
-  return fun(soil, I, pEc, pEs, fwet, s_tem, s_VOD, soilpar, pftpar) # Tr, Es, uex
+  jwt = find_jwt(z₊ₕ, zwt)
+  1 <= jwt <= N && (θ_unsat[jwt] = find_θ_unsat(θ, zwt; z₊ₕ, Δz, θ_sat)[1])
+
+  # ====== Water Consumption ====== #
+  f_cons = s_tem * s_vod
+  Tr, Es = Evapotranspiration!(soil, pEc, pEs, fwet, f_cons, soilpar, pftpar)
+
+  # ====== Soil Water Drainage (Unsaturated Zone) ====== #  
+  exceed = SM_discharge!(soil, θ_unsat, sink, soilpar)
+
+  # ====== The Groundwater Table Depth ====== #
+  Δw = exceed + extra - sum(Ec_gw) - GW_Rsb(zwt)
+
+  1 <= jwt <= N && (sy = θ_sat - mean(θ_unsat[1:jwt]))
+  jwt == 0 && (sy = θ_sat - θ_fc)
+  jwt > N && (sy = 0.2)
+
+  zwt = zwt - Δw / sy
+
+  uex = update_wa!(soil, θ_unsat, soil.zwt, zwt)
+  soil.zwt = max(0, zwt)
+  return Tr, Es, uex
 end
-
-# # Temperature Constrains for plant growing
-# # INPUT:
-# # - Topt  : Optimum temperature for plant growing
-# # - Ta    : Air temperature
-# function Temp_stress(Topt::T, Ta::T) where {T<:Real}
-#   return exp(-((Ta - Topt) / Topt)^2)
-# end

@@ -27,9 +27,7 @@ function update_wa!(soil::Soil, θ_unsat, zwt1, zwt2)
     end
 
   else # 水位下降
-    # 逻辑完整
     i = j0
-
     if i >= 1
       z0 = i == 1 ? 0 : z₊ₕ[i-1]
       if j0 == j1
@@ -48,6 +46,5 @@ function update_wa!(soil::Soil, θ_unsat, zwt1, zwt2)
       end
     end
   end
-
   return uex
 end
