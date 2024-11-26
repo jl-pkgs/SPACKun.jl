@@ -12,9 +12,6 @@ function swb_case2(soil::Soil, I, pEc, pEs, fwet, s_tem, s_vod, soilpar, pftpar)
   (; θ, Δz, zwt, Ec_gw, sink) = soil
   (; θ_sat, θ_fc) = soilpar
 
-  d1 = Δz[1]
-  d2 = zwt - d1
-
   # ====== Water Supplement ====== #  
   wa1_unsat = θ[1] # 需要更新
   vw2 = SM_recharge!(θ, I; Δz, θ_sat)
@@ -33,31 +30,9 @@ function swb_case2(soil::Soil, I, pEc, pEs, fwet, s_tem, s_vod, soilpar, pftpar)
   # ====== Groundwater Table Depth Update ====== #
   sy = θ_sat - (wa1 + wa2_unsat) / 2
   Δw = exceed + vw2 - sum(Ec_gw) - GW_Rsb(zwt)
-  zwt -= Δw / sy
-  uex = 0  # Excess water to soil surface
-
-  # Update soil moisture and groundwater table depth
-  if zwt > z₊ₕ[3]
-    wa2 = (wa2_unsat * d2 + θ_fc * (Δz[2] - d2)) / Δz[2]
-    wa3 = θ_fc
-  elseif z₊ₕ[2] < zwt <= z₊ₕ[3]
-    wa2 = (wa2_unsat * d2 + θ_fc * (Δz[2] - d2)) / Δz[2]
-    wa3 = (θ_fc * (zwt - z₊ₕ[2]) + θ_sat * (z₊ₕ[3] - zwt)) / Δz[3]
-  elseif z₊ₕ[1] < zwt <= z₊ₕ[2] # [x]
-    wa2 = (wa2_unsat * (zwt - z₊ₕ[1]) + θ_sat * (z₊ₕ[2] - zwt)) / Δz[2]
-    wa3 = θ_sat
-  elseif 0 < zwt <= Δz[1]
-    wa1 = (wa1 * zwt + θ_sat * (Δz[1] - zwt)) / Δz[1]
-    wa2 = θ_sat
-    wa3 = θ_sat
-  elseif zwt <= 0
-    wa1 = θ_sat
-    wa2 = θ_sat
-    wa3 = θ_sat
-    uex = -zwt * θ_fc
-  end
-
-  soil.θ .= [wa1, wa2, wa3]
+  zwt = zwt - Δw / sy
+  
+  uex = update_wa!(soil, θ_unsat, soil.zwt, zwt)
   soil.zwt = max(0, zwt)
   return Tr, Es, uex
 end

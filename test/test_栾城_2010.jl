@@ -24,7 +24,8 @@ end
 dir_root = "$(@__DIR__)/.."
 d = fread("$dir_root/data/dat_栾城_ERA5L_2010.csv")
 
-function test_LuanCheng(; zwt=0.0)
+
+function test_LuanCheng(; zwt=0.0, method="Kun")
   soilpar, pftpar, soil = init_param()
   soil.zwt = zwt
   topt = 24.0
@@ -39,7 +40,7 @@ function test_LuanCheng(; zwt=0.0)
   s_VODi = (VOD ./ maximum(VOD)) .^ 0.5 # VOD-stress
 
   @time ET, Tr, Es, Ei, Esb, RF, GW, SM =
-    SiTHv2_site(Rn, Tavg, Tas, Prcp, Pa, Gi, LAI, s_VODi, topt, soilpar, pftpar, soil, false)
+    SiTHv2_site(Rn, Tavg, Tas, Prcp, Pa, Gi, LAI, s_VODi, topt, soilpar, pftpar, soil, false; method)
 
   SM1 = SM[:, 1]
   SM2 = SM[:, 2]
@@ -48,6 +49,7 @@ function test_LuanCheng(; zwt=0.0)
 
   fwrite(df_jl, "$dir_root/data/OUTPUT/OUTPUT_栾城_2010_zgw=$(Int(zwt)).csv")
 end
+
 
 
 # @run test_LuanCheng(; zwt=6000.0)

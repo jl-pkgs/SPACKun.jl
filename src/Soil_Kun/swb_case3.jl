@@ -9,9 +9,7 @@
 function swb_case3(soil, I, pEc, pEs, fwet, s_tem, s_vod, soilpar, pftpar)
   (; θ, Δz, zwt, Ec_gw, sink) = soil
   (; θ_sat, θ_fc) = soilpar
-  d3 = zwt - z₊ₕ[2]
 
-  # ====== Water Supplement ====== #
   wa1_unsat = θ[1] # 需要更新
   wa2_unsat = θ[2] # 需要更新
   vw3 = SM_recharge!(θ, I; Δz, θ_sat)
@@ -31,27 +29,8 @@ function swb_case3(soil, I, pEc, pEs, fwet, s_tem, s_vod, soilpar, pftpar)
   Δw = exceed + vw3 - sum(Ec_gw) - GW_Rsb(zwt)
   sy = θ_sat - (wa1 + wa2 + wa3_unsat) / 3
   zwt = zwt - Δw / sy
-  uex = 0
 
-  if zwt > z₊ₕ[3]
-    wa3 = (wa3_unsat * d3 + θ_fc * (Δz[3] - d3)) / Δz[3]
-  elseif z₊ₕ[2] < zwt <= z₊ₕ[3] # [x]
-    wa3 = (wa3_unsat * (zwt - z₊ₕ[2]) + θ_sat * (z₊ₕ[3] - zwt)) / Δz[3]
-  elseif z₊ₕ[1] < zwt <= z₊ₕ[2] # 水位上升
-    wa2 = (wa2 * (zwt - z₊ₕ[1]) + θ_sat * (z₊ₕ[2] - zwt)) / Δz[2]
-    wa3 = θ_sat
-  elseif 0 < zwt <= Δz[1]
-    wa1 = (wa1 * zwt + θ_sat * (Δz[1] - zwt)) / Δz[1]
-    wa2 = θ_sat
-    wa3 = θ_sat
-  elseif zwt <= 0
-    wa1 = θ_sat
-    wa2 = θ_sat
-    wa3 = θ_sat
-    uex = -zwt * θ_sat
-  end
-
-  soil.θ .= [wa1, wa2, wa3]
+  uex = update_wa!(soil, θ_unsat, soil.zwt, zwt)
   soil.zwt = max(0, zwt)
   return Tr, Es, uex
 end
