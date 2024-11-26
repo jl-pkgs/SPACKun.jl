@@ -14,7 +14,7 @@ function SM_discharge!(soil::Soil, θ_unsat::Vector{T}, sink::Vector{T},
     depth = z1 - z0
 
     # TODO: 这里存在bug，土壤的厚度影响排泄量
-    Q[i] = soil_drainage(θ_unsat[i], θ_sat, Ksat, Dmin[i], Dmax[i]) # 向下排泄量, [mm/d]
+    Q[i] = soil_drainage(θ_unsat[i] / θ_sat, Ksat, Dmin[i], Dmax[i]) # 向下排泄量, [mm/d]
     ΔQ = Q_in - Q[i]
 
     # 对蒸发量也进行限制

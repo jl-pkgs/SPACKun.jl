@@ -35,7 +35,7 @@ function SM_discharge!(soil::Soil, soilpar; Q_in::T=0.0) where {T<:Real}
     end
 
     # Q = K (∂ψ/∂z + 1)
-    Q[i] = soil_drainage(_θ, θ_sat, Ksat, Dmin[i], Dmax[i]) # 向下排泄量, [mm/d]
+    Q[i] = soil_drainage(_θ / θ_sat, Ksat, Dmin[i], Dmax[i]) # 向下排泄量, [mm/d]
     ΔQ = Q_in - Q[i]
 
     # _sink = sink[i]
