@@ -61,6 +61,12 @@ function swc_stress(θ::T, pET::T, soilpar, pftpar) where {T<:Real}
 end
 
 
+function constrain_sm(θ; θ_fc, θ_wp)
+  θ <= θ_wp && (fsm = 0.0)
+  θ >= θ_fc && (fsm = 1.0)
+  (θ - θ_wp) / (θ_fc - θ_wp)
+end
+
 # --- old version
 # # wc = (θ_c - θ_wp) / (θ_fc - θ_wp)
 # if θ <= θ_wp

@@ -8,4 +8,5 @@ using SPAC, Test
   
   @test ET0_Penman48(Rn, Ta, VPD, Uz) == 7.9265544809634365
   @test ET0_PT1972(Rn, Ta) == 6.564860193238437
+  @test ET0_FAO98(Rn, Ta, VPD, Uz) == 6.928646397419433
 end

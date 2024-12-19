@@ -32,9 +32,9 @@ Potential ET partition
 - pEc   : potential Transpiration, mm/day
 - pEs   : potential Soil evaporation, mm/day
 """
-function potentialET(Rn::T, G::T, LAI::T, Ta::T, Pa::T, 
+function potentialET(Rn::T, G::T, LAI::T, Ta::T, Pa::T,
   VPD::T, U2::T, doy::Int;
-  method="PT1972",
+  method="PT1972", tall_crop=false,
   Kc::Vector=[0.75, 0.9, 1.0],
   k::Vector=[0.6, 0.6, 0.6]) where {T<:Real}
 
@@ -52,9 +52,13 @@ function potentialET(Rn::T, G::T, LAI::T, Ta::T, Pa::T,
     pEc = ET0_PT1972(Rnc, Ta, Pa) * _Kc
     pEs = ET0_PT1972(Rns - G, Ta, Pa)
   elseif method == "Penman48"
-    ET0 = ET0_Penman48(Rn, Ta, VPD, U2)             # all
+    ET0 = ET0_Penman48(Rn, Ta, VPD, U2, Pa)             # all
     pEc = ET0_Penman48(Rnc, Ta, VPD, U2, Pa) * _Kc  # canopy
     pEs = ET0_Penman48(Rns - G, Ta, VPD, U2, Pa)    # soil
+  elseif method == "FAO98"
+    ET0 = ET0_FAO98(Rn, Ta, VPD, U2, Pa; tall_crop)
+    pEc = ET0_FAO98(Rnc, Ta, VPD, U2, Pa; tall_crop) * _Kc  # canopy
+    pEs = ET0_FAO98(Rns - G, Ta, VPD, U2, Pal tall_crop)    # soil
   end
   return pEc, pEs, ET0
 end
@@ -89,6 +93,34 @@ function ET0_Penman48(Rn::T, Tair::T, VPD::T, Uz::T, Pa::T=atm; z_wind=2) where 
 end
 
 
+"""
+    ET0_FAO98(Rn::T, Tair::T, VPD::T, wind::T, Pa::T=atm; z_wind=2, tall_crop=false)
+# Examples
+```julia
+ET0_Penman48(200., 20., 2., 2.)
+PET = ET0_FAO98(200.0, 20.0, 2.0, 2.0) # mm
+PET = ET0_FAO98(Rn, Tair, VPD, U2, Pa; tall_crop = false) # mm
+```
+"""
+function ET0_FAO98(Rn::T, Tair::T, VPD::T, wind::T, Pa::T=atm; z_wind=2, tall_crop=false) where {T<:Real}
+  # T = eltype(Rn)
+  U2 = cal_U2(wind, z_wind)
+
+  if tall_crop
+    p1 = T(1600.0)
+    p2 = T(0.38)
+  else
+    p1 = T(900.0)
+    p2 = T(0.34)
+  end
+  Eeq, λ, Δ, γ = ET0_eq(Rn, Tair, Pa)
+  Eeq::T = Δ / (Δ + (γ * (1.0 + p2 * U2))) * Rn |> x -> W2mm(x, λ)
+  Evp::T = γ * p1 / (Tair + 273.15) * U2 * VPD / (Δ + (γ * (1.0 + p2 * U2)))
+
+  PET::T = Eeq + Evp
+  PET
+end
+
 # λ: latent heat of vaporization (J kg-1)
 W2mm(w::T, λ::T) where {T<:Real} = w * 0.086400 / λ
 
@@ -106,4 +138,4 @@ function cal_U2(Uz::T, z=10.0) where {T<:Real}
 end
 
 
-export ET0_eq, ET0_Penman48, ET0_PT1972
+export ET0_eq, ET0_Penman48, ET0_PT1972, ET0_FAO98

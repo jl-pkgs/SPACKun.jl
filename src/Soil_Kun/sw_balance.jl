@@ -43,14 +43,14 @@ Dmax = 1.2; # 0.05*24,   mm day-1
 # Reference
 1. Ducharne & Polcher, 1998
 """
-function soil_drainage(se, ks, Dmin, Dmax; dd=1.5)
+function soil_drainage(se, Ksat, Dmin, Dmax; dd=1.5)
   # se = θ_unsat / θ_sat
   if se < 0.75
     perc = Dmin * se
   else
     perc = Dmin * se + (Dmax - Dmin) * se^dd
   end
-  return min(ks, perc) # drainage from unsaturated zone
+  return min(Ksat, perc) # drainage from unsaturated zone
 end
 
 
@@ -82,7 +82,7 @@ end
 function sw_balance(soil::Soil, I::T, pEc::T, pEs::T, Ta::T, Topt::T, fwet, s_vod::T,
   soilpar, pftpar) where {T<:Real}
   s_tem = exp(-((Ta - Topt) / Topt)^2)
-  
+
   (; θ_unsat, θ, N, Δz, zwt, Ec_gw, sink) = soil
   (; θ_sat, θ_fc) = soilpar
 
