@@ -6,7 +6,7 @@
   Pa = 100.0
 
   VPD, U2, doy = 0.0, 0.0, 0
-  pEc, pEs, ET0 = potentialET(Rn, G, LAI, Ta, Pa, VPD, U2, doy)
+  pEc, pEs = potentialET(Rn, G, LAI, Ta, Pa, VPD, U2, doy)
 
   @test pEc ≈ 2.5389604966643824
   @test pEs ≈ 0.3507115521629298

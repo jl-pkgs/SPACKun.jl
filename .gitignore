@@ -2,5 +2,8 @@ data/inpara
 data
 Manifest.toml
 *debug*
-docs
+# docs
 Project*
+
+*.pdf
+*.docx

@@ -9,6 +9,7 @@ export Soil
 export get_pftpar, get_soilpar
 export potentialET, pTr_partition!, interception, snp_balance, runoff_up
 export Δz, z₊ₕ
+export atm
 
 # Set the soil depth for three soil layers
 const Δz = [50.0, 1450.0, 3500.0]  # mm
@@ -34,6 +35,5 @@ include("Soil_Kun/sw_balance.jl")
 include("Soil_CoLM/CoLM.jl")
 
 include("SiTHv2.jl")
-
 
 end # module SiTH

@@ -25,8 +25,15 @@ Potential ET partition
 - G   : Soil heat flux, W/m^2
 
 ## Optional:
-- k   : 消光系数，default `[0.6, 0.6, 0.6]`
+- kA  : 消光系数，default `[0.6, 0.6, 0.6]`
 - Kc  : 作物折腾转换系数，default `[0.75, 0.9, 1.0]`
+
+## 优化参数
+- `rs`: 
+
+## 不敏感参数
+- `hc`: 指定参数，小麦和玉米，0.4m, 1.0m；
+- `Kc`: 需要测试
 
 ## OUTPUT
 - pEc   : potential Transpiration, mm/day
@@ -34,33 +41,30 @@ Potential ET partition
 """
 function potentialET(Rn::T, G::T, LAI::T, Ta::T, Pa::T,
   VPD::T, U2::T, doy::Int;
-  method="PT1972", tall_crop=false,
+  method="PT1972", hc::T=0.12, β=1.0, rs=70.0,
   Kc::Vector=[0.75, 0.9, 1.0],
-  k::Vector=[0.6, 0.6, 0.6]) where {T<:Real}
+  kA::Vector=[0.6, 0.6, 0.6]) where {T<:Real}
 
   i = iGrowthPeriod(doy)
   _Kc = Kc[i]
-  _k = k[i]
+  _k = kA[i]
 
   # Radiation located into soil and canopy, separately
   Rns = exp(-_k * LAI) * Rn
   Rnc = Rn - Rns
 
   ## Potential Transpiration and Soil evaporation, mm/day
-  if method == "PT1972"
-    ET0 = ET0_PT1972(Rn, Ta, Pa)
+  # ET0 = ET0_PT1972(Rn, Ta, Pa)
+  # ET0 = ET0_Penman48(Rn, Ta, VPD, U2, Pa)                      # all
+  if method == "Penman48"
+    pEc = ET0_Penman48(Rnc, Ta, VPD, U2, Pa) * _Kc               # canopy  
+  elseif method == "PT1972"
     pEc = ET0_PT1972(Rnc, Ta, Pa) * _Kc
-    pEs = ET0_PT1972(Rns - G, Ta, Pa)
-  elseif method == "Penman48"
-    ET0 = ET0_Penman48(Rn, Ta, VPD, U2, Pa)             # all
-    pEc = ET0_Penman48(Rnc, Ta, VPD, U2, Pa) * _Kc  # canopy
-    pEs = ET0_Penman48(Rns - G, Ta, VPD, U2, Pa)    # soil
-  elseif method == "FAO98"
-    ET0 = ET0_FAO98(Rn, Ta, VPD, U2, Pa; tall_crop)
-    pEc = ET0_FAO98(Rnc, Ta, VPD, U2, Pa; tall_crop) * _Kc  # canopy
-    pEs = ET0_FAO98(Rns - G, Ta, VPD, U2, Pal tall_crop)    # soil
+  elseif method == "Monteith65"
+    pEc = ET0_Monteith65(Rnc, Ta, VPD, U2, Pa, β; rs, hc) * _Kc  # canopy
   end
-  return pEc, pEs, ET0
+  pEs = ET0_eq(Rns - G, Ta, Pa)[1] * 1.26 # PML
+  return pEc, pEs
 end
 
 
@@ -116,15 +120,44 @@ function ET0_FAO98(Rn::T, Tair::T, VPD::T, wind::T, Pa::T=atm; z_wind=2, tall_cr
   Eeq, λ, Δ, γ = ET0_eq(Rn, Tair, Pa)
   Eeq::T = Δ / (Δ + (γ * (1.0 + p2 * U2))) * Rn |> x -> W2mm(x, λ)
   Evp::T = γ * p1 / (Tair + 273.15) * U2 * VPD / (Δ + (γ * (1.0 + p2 * U2)))
-
-  PET::T = Eeq + Evp
-  PET
+  Eeq + Evp
 end
 
-# λ: latent heat of vaporization (J kg-1)
+
+# β: 土壤水分限制因子, [0~1], 1充分供水。
+function ET0_Monteith65(Rn::T, Tair::T, VPD::T, wind::T, Pa::T=atm, β::T=1.0;
+  z_wind=2.0, rs=70.0, hc=0.12) where {T<:Real}
+
+  Eeq, λ, Δ, γ = ET0_eq(Rn, Tair, Pa)
+  U2 = cal_U2(wind, z_wind)
+  rH = aerodynamic_resistance(U2, hc)
+  rs = rs / β
+
+  rho_a = cal_rho_a(Tair, Pa) # FAO56, Eq. 3-5, kg m-3
+  # Cp = 1.013 * 1e-3 # MJ kg-1 degC-1
+  # rho_a * Cp * dT * gH (in MJ m-2 s-1)
+  # = kg m-3 * MJ kg-1 degC-1 * degC * m s-1
+  # = MJ m-2 s-1
+  Eeq = Δ / (Δ + (γ * (1 + rs / rH))) * Rn |> x -> W2mm(x, λ)
+  Evp = (rho_a * Cp * VPD / rH) / (Δ + (γ * (1 + rs / rH))) * 86400 / λ
+  Eeq + Evp
+end
+
+
+# 空气动力学阻力
+function aerodynamic_resistance(U2::T, h::T=0.12) where {T<:Real}
+  k = 0.41
+  d = 2 / 3 * h
+  z_om = 0.123 * h
+  z_oh = 0.1 * z_om
+  z_m = z_h = 2
+  log((z_m - d) / z_om) * log((z_h - d) / z_oh) / (k^2 * U2)
+end
+
+# λ: latent heat of vaporization (MJ kg-1)
 W2mm(w::T, λ::T) where {T<:Real} = w * 0.086400 / λ
 
-# λ: latent heat of vaporization (J kg-1)
+# λ: latent heat of vaporization (MJ kg-1)
 cal_lambda(Ta::T) where {T<:Real} = 2.501 - 2.361 / 1000 * Ta
 
 # cal_gamma(Pa, λ) = (Cp * Pa) / (ϵ * λ)
@@ -137,5 +170,27 @@ function cal_U2(Uz::T, z=10.0) where {T<:Real}
   Uz * 4.87 / log(67.8 * z - 5.42)
 end
 
+# kg m-3
+cal_rho_a(Tair, Pa) = 3.486 * Pa / cal_TvK(Tair)
 
-export ET0_eq, ET0_Penman48, ET0_PT1972, ET0_FAO98
+## 几种计算虚温的方法
+
+# FAO56, Eq. 3-7
+cal_TvK(Tair) = 1.01 * (Tair + 273)
+
+# 这个是最精确的版本
+# FAO56, Eq. 3-6
+cal_TvK(Tair, ea, Pa) = (Tair + K0) * (1 + (1 - epsilon) * ea / Pa)
+
+# https://github.com/CUG-hydro/class2022_CUG_HydroMet/blob/master/ch02_大气的基本特征.md
+# q ≈ ϵ*ea/Pa
+# q = ϵ*ea/(Pa - (1 - ϵ)*ea)
+function cal_TvK(Tair, q)
+  # ea / Pa = q/(ϵ + (1 - ϵ) * q)
+  (Tair + K0) * (1 + (1 - epsilon) * q / (ϵ + (1 - ϵ) * q))
+end
+
+
+export aerodynamic_resistance
+export cal_rho_a
+export ET0_eq, ET0_Penman48, ET0_Monteith65, ET0_PT1972, ET0_FAO98

@@ -42,7 +42,7 @@ function SiTHv2!(output::SpacOutput{T},
   (; θ, zwt, snowpack) = soil
   Kc = [1.0, 1.0, 1.0]
   VPD, U2, doy = 0.0, 0.0, 0
-  pEc, pEs, ET0 = potentialET(Rn, G, LAI, Ta, Pa, VPD, U2, doy; Kc) # PET allocated to canopy and soil surface
+  pEc, pEs = potentialET(Rn, G, LAI, Ta, Pa, VPD, U2, doy; Kc) # PET allocated to canopy and soil surface
   Ei, fwet, PE = interception(P, pEc, LAI, pftpar)  # Interception evaporation
 
   # Snow sublimation, snow melt
