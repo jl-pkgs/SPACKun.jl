@@ -17,7 +17,7 @@ function init_param(soil_type=2, PFTi=11)
   θ = ones(3) * θ_sat
   zwt = 0.0
   snowpack = 0.0
-  soil = Soil(; θ, zwt, snowpack)
+  soil = Soil{Float64}(; θ, zwt, snowpack)
   soilpar, pftpar, soil
 end
 

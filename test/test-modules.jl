@@ -25,7 +25,7 @@ end
 
 @testset "pTr_partition" begin
   pEc = 20.0
-  soil = Soil()
+  soil = Soil{Float64}()
   soil.θ = [0.3, 0.2, 0.1]
 
   fwet = 0.5

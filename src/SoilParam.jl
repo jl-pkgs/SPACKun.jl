@@ -2,7 +2,7 @@
   N::Int = 10
   
   ## 土壤水力
-  method::String = "van_Genuchten"     # "van_Genuchten" or "Campbell"
+  method::String = "Campbell"     # "van_Genuchten" or "Campbell"
   use_m::Bool = false
   same_layer = true
 
@@ -76,12 +76,15 @@ function Base.show(io::IO, param::SoilParam{T}) where {T<:Real}
   print_selected(io, "van_Genuchten ($(np)p$subfix)", method)
   print_var(io, param, :θ_sat)
   print_var(io, param, :θ_wp)
-  print_var(io, param, :Ksat; scale=1e-3)
+  print_var(io, param, :Ksat) # 1e-3
   print_var(io, param, :α)
   print_var(io, param, :n)
   use_m && print_var(io, param, :m; used=use_m)
+  
   print_selected(io, "Campbell (4p$subfix)", method)
-  printstyled(io, " - θ_sat, Ksat \n", color=:blue)
+  # printstyled(io, " - θ_sat, Ksat \n", color=:blue)
+  print_var(io, param, :θ_sat)
+  print_var(io, param, :Ksat) # 1e-3
 
   print_var(io, param, :ψ_sat)
   print_var(io, param, :b)
