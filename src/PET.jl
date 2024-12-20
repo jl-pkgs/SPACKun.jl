@@ -23,6 +23,7 @@ Potential ET partition
 - Pa  : atmospheric pressure, kPa
 - LAI : Leaf area index, 1
 - G   : Soil heat flux, W/m^2
+- β   : 土壤水分限制因子, [0~1], 1充分供水
 
 ## Optional:
 - kA  : 消光系数，default `[0.6, 0.6, 0.6]`
@@ -39,30 +40,37 @@ Potential ET partition
 - pEc   : potential Transpiration, mm/day
 - pEs   : potential Soil evaporation, mm/day
 """
-function cal_PET(Rn::T, G::T, LAI::T, Ta::T, Pa::T, VPD::T, U2::T, doy::Int;
-  method="PT1972", hc::T=0.12, β=1.0, rs=70.0,
-  Kc::Vector=[0.75, 0.9, 1.0],
-  kA::Vector=[0.6, 0.6, 0.6]) where {T<:Real}
+function cal_PET(Rn::FT, G::FT, LAI::FT, Ta::FT, Pa::FT, VPD::FT, U2::FT, doy::Int;
+  method="PT1972", β=1.0, 
+  α_soil=1.26,
+  # Kc::Vector{FT}=[0.75, 0.9, 1.0],
+  Hc::Vector{FT}=[0.12, 0.12, 0.12],
+  rs::Vector{FT}=[70.0, 70.0, 70.0],
+  kA::Vector{FT}=[0.6, 0.6, 0.6]) where {FT<:Real}
 
+  # 考虑不同作物，rs, hc, kA的不同；这里引入了rs，因此不再需要Kc
   i = iGrowthPeriod(doy)
-  _Kc = Kc[i]
-  _k = kA[i]
+  _kA = kA[i]
+  _rs = rs[i]
+  hc = Hc[i]
 
   # Radiation located into soil and canopy, separately
-  Rns = exp(-_k * LAI) * Rn
+  Rns = exp(-_kA * LAI) * Rn
   Rnc = Rn - Rns
 
   ## Potential Transpiration and Soil evaporation, mm/day
   # ET0 = ET0_PT1972(Rn, Ta, Pa)
-  # ET0 = ET0_Penman48(Rn, Ta, VPD, U2, Pa)                      # all
+  # ET0 = ET0_Penman48(Rn, Ta, VPD, U2, Pa) # all
+
+  ## canopy
   if method == "Penman48"
-    pEc = ET0_Penman48(Rnc, Ta, VPD, U2, Pa) * _Kc               # canopy  
+    pEc = ET0_Penman48(Rnc, Ta, VPD, U2, Pa)
   elseif method == "PT1972"
-    pEc = ET0_PT1972(Rnc, Ta, Pa) * _Kc
+    pEc = ET0_PT1972(Rnc, Ta, Pa)
   elseif method == "Monteith65"
-    pEc = ET0_Monteith65(Rnc, Ta, VPD, U2, Pa, β; rs, hc) * _Kc  # canopy
+    pEc = ET0_Monteith65(Rnc, Ta, VPD, U2, Pa, β; rs=_rs, hc)
   end
-  pEs = ET0_eq(Rns - G, Ta, Pa)[1] * 1.26 # PML
+  pEs = ET0_eq(Rns - G, Ta, Pa)[1] * α_soil # PML
   return pEc, pEs
 end
 
@@ -202,15 +210,12 @@ Partition transpiration into soil layers
 - Tr_p :  separate potential Transpiration
 """
 function PT_partition!(soil::Soil, pEc::T, fwet::T) where {T<:Real}
-  (; θ, Δz, Ec_pot) = soil
-
-  b = soil.param.b[1]
-  θ_sat = soil.param.θ_sat[1]
-  D50 = soil.param.D50[1]
-  D95 = soil.param.D95[1]
-
+  (; θ, Δz, Ec_pot, param) = soil
+  (; D50, D95) = param
+  b = param.b[1]
+  θ_sat = param.θ_sat[1]
+  
   c = -2.944 / log(D95 / D50)
-
   r1 = (1 / (1 + (Δz[1] / D50)^c)) # Zhang 2019, Eq. 21, root depths function
   r2 = (1 / (1 + (Δz[2] / D50)^c)) - (1 / (1 + (Δz[1] / D50)^c))
   r3 = (1 / (1 + (Δz[3] / D50)^c)) - (1 / (1 + (Δz[2] / D50)^c))

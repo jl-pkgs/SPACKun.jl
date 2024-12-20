@@ -24,15 +24,15 @@ S_plant = 1 - \frac{θ_c-θ}{θ_c-θ_wp}^2 = 1-(1-w/wc)^2
 S_soil  = 1 - \frac{θ_c-θ}{θ_c-θ_r}    = 1-(1-w/wc)=w/wc
 ```
 """
-function swc_stress(θ::T, pET::T, θ_fc::T, θ_wp::T, Hc::T) where {T<:Real}
+function swc_stress(θ::T, pET::T, θ_fc::T, θ_wp::T, hc::T) where {T<:Real}
   # (; θ_fc, θ_wp) = soilpar
-  # (; Hc) = pftpar # canopy height, Zhang 2022
+  # (; hc) = pftpar # canopy height, Zhang 2022
 
-  k = Hc^0.5
+  k = hc^0.5
   k = 4 * ((k - 0.7) / 4.3) + 1 # scale [1, 25] to [1, 5], `CH_scalar`
 
   b = 0.1
-  p = 1 / (1 + pET) - b / (1 + Hc) # Zhang 2022, Eq. 9
+  p = 1 / (1 + pET) - b / (1 + hc) # Zhang 2022, Eq. 9
   θ_wpCH = θ_wp / k
 
   # critical soil moisture for different PFTs

@@ -28,25 +28,24 @@ export SiTHv2_site
 - zwt    : Groundwater table depth, mm
 - snp    : Snow package (new), mm day-1
 """
-function SiTHv2!(output::SpacOutput{T},
-  Rn::T, Ta::T, Tas::T, Topt::T, P::T, Pa::T, s_VOD::T,
-  G::T, LAI::T, soil::Soil;
-  Kc=1.0, method="Kun", method_PET="PT1972") where {T<:Real}
+function SiTHv2!(output::SpacOutput{T}, soil::Soil,
+  Rn::T, Ta::T, Tas::T, Topt::T, P::T, Pa::T,
+  s_VOD::T, G::T, LAI::T,
+  VPD::T=0.0, U2::T=0.0; # Monteith method
+  doy::Int=1, method_sw="Kun", method_PET="PT1972") where {T<:Real}
 
+  (; θ, zwt, snowpack) = soil
   θ_sat = soil.param.θ_sat[1]
-  β = soil.param.β[1]
+  β = soil.param.β
 
   funcs = Dict(
     "Kun" => sw_balance,
     "CoLM" => sw_balance_CoLM)
-  _sw_balance = funcs[method]
+  _sw_balance = funcs[method_sw]
 
-  (; θ, zwt, snowpack) = soil
-  Kc = [1.0, 1.0, 1.0]
-  
   ## 这里还需要输入，VPD和风速数据
-  VPD, U2, doy = 0.0, 0.0, 0
-  pEc, pEs = cal_PET(Rn, G, LAI, Ta, Pa, VPD, U2, doy; Kc, method=method_PET)
+  pEc, pEs = cal_PET(Rn, G, LAI, Ta, Pa, VPD, U2, doy;
+    method=method_PET)
   Ei, fwet, PE = interception(P, pEc, LAI, β)  # Interception evaporation
 
   # Snow sublimation, snow melt
@@ -69,19 +68,35 @@ function SiTHv2!(output::SpacOutput{T},
 end
 
 
-# 状态变量需要连续，传递到下一年中；模型对初始状态soil敏感。
-# - θ  : 采用warming-up的方式获取，warming-up period可取3年
-# - zwt: 采用spin-up的方式获取，spin-up period可取100年
-function _run_model!(res::SpacOutputs{FT}, Rn::T, Ta::T, Tas::T, Prcp::T, Pa::T,
-  G::T, LAI::T, s_VOD::T,
-  Top::FT, soil::Soil; Kc=1.0, method="Kun") where {FT<:Real,T<:AbstractVector{FT}}
+## WITH VPD and U2 as INPUT
+function _run_model!(res::SpacOutputs{FT}, soil::Soil,
+  Rn::V, Ta::V, Tas::V, Prcp::V, Pa::V,
+  G::V, LAI::V, s_VOD::V, Top::FT,
+  VPD::V, U2::V;
+  method_sw="Kun") where {FT<:Real,V<:AbstractVector{FT}}
   ntime = size(Rn, 1) # 1365
 
   output = SpacOutput{FT}()
   for i in 1:ntime
-    _Kc = 180 <= i <= 220 ? Kc : 1.0
-    SiTHv2!(output, Rn[i], Ta[i], Tas[i], Top, Prcp[i], Pa[i], s_VOD[i], G[i], LAI[i],
-      soil; Kc=_Kc, method)
+    SiTHv2!(output, soil,
+      Rn[i], Ta[i], Tas[i], Top, Prcp[i], Pa[i], s_VOD[i], G[i], LAI[i], VPD[i], U2[i];
+      doy=i, method_sw)
+    res[i] = output
+  end
+  return res
+end
+
+function _run_model!(res::SpacOutputs{FT}, soil::Soil,
+  Rn::V, Ta::V, Tas::V, Prcp::V, Pa::V,
+  G::V, LAI::V, s_VOD::V, Top::FT;
+  method_sw="Kun") where {FT<:Real,V<:AbstractVector{FT}}
+  ntime = size(Rn, 1) # 1365
+
+  output = SpacOutput{FT}()
+  for i in 1:ntime
+    SiTHv2!(output, soil,
+      Rn[i], Ta[i], Tas[i], Top, Prcp[i], Pa[i], s_VOD[i], G[i], LAI[i];
+      doy=i, method_sw)
     res[i] = output
   end
   return res
@@ -89,6 +104,11 @@ end
 
 
 """
+状态变量需要连续，传递到下一年中；模型对初始状态soil敏感。
+
+- θ  : 采用warming-up的方式获取，warming-up period可取3年
+- zwt: 采用spin-up的方式获取，spin-up period可取100年
+
 ## Arguments
 - `Top`   : optimal growth temperature for plant, degC
 - `soil`: 
@@ -97,18 +117,17 @@ end
   + `snp`   : Snow package (old), mm day-1
 - `spinfg`: spin-up flag, 1 for spin-up, 0 for normal calculation. 循环重复跑100次。
 """
-function SiTHv2_site(Rn, Ta, Tas, Prcp, Pa, G, LAI, s_VOD,
-  Top, soil, spin::Bool=false; Kc=1.0, method="Kun")
+function SiTHv2_site(soil, Rn, Ta, Tas, Prcp, Pa, G, LAI, s_VOD, Top, args...; spin::Bool=false, method_sw="Kun")
 
   ntime = length(Rn)
   res = SpacOutputs{Float64}(; ntime)
 
   if spin == 1 # spin-up
     for k in 1:100 # set the spin-up time (100 years)
-      _run_model!(res, Rn, Ta, Tas, Prcp, Pa, G, LAI, s_VOD, Top, soil; Kc, method)
+      _run_model!(res, soil, Rn, Ta, Tas, Prcp, Pa, G, LAI, s_VOD, Top, args...; method_sw)
     end
   else
-    _run_model!(res, Rn, Ta, Tas, Prcp, Pa, G, LAI, s_VOD, Top, soil; Kc, method)
+    _run_model!(res, soil, Rn, Ta, Tas, Prcp, Pa, G, LAI, s_VOD, Top, args...; method_sw)
   end
 
   (; ET, Tr, Es, Ei, Esb, RS, GW, SM) = res

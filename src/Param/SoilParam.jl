@@ -40,10 +40,16 @@ end
   θ_c::Vector{FT} = fill(0.2, N)       # [not used], critical water content, [m3 m-3]
 
   ## 植被
-  β::Vector{FT} = fill(1.0, N)         # 土壤水分限制因子, [0~1], 1充分供水。
-  D50::Vector{FT} = fill(0.1, N)       # [cm]
-  D95::Vector{FT} = fill(0.2, N)       # [cm]
-  Hc::Vector{FT} = fill(0.1, N)        # [m]
+  β::FT = 1.0                          # 冠层截留系数，[-]
+  D50::FT = 0.1                        # [cm]
+  D95::FT = 0.2                        # [cm]
+  hc::FT = 0.1                         # 冠层高度，[m]
+
+  ## 蒸发参数
+  Kc::Vector{FT} = [1.0, 1.0, 1.0]     # ET0转换系数，[ungrowing, wheat, cron]
+  Hc::Vector{FT} = [0.12, 0.12, 0.12]
+  rs::Vector{FT} = [70.0, 70.0, 70.0]
+  kA::Vector{FT} = [0.6, 0.6, 0.6]
 end
 
 function SoilParam(N::Int; FT::Type=Float64, soiltype::Int=2, lc::Int=11, kw...)
@@ -70,10 +76,8 @@ function SoilParam!(param::SoilParam; soiltype=2, lc=11, same_layer=true)
   # param.m .= soilpar.m
 
   # 植被参数
-  param.β .= pftpar.β
-  param.D50 .= pftpar.D50
-  param.D95 .= pftpar.D95
-  param.Hc .= pftpar.Hc
+  (; β, D50, D95, hc) = pftpar
+  @pack! param = β, D50, D95, hc
   return param
 end
 
@@ -110,7 +114,7 @@ function Base.show(io::IO, param::SoilParam{T}) where {T<:Real}
   print_var(io, param, :β)
   print_var(io, param, :D50)
   print_var(io, param, :D95)
-  print_var(io, param, :Hc)
+  print_var(io, param, :hc)
 
   return nothing
 end

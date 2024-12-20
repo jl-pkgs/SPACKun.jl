@@ -6,7 +6,7 @@
   + 1  `β`   : the coefficient for calculation of interceptions
   + 2  `D50` : the depth above which 50% of the root mas is located, mm
   + 3  `c`   : the shape parameters of logistic dose-response root distribution model
-  + 4  `Hc`  : root depth (m)
+  + 4  `hc`  : root depth (m)
 
 Standard numbering rule for different PFTs based on MCD12, IGBP
 - `0` : 'water'
@@ -30,7 +30,7 @@ Standard numbering rule for different PFTs based on MCD12, IGBP
 function get_pftpar(lc::Int)
   # The PFTpar look up table
   PLUT = [
-    # :β, :D50, :D95, :Hc
+    # :β, :D50, :D95, :hc
     0.06 1771 3998 20;   # 1  Evergreen Needleleaf Forest   ------ ENF
     0.02 2187 4316 18;   # 2  Evergreen Broadleaf  Forest   ------ EBF
     0.06 1668 3936 18;   # 3  Deciduous Needleleaf Forest   ------ DNF
@@ -47,7 +47,7 @@ function get_pftpar(lc::Int)
   # Adjust the PFT code to match the IGBP-lc
   # IGBP <-----> PFTpar table
   pftpar = PLUT[lc, :]
-  @LArray pftpar (:β, :D50, :D95, :Hc)
+  @LArray pftpar (:β, :D50, :D95, :hc)
 end
 
 """
