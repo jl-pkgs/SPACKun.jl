@@ -6,11 +6,13 @@ include("Parameter.jl")
 
 function param2theta(param)
   ## 需要进行优化的参数放到这里
+  
 end
 
 function theta2param(theta, param)
-  ## 需要进行优化的参数放到这里
-
+  # 只优化如下参数
+  N = 3
+  param.rs = theta[(1-1)*N+1:1N]
 end
 
 

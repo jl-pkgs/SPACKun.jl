@@ -42,7 +42,7 @@ Potential ET partition
 """
 function cal_PET(Rn::FT, G::FT, LAI::FT, Ta::FT, Pa::FT, VPD::FT, U2::FT, doy::Int;
   param::SoilParam=SoilParam(3), # 3 layers
-  method="PT1972", 
+  method="PT72", 
   β=1.0, 
   α_soil=1.26,
 ) where {FT<:Real}
@@ -55,19 +55,19 @@ function cal_PET(Rn::FT, G::FT, LAI::FT, Ta::FT, Pa::FT, VPD::FT, U2::FT, doy::I
   _rs = rs[i]
   hc = Hc[i]
 
+  # @show rs
   # Radiation located into soil and canopy, separately
   Rns = exp(-_kA * LAI) * Rn
   Rnc = Rn - Rns
 
   ## Potential Transpiration and Soil evaporation, mm/day
-  # ET0 = ET0_PT1972(Rn, Ta, Pa)
+  # ET0 = ET0_PT72(Rn, Ta, Pa)
   # ET0 = ET0_Penman48(Rn, Ta, VPD, U2, Pa) # all
-
   ## canopy
   if method == "Penman48"
     pEc = ET0_Penman48(Rnc, Ta, VPD, U2, Pa)
-  elseif method == "PT1972"
-    pEc = ET0_PT1972(Rnc, Ta, Pa)
+  elseif method == "PT72"
+    pEc = ET0_PT72(Rnc, Ta, Pa)
   elseif method == "Monteith65"
     pEc = ET0_Monteith65(Rnc, Ta, VPD, U2, Pa, β; rs=_rs, hc)
   end
@@ -88,7 +88,7 @@ end
 
 # - Rn: W m-2
 # - α: PT coefficient for water saturated surface
-function ET0_PT1972(Rn::T, Tair::T, Pa::T=atm; α=1.26) where {T<:Real}
+function ET0_PT72(Rn::T, Tair::T, Pa::T=atm; α=1.26) where {T<:Real}
   Eeq = ET0_eq(Rn, Tair, Pa)[1]
   α * Eeq # [mm d-1]
 end
@@ -239,4 +239,4 @@ end
 
 export aerodynamic_resistance
 export cal_rho_a
-export ET0_eq, ET0_Penman48, ET0_Monteith65, ET0_PT1972, ET0_FAO98
+export ET0_eq, ET0_Penman48, ET0_Monteith65, ET0_PT72, ET0_FAO98

@@ -7,7 +7,7 @@ using SPAC, Test
   Uz = 3.0      # m/s
   
   @test ET0_Penman48(Rn, Ta, VPD, Uz) == 7.9265544809634365
-  @test ET0_PT1972(Rn, Ta) == 6.564860193238437
+  @test ET0_PT72(Rn, Ta) == 6.564860193238437
   @test ET0_FAO98(Rn, Ta, VPD, Uz) == 6.928646397419433
 
   @test aerodynamic_resistance(1.0) == 207.66407000788683 # s/m

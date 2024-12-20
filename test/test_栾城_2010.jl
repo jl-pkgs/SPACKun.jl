@@ -19,7 +19,7 @@ dir_root = "$(@__DIR__)/.."
 d = fread("$dir_root/data/dat_栾城_ERA5L_2010.csv")
 
 
-function test_LuanCheng(; zwt=0.0, method_sw="Kun")
+function test_LuanCheng(; zwt=0.0, method_SW="Kun")
   soil = init_param()
   soil.zwt = zwt
   topt = 24.0
@@ -35,7 +35,7 @@ function test_LuanCheng(; zwt=0.0, method_sw="Kun")
 
   @time ET, Tr, Es, Ei, Esb, RF, GW, SM =
     SiTHv2_site(soil, Rn, Tavg, Tas, Prcp, Pa, Gi, LAI, s_VODi, topt; 
-      spin=false, method_sw)
+      spin=false, method_SW)
 
   SM1 = SM[:, 1]
   SM2 = SM[:, 2]

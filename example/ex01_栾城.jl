@@ -1,3 +1,14 @@
+# begin
+#   k = 1
+#   x, y = st[k, [:lon, :lat]]
+#   i, j = findnear(x, y, lon, lat)
+#   soil_type = Soil[i, j]
+#   soilpar = get_soilpar(soil_type)
+
+#   topt = Float64(Topt[i, j])
+#   soil = init_param(;soil_type, lc=22)
+# end
+
 using SPAC, Ipaper, Dates
 using RTableTools, DataFrames, NaNStatistics
 # using Ipaper, Ipaper.sf, ArchGDAL
@@ -9,16 +20,6 @@ function init_param(soiltype=2, lc=11)
   soil
 end
 
-# begin
-#   k = 1
-#   x, y = st[k, [:lon, :lat]]
-#   i, j = findnear(x, y, lon, lat)
-#   soil_type = Soil[i, j]
-#   soilpar = get_soilpar(soil_type)
-
-#   topt = Float64(Topt[i, j])
-#   soil = init_param(;soil_type, lc=22)
-# end
 # Load necessary data
 df = fread("data/dat_栾城_ERA5L_1982-2019.csv")
 dates = df.date
@@ -39,12 +40,12 @@ s_VODi = (VOD ./ nanmaximum(VOD)) .^ 0.5 # VOD-stress
 topt = 24.0
 
 ET, Tr, Es, Ei, Esb, SM, RF, GW = 
-  SiTHv2_site(Rn, Tavg, Tas, Prcp, Pa, Gi, LAI, s_VODi, topt, soilpar, pftpar, soil, false)
+  SiTHv2_site(soil, Rn, Tavg, Tas, Prcp, Pa, Gi, LAI, s_VODi, topt; spin=false)
 
 # df_out = DataFrame(; ET, Tr, Es, Ei, Esb, SM1, SM2, SM3, RF, GW)
 # fwrite(df_out, "data/Output_栾城_2010.csv")
-# begin
-#   using Plots
-#   gr(framestyle = :box)
-#   plot(ET)
-# end
+begin
+  using Plots
+  gr(framestyle = :box)
+  plot(ET)
+end
