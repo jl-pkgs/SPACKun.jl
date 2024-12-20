@@ -9,7 +9,7 @@ function absmax(d::AbstractDataFrame; fun=maximum)
   NamedTuple{Symbol.(keys)}(values)
 end
 
-function init_param(soil_type=2, PFTi=22)
+function init_param(soil_type=2, PFTi=11)
   soilpar = get_soilpar(soil_type)
   pftpar = get_pftpar(PFTi)
 

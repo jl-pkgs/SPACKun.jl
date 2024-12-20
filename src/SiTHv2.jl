@@ -1,7 +1,7 @@
 export SiTHv2_site
 
-"""
 
+"""
 # Model input
 - Rn     : Net Radiation, W/m-2
 - Ta     : Near surface air temperature, C
@@ -27,7 +27,6 @@ export SiTHv2_site
 - srf    : Surface runoff, mm day-1
 - zwt    : Groundwater table depth, mm
 - snp    : Snow package (new), mm day-1
-
 """
 function SiTHv2!(output::SpacOutput{T},
   Rn::T, Ta::T, Tas::T, Topt::T, P::T, Pa::T, s_VOD::T,

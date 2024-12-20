@@ -30,7 +30,7 @@ end
 
   fwet = 0.5
   soilpar = get_soilpar(2) #|> collect
-  pftpar = get_pftpar(22) #|> collect
+  pftpar = get_pftpar(11) #|> collect
   pTr_partition!(soil, pEc, fwet, soilpar, pftpar)
   @test soil.Ec_pot == [0.004508186497043249, 9.864271368015835, 0.1312204454871218]
 end

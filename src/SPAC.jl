@@ -19,9 +19,9 @@ const atm = 101.325  # atmospheric pressure (kPa)
 
 include("Soil.jl")
 include("SpacOutput.jl")
-include("get_pftpar.jl")
-include("get_soilpar.jl")
-
+# include("get_pftpar.jl")
+# include("get_soilpar.jl")
+include("Parameter.jl")
 include("pTr_partition.jl")
 # include("ultilize.jl")
 include("potentialET.jl")

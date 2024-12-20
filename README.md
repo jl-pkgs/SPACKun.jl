@@ -43,6 +43,8 @@ Pkg.add(url="https://github.com/CUG-hydro/SPACKun.jl")
 
 ## 存在问题
 
+- [ ] **模型未建立起冠层导度与LAI之间的关系**
+
 - [ ] 地下水水位更新过程汇总，$\theta$不统一，一会是原始的$\theta_{unsat}$，一会考虑补给之后的$\theta$
 
 - [ ] `soil_drainage!`方案存在严重漏洞

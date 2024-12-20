@@ -40,7 +40,7 @@ export Soil, update_soil
   Dmax::Vector{FT} = [4.8, 1.2, 1.2]
   
   soiltype::Int = 2
-  LC::Int = 22
+  LC::Int = 11
   soilpar::LArray{Float64,1} = get_soilpar(soiltype)
   pftpar::LArray{Float64,1} = get_pftpar(LC)
 end
@@ -48,7 +48,7 @@ end
 
 """
 状态变量需要连续，传递到下一年中；模型对初始状态soil敏感。
-- θ: 采用warming-up的方式获取，warming-up period可取3年
+- θ  : 采用warming-up的方式获取，warming-up period可取3年
 - zwt: 采用spin-up的方式获取，spin-up period可取100年
 
 # Argument Specification
