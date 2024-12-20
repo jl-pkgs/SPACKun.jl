@@ -1,5 +1,6 @@
 export Soil, SoilParam, update_soil
 using Printf
+include("SoilParam.jl")
 
 
 @with_kw mutable struct Soil{FT}
@@ -7,7 +8,6 @@ using Printf
   z₊ₕ::Vector{FT} = cumsum(Δz)
   N::Int = length(Δz)
 
-  jwt::Int = 0                       # index of groundwater table, 追踪地下水，所在位置的上一层
   θ::Vector{FT} = ones(N) .* 0.2
   θ_prev::Vector{FT} = fill(0.2, N)  # previous soil water content
   θ_unsat::Vector{FT} = fill(0.3, N)
@@ -27,6 +27,7 @@ using Printf
   fsm_Es::Vector{FT} = fill(1.0, N)  # SM constraint for soil evaporation
   fsm_Ec::Vector{FT} = fill(1.0, N)  # SM constraint for transpiration
 
+  jwt::Int = 0                       # index of groundwater table, 追踪地下水，所在位置的上一层
   zwt::FT = 0.0                      # groundwater depths [mm]
   Sy::Vector{FT} = fill(0.02, N)     # specific yield, [m3 m-3]
   Syₙ::FT = 0.2                      # specific yield of `N+1` layer, [m3 m-3] 
@@ -39,85 +40,13 @@ using Printf
   ## Parameters
   Dmin::Vector{FT} = [0.048, 0.012, 0.012]  # drainage Parameters, ! 后期移除的参数
   Dmax::Vector{FT} = [4.8, 1.2, 1.2]
-  
+
   soiltype::Int = 2
   LC::Int = 11
   soilpar::LArray{Float64,1} = get_soilpar(soiltype)
   pftpar::LArray{Float64,1} = get_pftpar(LC)
-end
 
-
-@with_kw mutable struct SoilParam{FT}
-  ## Parameter: 土壤水力
-  N::Int = 10
-  method::String = "van_Genuchten"     # "van_Genuchten" or "Campbell"
-  use_m::Bool = false
-  same_layer = true
-
-  # van Genuchten
-  θ_sat::Vector{FT} = fill(0.4, N)     # saturated water content, [m3 m-3]
-  θ_wp::Vector{FT} = fill(0.1, N)      # residual water content, [m3 m-3]
-  Ksat::Vector{FT} = fill(400.0, N)    # saturated hydraulic conductivity, [mm d-1]
-  α::Vector{FT} = fill(0.01, N)        # [m-1]
-  n::Vector{FT} = fill(2.0, N)         # [-]
-  m::Vector{FT} = fill(0.5, N)         # [-]，优化时的可选参数
-
-  # Campbell
-  ψ_sat::Vector{FT} = fill(-10.0, N)   # [cm]
-  b::Vector{FT} = fill(4.0, N)         # [-]
-  
-  # 其他
-  θ_c::Vector{FT} = fill(0.2, N)       # [not used], critical water content, [m3 m-3]
-end
-
-
-function Base.show(io::IO, param::SoilParam{T}) where {T<:Real}
-  (; use_m, same_layer) = param
-  printstyled(io, "Parameters: \n", color=:blue, bold=true)
-  # println("[use_m = $use_m, same_layer = $same_layer]")
-
-  println(io, "-----------------------------")
-  # print_var(io, param, :κ)
-  # print_var(io, param, :cv; scale=1e6)
-  # println(io, "-----------------------------")
-
-  method = param.method
-  subfix = same_layer ? " * 1" : " * N"
-  np = use_m ? 6 : 5
-  print_selected(io, "van_Genuchten ($(np)p$subfix)", method)
-  print_var(io, param, :θ_sat)
-  print_var(io, param, :θ_wp)
-  print_var(io, param, :Ksat; scale=1e-3)
-  print_var(io, param, :α)
-  print_var(io, param, :n)
-  use_m && print_var(io, param, :m; used=use_m)
-  print_selected(io, "Campbell (4p$subfix)", method)
-  printstyled(io, " - θ_sat, Ksat \n", color=:blue)
-
-  print_var(io, param, :ψ_sat)
-  print_var(io, param, :b)
-  return nothing
-end
-
-
-function print_var(io::IO, x, var; scale=nothing, digits=3, color=:blue, used=true)
-  value = getfield(x, var)
-  name = @sprintf("%-5s", string(var))
-  _color = used ? color : :white
-  printstyled(io, " - $name: "; color=_color)
-  if isnothing(scale)
-    println(io, round.(value; digits))
-  else
-    println(io, "$(round.(value/scale; digits)) * $scale")
-  end
-end
-
-function print_selected(io::IO, name::String, method::String)
-  if name[1:5] == method[1:5]
-    printstyled(io, "   [$name]\n", bold=true, color=:green)
-  else
-    printstyled(io, "   [$name]\n", bold=true)
-  end
+  param::SoilParam{FT} = SoilParam(N; FT, soiltype, lc=LC)
 end
 
 """
