@@ -1,6 +1,6 @@
 export Soil, SoilParam, update_soil
 using Printf
-include("Param/SoilParam.jl")
+include("SoilParam.jl")
 
 
 @with_kw mutable struct Soil{FT}
@@ -44,22 +44,4 @@ include("Param/SoilParam.jl")
   soiltype::Int = 2
   lc::Int = 11
   param::SoilParam{FT} = SoilParam(N; FT, soiltype, lc)
-end
-
-"""
-状态变量需要连续，传递到下一年中；模型对初始状态soil敏感。
-- θ  : 采用warming-up的方式获取，warming-up period可取3年
-- zwt: 采用spin-up的方式获取，spin-up period可取100年
-
-# Argument Specification
-- θ: soil water content in three layers, [m^3 m^-3]
-- zwt: groundwater depth, [mm]
-- snowpack: snowpack depth
-"""
-function update_soil!(soil, θ, zwt, snowpack)
-  θ[θ.<0] .= 0.01  # set the minimum value for soil moisture
-  soil.θ = θ
-  soil.zwt = zwt
-  soil.snowpack = snowpack
-  return soil
 end

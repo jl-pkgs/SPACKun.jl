@@ -67,6 +67,9 @@ function SiTHv2!(output::SpacOutput{T},
 end
 
 
+# 状态变量需要连续，传递到下一年中；模型对初始状态soil敏感。
+# - θ  : 采用warming-up的方式获取，warming-up period可取3年
+# - zwt: 采用spin-up的方式获取，spin-up period可取100年
 function _run_model!(res::SpacOutputs{FT}, Rn::T, Ta::T, Tas::T, Prcp::T, Pa::T,
   G::T, LAI::T, s_VOD::T,
   Top::FT, soil::Soil; Kc=1.0, method="Kun") where {FT<:Real,T<:AbstractVector{FT}}
