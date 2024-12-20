@@ -41,13 +41,14 @@ Potential ET partition
 - pEs   : potential Soil evaporation, mm/day
 """
 function cal_PET(Rn::FT, G::FT, LAI::FT, Ta::FT, Pa::FT, VPD::FT, U2::FT, doy::Int;
-  method="PT1972", β=1.0, 
+  param::SoilParam=SoilParam(3), # 3 layers
+  method="PT1972", 
+  β=1.0, 
   α_soil=1.26,
+) where {FT<:Real}
   # Kc::Vector{FT}=[0.75, 0.9, 1.0],
-  Hc::Vector{FT}=[0.12, 0.12, 0.12],
-  rs::Vector{FT}=[70.0, 70.0, 70.0],
-  kA::Vector{FT}=[0.6, 0.6, 0.6]) where {FT<:Real}
-
+  (; Hc, rs, kA) = param
+  
   # 考虑不同作物，rs, hc, kA的不同；这里引入了rs，因此不再需要Kc
   i = iGrowthPeriod(doy)
   _kA = kA[i]

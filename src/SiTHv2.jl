@@ -34,9 +34,8 @@ function SiTHv2!(output::SpacOutput{T}, soil::Soil,
   VPD::T=0.0, U2::T=0.0; # Monteith method
   doy::Int=1, method_sw="Kun", method_PET="PT1972") where {T<:Real}
 
-  (; θ, zwt, snowpack) = soil
-  θ_sat = soil.param.θ_sat[1]
-  β = soil.param.β
+  (; θ, zwt, snowpack, param) = soil
+  θ_sat = param.θ_sat[1]
 
   funcs = Dict(
     "Kun" => sw_balance,
@@ -45,8 +44,8 @@ function SiTHv2!(output::SpacOutput{T}, soil::Soil,
 
   ## 这里还需要输入，VPD和风速数据
   pEc, pEs = cal_PET(Rn, G, LAI, Ta, Pa, VPD, U2, doy;
-    method=method_PET)
-  Ei, fwet, PE = interception(P, pEc, LAI, β)  # Interception evaporation
+    param, method=method_PET)
+  Ei, fwet, PE = interception(P, pEc, LAI, param.β)  # Interception evaporation
 
   # Snow sublimation, snow melt
   soil.snowpack, Esb, _, Pnet = snp_balance(PE, Ta, Tas, snowpack, pEs)

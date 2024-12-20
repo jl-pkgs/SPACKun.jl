@@ -1,5 +1,7 @@
 using Test, SPAC
 using DataFrames, RTableTools
+import HydroTools: GOF
+using Plots
 
 
 function absmax(d::AbstractDataFrame; fun=maximum)
@@ -20,7 +22,7 @@ d = fread("$dir_root/data/dat_栾城_ERA5L_2010.csv")
 
 
 begin
-  method = "Kun"
+  method_sw = "Kun"
   soil = init_param()
   soil.zwt = 0.0
   topt = 24.0
@@ -36,7 +38,7 @@ begin
   s_VODi = (VOD ./ maximum(VOD)) .^ 0.5 # VOD-stress
 
   @time ET, Tr, Es, Ei, Esb, RF, GW, SM =
-    SiTHv2_site(soil, Rn, Tavg, Tas, Prcp, Pa, Gi, LAI, s_VODi, topt; spin=false, method)
+    SiTHv2_site(soil, Rn, Tavg, Tas, Prcp, Pa, Gi, LAI, s_VODi, topt; spin=false, method_sw)
 
   SM1 = SM[:, 1]
   SM2 = SM[:, 2]
@@ -46,12 +48,9 @@ begin
   GOF(ET_obs, ET)
   # fwrite(df_jl, "$dir_root/data/OUTPUT/OUTPUT_栾城_2010_zgw=$(Int(zwt)).csv")
 end
-
-import HydroTools: GOF
+# NSE = 0.36559951360621057, R2 = 0.5191778406212801, KGE = 0.5759085145817919
 
 ## 尝试根据ET优化模型参数
-using Plots
-
 begin
   gr(framestyle = :box)
   plot(ET, label="ET_sim")

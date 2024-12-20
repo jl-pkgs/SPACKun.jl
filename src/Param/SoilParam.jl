@@ -46,11 +46,12 @@ end
   hc::FT = 0.1                         # 冠层高度，[m]
 
   ## 蒸发参数
-  Kc::Vector{FT} = [1.0, 1.0, 1.0]     # ET0转换系数，[ungrowing, wheat, cron]
+  # Kc::Vector{FT} = [1.0, 1.0, 1.0]     # ET0转换系数，[ungrowing, wheat, cron]
   Hc::Vector{FT} = [0.12, 0.12, 0.12]
   rs::Vector{FT} = [70.0, 70.0, 70.0]
   kA::Vector{FT} = [0.6, 0.6, 0.6]
 end
+
 
 function SoilParam(N::Int; FT::Type=Float64, soiltype::Int=2, lc::Int=11, kw...)
   param = SoilParam{FT}(; N, kw...)
