@@ -1,5 +1,5 @@
 """
-  get_pftpar(LC::Int)
+  get_pftpar(lc::Int)
 
 # Output:
 - pftpar
@@ -27,7 +27,7 @@ Standard numbering rule for different PFTs based on MCD12, IGBP
 - `15`: 'snow and ice'
 - `16`: 'barren or sparsely vegetated'
 """
-function get_pftpar(LC::Int)
+function get_pftpar(lc::Int)
   # The PFTpar look up table
   PLUT = [
     # :β, :D50, :D95, :Hc
@@ -44,9 +44,9 @@ function get_pftpar(LC::Int)
     0.01 896 2203 1.5;   # 11 Cropland                      ------ CRO
     0.01 752 2809 1.5    # 12 Wetland                       ------ WET
   ]
-  # Adjust the PFT code to match the IGBP-LC
+  # Adjust the PFT code to match the IGBP-lc
   # IGBP <-----> PFTpar table
-  pftpar = PLUT[LC, :]
+  pftpar = PLUT[lc, :]
   @LArray pftpar (:β, :D50, :D95, :Hc)
 end
 
@@ -99,7 +99,7 @@ end
 # else
 #   pftpar = PLUT[Typenum, :]
 # end
-# function query_LC(LC::Int)
+# function query_lc(lc::Int)
 #   keys = Dict(
 #     11 => 13,
 #     22 => 12,
@@ -115,5 +115,5 @@ end
 #     77 => 11,
 #     0 => 10
 #   )
-#   haskey(keys, LC) ? keys[LC] : 10
+#   haskey(keys, lc) ? keys[lc] : 10
 # end

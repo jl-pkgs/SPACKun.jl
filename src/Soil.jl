@@ -42,11 +42,8 @@ include("Param/SoilParam.jl")
   Dmax::Vector{FT} = [4.8, 1.2, 1.2]
 
   soiltype::Int = 2
-  LC::Int = 11
-  soilpar::LArray{Float64,1} = get_soilpar(soiltype)
-  pftpar::LArray{Float64,1} = get_pftpar(LC)
-
-  param::SoilParam{FT} = SoilParam(N; FT, soiltype, lc=LC)
+  lc::Int = 11
+  param::SoilParam{FT} = SoilParam(N; FT, soiltype, lc)
 end
 
 """

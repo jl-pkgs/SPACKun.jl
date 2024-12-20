@@ -3,9 +3,9 @@ using RTableTools, DataFrames, NaNStatistics
 # using Ipaper, Ipaper.sf, ArchGDAL
 # using GLMakie, MakieLayers
 
-function init_param(; soil_type=2, PFTi=22)
+function init_param(; soil_type=2, lc=22)
   soilpar = get_soilpar(soil_type)
-  pftpar = get_pftpar(PFTi)
+  pftpar = get_pftpar(lc)
 
   θ_sat = soilpar.θ_sat
   θ = ones(3) * θ_sat
@@ -23,7 +23,7 @@ end
 #   soilpar = get_soilpar(soil_type)
 
 #   topt = Float64(Topt[i, j])
-#   soilpar, pftpar, soil = init_param(;soil_type, PFTi=22)
+#   soilpar, pftpar, soil = init_param(;soil_type, lc=22)
 # end
 # Load necessary data
 df = fread("data/dat_栾城_ERA5L_1982-2019.csv")

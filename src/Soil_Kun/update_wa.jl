@@ -1,8 +1,9 @@
 function update_wa!(soil::Soil, θ_unsat, zwt1, zwt2)
   (; θ, z₊ₕ, N) = soil
-  (; θ_sat, θ_fc) = soil.soilpar
-  dz = zwt2 - zwt1
+  θ_sat = soil.param.θ_sat[1]
+  θ_fc = soil.param.θ_fc[1]
 
+  dz = zwt2 - zwt1
   j0 = find_jwt(z₊ₕ, zwt1) # 地下水所在层
   for i = 1:N
     i != j0 && (θ[i] = θ_unsat[i])
