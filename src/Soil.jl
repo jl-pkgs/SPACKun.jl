@@ -1,6 +1,6 @@
 export Soil, SoilParam, update_soil
 using Printf
-include("SoilParam.jl")
+include("Param/SoilParam.jl")
 
 
 @with_kw mutable struct Soil{FT}

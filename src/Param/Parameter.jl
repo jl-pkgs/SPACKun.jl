@@ -50,34 +50,6 @@ function get_pftpar(LC::Int)
   @LArray pftpar (:β, :D50, :D95, :Hc)
 end
 
-# if Typenum in [0, 13, 15, 16]
-#   pftpar = PLUT[10, :]  # set to Grassland
-# elseif Typenum == 11
-#   pftpar = PLUT[12, :]  # set to Wetland 
-# elseif Typenum in [12, 14]
-#   pftpar = PLUT[11, :]  # set to Cropland
-# else
-#   pftpar = PLUT[Typenum, :]
-# end
-# function query_LC(LC::Int)
-#   keys = Dict(
-#     11 => 13,
-#     22 => 12,
-#     33 => 10,
-#     40 => 4,
-#     41 => 1,
-#     42 => 2,
-#     43 => 3,
-#     44 => 4,
-#     45 => 5,
-#     55 => 10,
-#     66 => 10,
-#     77 => 11,
-#     0 => 10
-#   )
-#   haskey(keys, LC) ? keys[LC] : 10
-# end
-
 """
 # INPUT
 Soil Type index
@@ -116,3 +88,32 @@ function get_soilpar(SC)
   soilpar = store[SC, :]
   return @LArray(soilpar, (:Ksat, :ψ_sat, :θ_sat, :b, :θ_fc, :θ_c, :θ_wp))
 end
+
+
+# if Typenum in [0, 13, 15, 16]
+#   pftpar = PLUT[10, :]  # set to Grassland
+# elseif Typenum == 11
+#   pftpar = PLUT[12, :]  # set to Wetland 
+# elseif Typenum in [12, 14]
+#   pftpar = PLUT[11, :]  # set to Cropland
+# else
+#   pftpar = PLUT[Typenum, :]
+# end
+# function query_LC(LC::Int)
+#   keys = Dict(
+#     11 => 13,
+#     22 => 12,
+#     33 => 10,
+#     40 => 4,
+#     41 => 1,
+#     42 => 2,
+#     43 => 3,
+#     44 => 4,
+#     45 => 5,
+#     55 => 10,
+#     66 => 10,
+#     77 => 11,
+#     0 => 10
+#   )
+#   haskey(keys, LC) ? keys[LC] : 10
+# end

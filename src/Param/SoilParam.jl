@@ -1,3 +1,6 @@
+include("Parameter.jl")
+
+
 @with_kw mutable struct SoilParam{FT}
   N::Int = 10
   
@@ -80,7 +83,7 @@ function Base.show(io::IO, param::SoilParam{T}) where {T<:Real}
   print_var(io, param, :α)
   print_var(io, param, :n)
   use_m && print_var(io, param, :m; used=use_m)
-  
+
   print_selected(io, "Campbell (4p$subfix)", method)
   # printstyled(io, " - θ_sat, Ksat \n", color=:blue)
   print_var(io, param, :θ_sat)
@@ -88,6 +91,13 @@ function Base.show(io::IO, param::SoilParam{T}) where {T<:Real}
 
   print_var(io, param, :ψ_sat)
   print_var(io, param, :b)
+
+  println(io, "-----------------------------")
+  print_var(io, param, :β)
+  print_var(io, param, :D50)
+  print_var(io, param, :D95)
+  print_var(io, param, :Hc)
+
   return nothing
 end
 
