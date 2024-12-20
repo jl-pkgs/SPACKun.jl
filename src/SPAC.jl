@@ -7,7 +7,7 @@ using Statistics: mean
 
 export Soil
 export get_pftpar, get_soilpar
-export potentialET, pTr_partition!, interception, snp_balance, runoff_up
+export cal_PET, PT_partition!, interception, snp_balance, runoff_up
 export Δz, z₊ₕ
 export atm
 
@@ -22,10 +22,10 @@ include("SpacOutput.jl")
 # include("get_pftpar.jl")
 # include("get_soilpar.jl")
 # include("Parameter.jl")
-include("pTr_partition.jl")
 # include("ultilize.jl")
-include("potentialET.jl")
+include("PET.jl")
 include("Evapotranspiration.jl")
+
 include("interception.jl")
 include("snp_balance.jl")
 include("runoff_up.jl")

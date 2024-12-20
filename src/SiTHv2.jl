@@ -31,7 +31,7 @@ export SiTHv2_site
 function SiTHv2!(output::SpacOutput{T},
   Rn::T, Ta::T, Tas::T, Topt::T, P::T, Pa::T, s_VOD::T,
   G::T, LAI::T, soil::Soil;
-  Kc=1.0, method="Kun") where {T<:Real}
+  Kc=1.0, method="Kun", method_PET="PT1972") where {T<:Real}
 
   θ_sat = soil.param.θ_sat[1]
   β = soil.param.β[1]
@@ -43,8 +43,10 @@ function SiTHv2!(output::SpacOutput{T},
 
   (; θ, zwt, snowpack) = soil
   Kc = [1.0, 1.0, 1.0]
+  
+  ## 这里还需要输入，VPD和风速数据
   VPD, U2, doy = 0.0, 0.0, 0
-  pEc, pEs = potentialET(Rn, G, LAI, Ta, Pa, VPD, U2, doy; Kc) # PET allocated to canopy and soil surface
+  pEc, pEs = cal_PET(Rn, G, LAI, Ta, Pa, VPD, U2, doy; Kc, method=method_PET)
   Ei, fwet, PE = interception(P, pEc, LAI, β)  # Interception evaporation
 
   # Snow sublimation, snow melt

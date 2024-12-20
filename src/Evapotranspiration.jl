@@ -1,6 +1,6 @@
 # s_vod * s_tem
 function Evapotranspiration!(soil::Soil, pEc::T, pEs::T, fwet::T, f_cons::T) where {T<:Real}
-  pTr_partition!(soil, pEc, fwet) # EC_POT划分
+  PT_partition!(soil, pEc, fwet) # EC_POT划分
 
   θ_sat = soil.param.θ_sat[1]
   θ_fc = soil.param.θ_fc[1]

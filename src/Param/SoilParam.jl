@@ -1,5 +1,8 @@
 include("Parameter.jl")
 
+# 需要进行优化的参数
+# 
+# 
 
 function param2theta(param)
   ## 需要进行优化的参数放到这里
@@ -11,6 +14,7 @@ function theta2param(theta, param)
 end
 
 
+# 为多层土壤参数做好铺垫
 @with_kw mutable struct SoilParam{FT}
   N::Int = 10
 

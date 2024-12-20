@@ -3,16 +3,10 @@ using RTableTools, DataFrames, NaNStatistics
 # using Ipaper, Ipaper.sf, ArchGDAL
 # using GLMakie, MakieLayers
 
-function init_param(; soil_type=2, lc=22)
-  soilpar = get_soilpar(soil_type)
-  pftpar = get_pftpar(lc)
-
-  θ_sat = soilpar.θ_sat
-  θ = ones(3) * θ_sat
-  zwt = 0.0
-  snowpack = 0.0
-  soil = Soil(; θ, zwt, snowpack)
-  soilpar, pftpar, soil
+function init_param(soiltype=2, lc=11)
+  soil = Soil{Float64}(; zwt=0.0, snowpack=0.0, soiltype, lc)
+  soil.θ .= soil.param.θ_sat
+  soil
 end
 
 # begin
@@ -23,13 +17,12 @@ end
 #   soilpar = get_soilpar(soil_type)
 
 #   topt = Float64(Topt[i, j])
-#   soilpar, pftpar, soil = init_param(;soil_type, lc=22)
+#   soil = init_param(;soil_type, lc=22)
 # end
 # Load necessary data
 df = fread("data/dat_栾城_ERA5L_1982-2019.csv")
 dates = df.date
-
-soilpar, pftpar, soil = init_param()
+soil = init_param()
 
 inds = findall(year.(dates) .== 2000)
 d = df[inds, :]
@@ -50,7 +43,6 @@ ET, Tr, Es, Ei, Esb, SM, RF, GW =
 
 # df_out = DataFrame(; ET, Tr, Es, Ei, Esb, SM1, SM2, SM3, RF, GW)
 # fwrite(df_out, "data/Output_栾城_2010.csv")
-
 # begin
 #   using Plots
 #   gr(framestyle = :box)

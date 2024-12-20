@@ -9,15 +9,9 @@ function absmax(d::AbstractDataFrame; fun=maximum)
   NamedTuple{Symbol.(keys)}(values)
 end
 
-function init_param(soil_type=2, lc=11)
-  soilpar = get_soilpar(soil_type)
-  pftpar = get_pftpar(lc)
-
-  θ_sat = soilpar.θ_sat
-  θ = ones(3) * θ_sat
-  zwt = 0.0
-  snowpack = 0.0
-  soil = Soil{Float64}(; θ, zwt, snowpack)
+function init_param(soiltype=2, lc=11)
+  soil = Soil{Float64}(; zwt=0.0, snowpack=0.0, soiltype, lc)
+  soil.θ .= soil.param.θ_sat
   soil
 end
 
