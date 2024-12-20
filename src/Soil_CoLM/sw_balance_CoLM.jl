@@ -6,8 +6,7 @@
   + `非饱和带`: SM_discharge!
   + `饱和带`  : sum(Ec_gw) + GW_Rsb(zwt)
 """
-function sw_balance_CoLM(soil::Soil, I::T, pEc::T, pEs::T, Ta::T, Topt::T, fwet, s_VOD::T,
-  soilpar, pftpar) where {T<:Real}
+function sw_balance_CoLM(soil::Soil, I::T, pEc::T, pEs::T, Ta::T, Topt::T, fwet, s_VOD::T) where {T<:Real}
 
   (; θ, Δz, zwt, wa, Ec_gw) = soil
   (; θ_sat) = soilpar
@@ -17,7 +16,7 @@ function sw_balance_CoLM(soil::Soil, I::T, pEc::T, pEs::T, Ta::T, Topt::T, fwet,
 
   extra = SM_recharge!(θ, I; Δz, θ_sat) # 补给-> θ，不影响水位
 
-  Tr, Es = Evapotranspiration!(soil, pEc, pEs, fwet, f_cons, soilpar, pftpar)
+  Tr, Es = Evapotranspiration!(soil, pEc, pEs, fwet, f_cons)
 
   exceed = SM_discharge!(soil, soilpar) # 排泄 -> θ, 非饱和带
 

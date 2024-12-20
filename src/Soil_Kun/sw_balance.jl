@@ -79,12 +79,13 @@ end
 - `zwt`    : groundwater table depth, mm
 - `uex`    : goundwater overflow soil surface, mm
 """
-function sw_balance(soil::Soil, I::T, pEc::T, pEs::T, Ta::T, Topt::T, fwet, s_vod::T,
-  soilpar, pftpar) where {T<:Real}
+function sw_balance(soil::Soil, I::T, pEc::T, pEs::T, Ta::T, Topt::T, fwet, s_vod::T) where {T<:Real}
+  θ_sat = soil.param.θ_sat[1]
+  θ_fc = soil.param. θ_fc[1]
+
   s_tem = exp(-((Ta - Topt) / Topt)^2)
 
   (; θ_unsat, θ, N, Δz, zwt, Ec_gw, sink) = soil
-  (; θ_sat, θ_fc) = soilpar
 
   θ_unsat .= θ
   extra = SM_recharge!(θ, I; Δz, θ_sat)
@@ -94,10 +95,10 @@ function sw_balance(soil::Soil, I::T, pEc::T, pEs::T, Ta::T, Topt::T, fwet, s_vo
 
   # ====== Water Consumption ====== #
   f_cons = s_tem * s_vod
-  Tr, Es = Evapotranspiration!(soil, pEc, pEs, fwet, f_cons, soilpar, pftpar)
+  Tr, Es = Evapotranspiration!(soil, pEc, pEs, fwet, f_cons)
 
   # ====== Soil Water Drainage (Unsaturated Zone) ====== #  
-  exceed = SM_discharge!(soil, θ_unsat, sink, soilpar)
+  exceed = SM_discharge!(soil, θ_unsat, sink)
 
   # ====== The Groundwater Table Depth ====== #
   Δw = exceed + extra - sum(Ec_gw) - GW_Rsb(zwt)

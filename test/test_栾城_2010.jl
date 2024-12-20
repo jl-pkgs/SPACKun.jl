@@ -40,7 +40,7 @@ function test_LuanCheng(; zwt=0.0, method="Kun")
   s_VODi = (VOD ./ maximum(VOD)) .^ 0.5 # VOD-stress
 
   @time ET, Tr, Es, Ei, Esb, RF, GW, SM =
-    SiTHv2_site(Rn, Tavg, Tas, Prcp, Pa, Gi, LAI, s_VODi, topt, soilpar, pftpar, soil, false; method)
+    SiTHv2_site(Rn, Tavg, Tas, Prcp, Pa, Gi, LAI, s_VODi, topt, soil, false; method)
 
   SM1 = SM[:, 1]
   SM2 = SM[:, 2]

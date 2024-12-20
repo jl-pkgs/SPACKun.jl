@@ -30,28 +30,31 @@ export SiTHv2_site
 """
 function SiTHv2!(output::SpacOutput{T},
   Rn::T, Ta::T, Tas::T, Topt::T, P::T, Pa::T, s_VOD::T,
-  G::T, LAI::T, soilpar, pftpar, soil::Soil; 
+  G::T, LAI::T, soil::Soil;
   Kc=1.0, method="Kun") where {T<:Real}
-  
+
+  θ_sat = soil.param.θ_sat[1]
+  β = soil.param.β[1]
+
   funcs = Dict(
     "Kun" => sw_balance,
     "CoLM" => sw_balance_CoLM)
   _sw_balance = funcs[method]
-  
+
   (; θ, zwt, snowpack) = soil
   Kc = [1.0, 1.0, 1.0]
   VPD, U2, doy = 0.0, 0.0, 0
   pEc, pEs = potentialET(Rn, G, LAI, Ta, Pa, VPD, U2, doy; Kc) # PET allocated to canopy and soil surface
-  Ei, fwet, PE = interception(P, pEc, LAI, pftpar)  # Interception evaporation
+  Ei, fwet, PE = interception(P, pEc, LAI, β)  # Interception evaporation
 
   # Snow sublimation, snow melt
   soil.snowpack, Esb, _, Pnet = snp_balance(PE, Ta, Tas, snowpack, pEs)
 
-  RS, I, Vmax = runoff_up(Pnet, θ, zwt, Δz, soilpar)
+  RS, I, Vmax = runoff_up(Pnet, θ, zwt, Δz, θ_sat)
 
   # Variables associated with soil water balance
   _pEs = max(pEs - Esb, 0)
-  Tr, Es, uex = _sw_balance(soil, I, pEc, _pEs, Ta, Topt, fwet, s_VOD, soilpar, pftpar)
+  Tr, Es, uex = _sw_balance(soil, I, pEc, _pEs, Ta, Topt, fwet, s_VOD)
 
   ET = Tr + Es + Ei + Esb # Total Evapotranspiration
   RS += uex
@@ -64,15 +67,16 @@ function SiTHv2!(output::SpacOutput{T},
 end
 
 
-function _run_model!(res::SpacOutputs{FT}, Rn::T, Ta::T, Tas::T, Prcp::T, Pa::T, G::T, LAI::T, s_VOD::T,
-  Top::FT, soilpar, pftpar, soil::Soil; Kc=1.0, method="Kun") where {FT<:Real,T<:AbstractVector{FT}}
+function _run_model!(res::SpacOutputs{FT}, Rn::T, Ta::T, Tas::T, Prcp::T, Pa::T,
+  G::T, LAI::T, s_VOD::T,
+  Top::FT, soil::Soil; Kc=1.0, method="Kun") where {FT<:Real,T<:AbstractVector{FT}}
   ntime = size(Rn, 1) # 1365
 
   output = SpacOutput{FT}()
   for i in 1:ntime
     _Kc = 180 <= i <= 220 ? Kc : 1.0
     SiTHv2!(output, Rn[i], Ta[i], Tas[i], Top, Prcp[i], Pa[i], s_VOD[i], G[i], LAI[i],
-      soilpar, pftpar, soil; Kc=_Kc, method)
+      soil; Kc=_Kc, method)
     res[i] = output
   end
   return res
@@ -89,17 +93,17 @@ end
 - `spinfg`: spin-up flag, 1 for spin-up, 0 for normal calculation. 循环重复跑100次。
 """
 function SiTHv2_site(Rn, Ta, Tas, Prcp, Pa, G, LAI, s_VOD,
-  Top, soilpar, pftpar, soil, spin::Bool=false; Kc=1.0, method="Kun")
+  Top, soil, spin::Bool=false; Kc=1.0, method="Kun")
 
   ntime = length(Rn)
   res = SpacOutputs{Float64}(; ntime)
 
   if spin == 1 # spin-up
     for k in 1:100 # set the spin-up time (100 years)
-      _run_model!(res, Rn, Ta, Tas, Prcp, Pa, G, LAI, s_VOD, Top, soilpar, pftpar, soil; Kc, method)
+      _run_model!(res, Rn, Ta, Tas, Prcp, Pa, G, LAI, s_VOD, Top, soil; Kc, method)
     end
   else
-    _run_model!(res, Rn, Ta, Tas, Prcp, Pa, G, LAI, s_VOD, Top, soilpar, pftpar, soil; Kc, method)
+    _run_model!(res, Rn, Ta, Tas, Prcp, Pa, G, LAI, s_VOD, Top, soil; Kc, method)
   end
 
   (; ET, Tr, Es, Ei, Esb, RS, GW, SM) = res

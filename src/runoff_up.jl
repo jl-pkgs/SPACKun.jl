@@ -2,7 +2,7 @@
 # INPUT:
   Δz       : Soil depth of different layers (mm)
   θ       : The antecedent soil water content (mm) expressed as a function of the WHC in that layer
-  soilpar  : Soil parameters according to Soil type
+  
   Pnet     : Net precipitation = P-I+Snowmelt
   zwt      : Groundwater table depth
   
@@ -11,9 +11,7 @@
   I      : Water that enters into the soil surface (mm)
   Vmax     : Maximum water retention capacity (mm)
 """
-function runoff_up(Pnet, θ, zwt, Δz, soilpar)
-  (; θ_sat) = soilpar
-
+function runoff_up(Pnet, θ, zwt, Δz, θ_sat)
   Vmax = 0.0
   if zwt <= 0
     # Exceeded groundwater on the soil surface

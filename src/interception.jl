@@ -17,8 +17,7 @@ Choudhury BJ, Digirolamo NE, 1998, A biological process-based estimate
 of global land surface evaporation using satellite and ancillary data I.
 Model description and comparison with observation. Journal of Hydrology.
 """
-function interception(P, pEc, LAI, pftpar) 
-  β = pftpar[:β]
+function interception(P, pEc, LAI, β)
   Sc = min(P, β * LAI * P)
 
   if pEc < 1e-3

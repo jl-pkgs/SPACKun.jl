@@ -1,8 +1,12 @@
 # SM_discharge!(soil, θ_unsat, soilpar; Q_in=0.0)
-function SM_discharge!(soil::Soil, θ_unsat::Vector{T}, sink::Vector{T},
-  soilpar; Q_in::T=0.0) where {T<:Real}
+function SM_discharge!(soil::Soil, θ_unsat::Vector{T}, sink::Vector{T}; 
+  Q_in::T=0.0) where {T<:Real}
+  
   (; z₊ₕ, zwt, θ, Q, Dmin, Dmax, N) = soil
-  (; θ_sat, θ_wp, Ksat) = soilpar
+  # (; θ_sat, θ_wp, Ksat) = soilpar
+  θ_sat = soil.param.θ_sat[1]
+  Ksat = soil.param.Ksat[1]
+
   j = find_jwt(z₊ₕ, zwt)
 
   ## 非饱和带

@@ -18,19 +18,19 @@ end
   zwt = 1000.0 # mm
   θ = [0.3, 0.3, 0.3]
   soilpar = get_soilpar(2)
-  srf, I, Vmax = runoff_up(Pnet, θ, zwt, Δz, soilpar)
+  θ_sat = soilpar.θ_sat
+  srf, I, Vmax = runoff_up(Pnet, θ, zwt, Δz, θ_sat)
   @test Vmax ≈ 129
   @test I ≈ 20
 end
 
 @testset "pTr_partition" begin
   pEc = 20.0
-  soil = Soil{Float64}()
+  N = 3
+  soil = Soil{Float64}(; soiltype=2, LC=11)
   soil.θ = [0.3, 0.2, 0.1]
 
   fwet = 0.5
-  soilpar = get_soilpar(2) #|> collect
-  pftpar = get_pftpar(11) #|> collect
-  pTr_partition!(soil, pEc, fwet, soilpar, pftpar)
+  pTr_partition!(soil, pEc, fwet)
   @test soil.Ec_pot == [0.004508186497043249, 9.864271368015835, 0.1312204454871218]
 end

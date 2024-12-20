@@ -10,11 +10,14 @@ Partition PET into three soil layers
 # OUTPUT:
 - Tr_p :  separate potential Transpiration
 """
-function pTr_partition!(soil::Soil, pEc::T, fwet::T, soilpar, pftpar) where {T<:Real}
+function pTr_partition!(soil::Soil, pEc::T, fwet::T) where {T<:Real}
   (; θ, Δz, Ec_pot) = soil
   
-  (; b, θ_sat) = soilpar
-  (; D50, D95) = pftpar
+  b = soil.param.b[1]
+  θ_sat = soil.param.θ_sat[1]
+  D50 = soil.param.D50[1]
+  D95 = soil.param.D95[1]
+  
   c = -2.944 / log(D95 / D50)
 
   r1 = (1 / (1 + (Δz[1] / D50)^c)) # Zhang 2019, Eq. 21, root depths function

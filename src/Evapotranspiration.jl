@@ -1,9 +1,12 @@
 # s_vod * s_tem
-function Evapotranspiration!(soil::Soil, pEc::T, pEs::T, fwet::T, f_cons::T,
-  soilpar, pftpar) where {T<:Real}
-  pTr_partition!(soil, pEc, fwet, soilpar, pftpar) # EC_POT划分
+function Evapotranspiration!(soil::Soil, pEc::T, pEs::T, fwet::T, f_cons::T) where {T<:Real}
+  pTr_partition!(soil, pEc, fwet) # EC_POT划分
 
-  (; θ_sat, θ_wp) = soilpar
+  θ_sat = soil.param.θ_sat[1]
+  θ_fc = soil.param.θ_fc[1]
+  θ_wp = soil.param.θ_wp[1]
+  Hc = soil.param.Hc[1]
+  
   (; θ, Ec_pot, fsm_Ec, fsm_Es, 
     Ec_sm, Ec_gw, sink, 
     zwt, z₊ₕ, N) = soil
@@ -13,7 +16,7 @@ function Evapotranspiration!(soil::Soil, pEc::T, pEs::T, fwet::T, f_cons::T,
 
   # 非饱和
   for i = 1:max(j - 1, 0) # 全部非饱和
-    fsm_Ec[i], fsm_Es[i] = swc_stress(θ[i], pEc, soilpar, pftpar)
+    fsm_Ec[i], fsm_Es[i] = swc_stress(θ[i], pEc, θ_fc, θ_wp, Hc)
 
     Ec_sm[i] = Ec_pot[i] * f_cons * fsm_Ec[i]
     # Ec_sm[j] = clamp(Ec_sm[i], 0, Δz[i] * (θ[i] - θ_wp)) # 限制最大蒸发量
@@ -23,7 +26,7 @@ function Evapotranspiration!(soil::Soil, pEc::T, pEs::T, fwet::T, f_cons::T,
   # 半饱和
   if 1 <= j <= N
     i = j
-    fsm_Ec[i], fsm_Es[i] = swc_stress(_θ_unsat, pEc, soilpar, pftpar)
+    fsm_Ec[i], fsm_Es[i] = swc_stress(_θ_unsat, pEc, θ_fc, θ_wp, Hc)
 
     _Ec_pot_sat = Ec_pot[i] * (1 - frac_unsat) # GW
     _Ec_pot_unsat = Ec_pot[i] * frac_unsat     # SM
