@@ -25,9 +25,6 @@ S_soil  = 1 - \frac{θ_c-θ}{θ_c-θ_r}    = 1-(1-w/wc)=w/wc
 ```
 """
 function swc_stress(θ::T, pET::T, θ_fc::T, θ_wp::T, hc::T) where {T<:Real}
-  # (; θ_fc, θ_wp) = soilpar
-  # (; hc) = pftpar # canopy height, Zhang 2022
-
   k = hc^0.5
   k = 4 * ((k - 0.7) / 4.3) + 1 # scale [1, 25] to [1, 5], `CH_scalar`
 

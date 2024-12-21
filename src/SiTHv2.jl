@@ -29,10 +29,11 @@ function SiTHv2!(output::SpacOutput{T}, soil::Soil,
   Rn::T, Ta::T, Tas::T, Topt::T, P::T, Pa::T,
   s_VOD::T, G::T, LAI::T,
   VPD::T=0.0, U2::T=0.0; # Monteith method
-  doy::Int=1, method_SW="Kun", method_PET="PT72") where {T<:Real}
+  doy::Int=-1, method_SW="Kun", method_PET="PT72") where {T<:Real}
 
   (; θ, zwt, snowpack, param) = soil
   θ_sat = param.θ_sat[1]
+  # update_VegParam!(param, doy) # update kA, rs, hc
 
   funcs = Dict(
     "Kun" => sw_balance,
@@ -69,12 +70,12 @@ function _run_model!(res::SpacOutputs{FT}, soil::Soil,
   Rn::V, Ta::V, Tas::V, Prcp::V, Pa::V,
   G::V, LAI::V, s_VOD::V, Top::FT,
   VPD::V, U2::V, doy::AbstractVector; kw...) where {FT<:Real,V<:AbstractVector{FT}}
-  
+
   ntime = size(Rn, 1) # 1365
   output = SpacOutput{FT}()
   for i in 1:ntime
-    SiTHv2!(output, soil, 
-      Rn[i], Ta[i], Tas[i], Top, Prcp[i], Pa[i], s_VOD[i], G[i], LAI[i], VPD[i], U2[i]; 
+    SiTHv2!(output, soil,
+      Rn[i], Ta[i], Tas[i], Top, Prcp[i], Pa[i], s_VOD[i], G[i], LAI[i], VPD[i], U2[i];
       doy=doy[i], kw...)
     res[i] = output
   end

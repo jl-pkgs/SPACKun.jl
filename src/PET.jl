@@ -2,20 +2,6 @@
 const Cp = 1.013 * 1e-3  # Specific heat (MJ kg-1 C-1)
 const ϵ = 0.622  # e (unitless) is the ratio of molecular weight of water to dry air (equal to 0.622)
 
-export period_wheat, period_corn
-
-period_wheat(doy::Int) = 32 <= doy <= 166
-period_corn(doy::Int) = 196 <= doy <= 288
-
-# [wheat, corn, non-gw]
-function iGrowthPeriod(doy::Int)
-  i = 3
-  period_wheat(doy) && (i = 1)
-  period_corn(doy) && (i = 2)
-  return i
-end
-
-
 """
 Potential ET partition
 
@@ -47,14 +33,11 @@ function cal_PET(Rn::FT, G::FT, LAI::FT, Ta::FT, Pa::FT, VPD::FT, U2::FT, doy::I
   method="PT72", β=1.0
 ) where {FT<:Real}
   # Kc::Vector{FT}=[0.75, 0.9, 1.0],
-  (; Hc, rs, kA, α_soil) = param
+  (; hc, rs, kA, α_soil) = param
   
-  # 考虑不同作物，rs, hc, kA的不同；这里引入了rs，因此不再需要Kc
   i = iGrowthPeriod(doy)
-  _kA = kA[i]
-  
   # Radiation located into soil and canopy, separately
-  Rns = exp(-_kA * LAI) * Rn
+  Rns = exp(-kA * LAI) * Rn
   Rnc = Rn - Rns
 
   ## Potential Transpiration and Soil evaporation, mm/day
@@ -66,9 +49,11 @@ function cal_PET(Rn::FT, G::FT, LAI::FT, Ta::FT, Pa::FT, VPD::FT, U2::FT, doy::I
   elseif method == "PT72"
     pEc = ET0_PT72(Rnc, Ta, Pa)
   elseif method == "Monteith65"
-    _rs = rs[i] / LAI # NSE高0.03
-    hc = Hc[i]
-    pEc = ET0_Monteith65(Rnc, Ta, VPD, U2, Pa, β; rs=_rs, hc)
+    hc = param._hc[i]
+    rs = param._rs[i]
+    # kA = param._kA[i]
+    rs = rs / LAI # NSE高0.03
+    pEc = ET0_Monteith65(Rnc, Ta, VPD, U2, Pa, β; rs, hc)
   end
   pEs = ET0_eq(Rns - G, Ta, Pa)[1] * α_soil # PML
   return pEc, pEs

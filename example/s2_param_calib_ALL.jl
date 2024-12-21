@@ -2,6 +2,7 @@ using Test, SPAC
 using DataFrames, RTableTools, Dates
 using Plots
 import HydroTools: GOF, sceua
+import Ipaper: drop_missing
 GOF_df(yobs, ysim) = DataFrame([GOF(yobs, ysim)])
 
 # > 固城，禹城KGE只有0.4
@@ -31,7 +32,7 @@ end
 function ModelSim(theta; method_PET="Monteith65")
   soil = init_param(theta; par)
   # ET, Tr, Es, Ei, Esb, RF, GW, SM =
-  SiTHv2_site(soil, Rn, Tavg, Tas, Prcp, Pa, Gi, LAI, s_VODi, topt, VPD, U2, doy;
+  SiTHv2_site(soil, Rn_obs, Tavg, Tas, Prcp, Pa, Gi, LAI, s_VODi, topt, VPD, U2, doy;
     spin=false, method_PET)[1]
 end
 
@@ -44,7 +45,7 @@ end
 
 
 begin
-  parNames = [:rs] # :Hc
+  parNames = [:_rs] # :HC
   par = select_param(parNames)
   
   ET_Kun = ModelSim(nothing; method_PET="PT72")
@@ -59,7 +60,7 @@ begin
   theta, feval, exitflag = sceua(goal, theta0, lower, upper)
   @show theta
 
-  theta0 = [70.0, 300.0, 600.0] # rs
+  # theta0 = [70.0, 300.0, 600.0] # rs
   theta0 = theta
   ET = ModelSim(theta0; method_PET="Monteith65")
   GOF_df(ET_obs, ET) |> print # 仍然存在系统偏差

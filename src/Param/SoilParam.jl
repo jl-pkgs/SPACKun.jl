@@ -1,4 +1,17 @@
 export SoilParam
+export period_wheat, period_corn
+
+
+period_wheat(doy::Int) = 32 <= doy <= 166
+period_corn(doy::Int) = 196 <= doy <= 288
+
+# [wheat, corn, non-gw]
+function iGrowthPeriod(doy::Int)
+  i = 3
+  period_wheat(doy) && (i = 1)
+  period_corn(doy) && (i = 2)
+  return i
+end
 
 
 # 为多层土壤参数做好铺垫
@@ -30,14 +43,28 @@ export SoilParam
   β::FT = 1.0                          # 冠层截留系数，[-]
   D50::FT = 0.1                        # [cm]
   D95::FT = 0.2                        # [cm]
-  hc::FT = 0.1                         # 冠层高度，[m]
 
-  ## 蒸发参数
-  # Kc::Vector{FT} = [1.0, 1.0, 1.0]     # ET0转换系数，[ungrowing, wheat, cron]
   α_soil::FT = 1.26
-  Hc::Vector{FT} = [0.12, 0.5, 1.0]
-  rs::Vector{FT} = [70.0, 70.0, 70.0]
-  kA::Vector{FT} = [0.6, 0.6, 0.6]
+  hc::FT = 0.1                         # 冠层高度，[m]
+  rs::FT = 70.0                        # 气孔导度阻力，[s m-1]
+  kA::FT = 0.6                         # 消光系数，[m-1]
+  Kc::FT = 1.0                         # ET0转换系数
+  ## 植被类型变动
+  _Kc::Vector{FT} = [1.0, 1.0, 1.0]    # [ungrowing, wheat, cron]
+  _hc::Vector{FT} = [0.12, 0.5, 1.0]
+  _rs::Vector{FT} = [70.0, 70.0, 70.0]
+  _kA::Vector{FT} = [0.6, 0.6, 0.6]
+end
+
+## 引入VegParam更新机制
+"update_VegParam!(soil.param, doy)"
+function update_VegParam!(param::SoilParam, doy::Int)
+  doy <= 0 && return
+  i = iGrowthPeriod(doy)
+  param.hc = param._hc[i]
+  param.rs = param._rs[i]
+  param.kA = param._kA[i]
+  param.Kc = param._Kc[i]
 end
 
 
