@@ -2,7 +2,7 @@ using NaNStatistics
 
 begin
   gr(framestyle=:box)
-  p_et = plot(ET_obs, label="ET_obs", color=:black)
+  p_et = plot(ET_obs, label="ET_obs", color=:black; size=(1400, 800))
   plot!(p_et, ET_Kun, label="ET_kun")
   plot!(p_et, ET, label="ET_kong")
 end
@@ -42,7 +42,7 @@ function plot_wue(ET; label)
 
   con_met = @. (P_obs > 1 && Rn_obs > 100)
   # plot!(wue; label="")
-  wue[(GPP_obs .< trs) .|| con_met] .= NaN # 去除非生长季
+  wue[(GPP_obs.<trs).||con_met] .= NaN # 去除非生长季
 
   t1 = 70:170
   t2 = 190:285

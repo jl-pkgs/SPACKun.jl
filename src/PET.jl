@@ -2,6 +2,8 @@
 const Cp = 1.013 * 1e-3  # Specific heat (MJ kg-1 C-1)
 const ϵ = 0.622  # e (unitless) is the ratio of molecular weight of water to dry air (equal to 0.622)
 
+export period_wheat, period_corn
+
 period_wheat(doy::Int) = 32 <= doy <= 166
 period_corn(doy::Int) = 196 <= doy <= 288
 
@@ -50,10 +52,7 @@ function cal_PET(Rn::FT, G::FT, LAI::FT, Ta::FT, Pa::FT, VPD::FT, U2::FT, doy::I
   # 考虑不同作物，rs, hc, kA的不同；这里引入了rs，因此不再需要Kc
   i = iGrowthPeriod(doy)
   _kA = kA[i]
-  _rs = rs[i] / LAI
-  hc = Hc[i]
-
-  # @show rs
+  
   # Radiation located into soil and canopy, separately
   Rns = exp(-_kA * LAI) * Rn
   Rnc = Rn - Rns
@@ -67,6 +66,8 @@ function cal_PET(Rn::FT, G::FT, LAI::FT, Ta::FT, Pa::FT, VPD::FT, U2::FT, doy::I
   elseif method == "PT72"
     pEc = ET0_PT72(Rnc, Ta, Pa)
   elseif method == "Monteith65"
+    _rs = rs[i] / LAI # NSE高0.03
+    hc = Hc[i]
     pEc = ET0_Monteith65(Rnc, Ta, VPD, U2, Pa, β; rs=_rs, hc)
   end
   pEs = ET0_eq(Rns - G, Ta, Pa)[1] * α_soil # PML
@@ -157,8 +158,13 @@ function aerodynamic_resistance(U2::T, h::T=0.12) where {T<:Real}
   z_om = 0.123 * h
   z_oh = 0.1 * z_om
   z_m = z_h = 2
-  log((z_m - d) / z_om) * log((z_h - d) / z_oh) / (k^2 * U2)
+  ra = safe_log((z_m - d) / z_om) * safe_log((z_h - d) / z_oh) / (k^2 * U2)
+  isnan(ra) && return 208.0/U2 # 70s/m
+  ra
 end
+
+safe_log(x::T) where {T<:Real} = x < 0 ? T(NaN) : log(x)
+
 
 # λ: latent heat of vaporization (MJ kg-1)
 W2mm(w::T, λ::T) where {T<:Real} = w * 0.086400 / λ

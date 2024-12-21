@@ -4,6 +4,7 @@ using Parameters
 using LabelledArrays
 using UnPack
 using Statistics: mean
+using Printf
 
 export Soil
 export get_pftpar, get_soilpar
@@ -17,7 +18,7 @@ const z₊ₕ = cumsum(Δz)
 
 const atm = 101.325  # atmospheric pressure (kPa)
 
-include("Param/Soil.jl")
+include("Param/Parameter.jl")
 include("SpacOutput.jl")
 # include("get_pftpar.jl")
 # include("get_soilpar.jl")

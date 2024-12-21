@@ -10,6 +10,7 @@ include("swc_stress.jl")
 
 
 # 水位向下为正，地表为0
+# 0 ~ N + 1
 function find_jwt(z₊ₕ::AbstractVector, zwt::Real)
   N = length(z₊ₕ)
   zwt <= 0 && return 0

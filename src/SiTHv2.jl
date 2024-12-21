@@ -68,13 +68,14 @@ end
 function _run_model!(res::SpacOutputs{FT}, soil::Soil,
   Rn::V, Ta::V, Tas::V, Prcp::V, Pa::V,
   G::V, LAI::V, s_VOD::V, Top::FT,
-  VPD::V, U2::V; kw...) where {FT<:Real,V<:AbstractVector{FT}}
+  VPD::V, U2::V, doy::AbstractVector; kw...) where {FT<:Real,V<:AbstractVector{FT}}
   
   ntime = size(Rn, 1) # 1365
   output = SpacOutput{FT}()
   for i in 1:ntime
     SiTHv2!(output, soil, 
-      Rn[i], Ta[i], Tas[i], Top, Prcp[i], Pa[i], s_VOD[i], G[i], LAI[i], VPD[i], U2[i]; doy=i, kw...)
+      Rn[i], Ta[i], Tas[i], Top, Prcp[i], Pa[i], s_VOD[i], G[i], LAI[i], VPD[i], U2[i]; 
+      doy=doy[i], kw...)
     res[i] = output
   end
   return res
@@ -88,7 +89,7 @@ function _run_model!(res::SpacOutputs{FT}, soil::Soil,
   output = SpacOutput{FT}()
   for i in 1:ntime
     SiTHv2!(output, soil,
-      Rn[i], Ta[i], Tas[i], Top, Prcp[i], Pa[i], s_VOD[i], G[i], LAI[i]; doy=i, kw...)
+      Rn[i], Ta[i], Tas[i], Top, Prcp[i], Pa[i], s_VOD[i], G[i], LAI[i]; kw...)
     res[i] = output
   end
   return res

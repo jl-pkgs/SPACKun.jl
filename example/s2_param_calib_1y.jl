@@ -4,6 +4,7 @@ import HydroTools: GOF, sceua
 using Plots
 
 GOF_df(yobs, ysim) = DataFrame([GOF(yobs, ysim)])
+GOF_df(yobs, ysim, period) = GOF_df(yobs[period], ysim[period])
 
 function init_param(::Nothing=nothing; soiltype=2, lc=11)
   soil = Soil{Float64}(; zwt=0.0, snowpack=0.0, soiltype, lc)
@@ -49,7 +50,10 @@ end
 
 ET_Kun = ModelSim(nothing; method_PET="PT72")
 GOF_df(ET_obs, ET_Kun)
+GOF_df(ET_obs, ET_Kun, period_wheat.(doy)) |> print ## 仍然存在系统偏差
+# GOF_df(ET_obs, ET_Kun, period_corn.(doy)) |> print ## 仍然存在系统偏差
 
+## 主要是修正了小麦的蒸腾量
 begin
   rs0 = [70.0, 70.0, 70.0]
   lower = [10, 40, 40.0]
@@ -64,6 +68,8 @@ begin
   theta = [50, 100, 300.0]
   ET = ModelSim(theta; method_PET="Monteith65")
   GOF_df(ET_obs, ET) |> print ## 仍然存在系统偏差
+  GOF_df(ET_obs, ET, period_wheat.(doy)) |> print ## 仍然存在系统偏差
+  # GOF_df(ET_obs, ET, period_corn.(doy)) |> print ## 仍然存在系统偏差
 end
 
 # NSE = 0.36559951360621057, R2 = 0.5191778406212801, KGE = 0.5759085145817919

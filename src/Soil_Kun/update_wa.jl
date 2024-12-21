@@ -29,7 +29,7 @@ function update_wa!(soil::Soil, θ_unsat, zwt1, zwt2)
 
   else # 水位下降
     i = j0
-    if i >= 1
+    if i >= 1 && i <= N
       z0 = i == 1 ? 0 : z₊ₕ[i-1]
       if j0 == j1
         θ[i] = (θ_unsat[i] * (zwt2 - z0) + θ_sat * (z₊ₕ[i] - zwt2)) / Δz[i]
@@ -40,6 +40,7 @@ function update_wa!(soil::Soil, θ_unsat, zwt1, zwt2)
 
     for i = j0+1:j1
       z0 = i == 1 ? 0 : z₊ₕ[i-1]
+      i > N && break
       if i == j1
         θ[i] = (θ_fc * (zwt2 - z0) + θ_sat * (z₊ₕ[i] - zwt2)) / Δz[i]
       else
