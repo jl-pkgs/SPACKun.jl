@@ -1,19 +1,14 @@
 include("Parameter.jl")
 
-# 需要进行优化的参数
-# 
-# 
+# function param2theta(param)
+#   ## 需要进行优化的参数放到这里
+# end
 
-function param2theta(param)
-  ## 需要进行优化的参数放到这里
-  
-end
-
-function theta2param(theta, param)
-  # 只优化如下参数
-  N = 3
-  param.rs = theta[(1-1)*N+1:1N]
-end
+# function theta2param(theta, param)
+#   # 只优化如下参数
+#   N = 3
+#   param.rs = theta[(1-1)*N+1:1N]
+# end
 
 
 # 为多层土壤参数做好铺垫
@@ -49,6 +44,7 @@ end
 
   ## 蒸发参数
   # Kc::Vector{FT} = [1.0, 1.0, 1.0]     # ET0转换系数，[ungrowing, wheat, cron]
+  α_soil::FT = 1.26
   Hc::Vector{FT} = [0.12, 0.12, 0.12]
   rs::Vector{FT} = [70.0, 70.0, 70.0]
   kA::Vector{FT} = [0.6, 0.6, 0.6]

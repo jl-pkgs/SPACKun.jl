@@ -42,17 +42,15 @@ Potential ET partition
 """
 function cal_PET(Rn::FT, G::FT, LAI::FT, Ta::FT, Pa::FT, VPD::FT, U2::FT, doy::Int;
   param::SoilParam=SoilParam(3), # 3 layers
-  method="PT72", 
-  β=1.0, 
-  α_soil=1.26,
+  method="PT72", β=1.0
 ) where {FT<:Real}
   # Kc::Vector{FT}=[0.75, 0.9, 1.0],
-  (; Hc, rs, kA) = param
+  (; Hc, rs, kA, α_soil) = param
   
   # 考虑不同作物，rs, hc, kA的不同；这里引入了rs，因此不再需要Kc
   i = iGrowthPeriod(doy)
   _kA = kA[i]
-  _rs = rs[i]
+  _rs = rs[i] / LAI
   hc = Hc[i]
 
   # @show rs
