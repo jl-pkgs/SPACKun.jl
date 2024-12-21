@@ -1,7 +1,7 @@
 using Test, SPAC
 using DataFrames, RTableTools
 import HydroTools: GOF, sceua
-using Plots
+using Plots, Ipaper
 
 GOF_df(yobs, ysim) = DataFrame([GOF(yobs, ysim)])
 GOF_df(yobs, ysim, period) = GOF_df(yobs[period], ysim[period])
@@ -39,6 +39,7 @@ begin
   dir_root = "$(@__DIR__)/.."
   d = fread("$dir_root/data/dat_栾城_ERA5L_2010_V2.csv")
   (; Rn_obs, P_obs, Rn, Pa, Prcp, Tavg, LAI, VOD, VPD, U2, ET_obs, GPP_obs) = d
+  Rn_obs = drop_missing(Rn_obs)
   Tas = deepcopy(Tavg) # Effective accumulated temperature
   Tas[Tas.<0] .= 0 # Remove values less than 0
   Tas = cumsum(Tas)

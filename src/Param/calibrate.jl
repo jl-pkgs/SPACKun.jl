@@ -4,7 +4,7 @@ ParRange = [
 ]
 
 # get field of param, and combine into a vector
-unlist(l::Vector, key::Symbol) = vcat(map(x -> getfield(x, key), l)...)
+unlist_field(l::Vector, key::Symbol) = vcat(map(x -> getfield(x, key), l)...)
 
 select_param(parNames) = filter(x -> x.name ∈ parNames, ParRange)
 
@@ -32,3 +32,6 @@ function init_param(theta::Vector{Float64}; par=ParRange, soiltype=2, lc=11, kw.
   set_param!(soil.param, theta, par)
   soil
 end
+
+
+export ParRange, unlist_field, select_param, set_param!, init_param

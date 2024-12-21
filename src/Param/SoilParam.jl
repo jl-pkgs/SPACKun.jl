@@ -1,4 +1,4 @@
-export SoilParam, ParRange, init_param, select_param
+export SoilParam
 
 
 # 为多层土壤参数做好铺垫
