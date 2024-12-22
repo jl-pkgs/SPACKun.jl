@@ -3,19 +3,17 @@ function Evapotranspiration!(soil::Soil, pEc::T, pEs::T, fwet::T, f_cons::T) whe
   (; θ, Ec_pot, fsm_Ec, fsm_Es,
     Ec_sm, Ec_gw, sink,
     zwt, z₊ₕ, N, param) = soil
-  θ_sat = param.θ_sat[1]
-  θ_fc = param.θ_fc[1]
-  θ_wp = param.θ_wp[1]
-  (; hc) = param
+  (; θ_sat, θ_fc, θ_wp, hc) = param
 
   PT_partition!(soil, pEc, fwet) # EC_POT划分
 
   j = find_jwt(z₊ₕ, zwt)
-  _θ_unsat, frac_unsat = find_θ_unsat(soil, θ_sat) # 这里可能需要求，非饱和的比例（或深度）
+  _θ_unsat, frac_unsat = find_θ_unsat(soil, θ_sat[1]) 
+  # TODO: fix `θ_sat`; 这里可能需要求，非饱和的比例（或深度）
 
   # 非饱和
   for i = 1:max(j - 1, 0) # 全部非饱和
-    fsm_Ec[i], fsm_Es[i] = swc_stress(θ[i], pEc, θ_fc, θ_wp, hc)
+    fsm_Ec[i], fsm_Es[i] = swc_stress(θ[i], pEc, θ_fc[i], θ_wp[i], hc)
 
     Ec_sm[i] = Ec_pot[i] * f_cons * fsm_Ec[i]
     # Ec_sm[j] = clamp(Ec_sm[i], 0, Δz[i] * (θ[i] - θ_wp)) # 限制最大蒸发量
@@ -25,13 +23,13 @@ function Evapotranspiration!(soil::Soil, pEc::T, pEs::T, fwet::T, f_cons::T) whe
   # 半饱和
   if 1 <= j <= N
     i = j
-    fsm_Ec[i], fsm_Es[i] = swc_stress(_θ_unsat, pEc, θ_fc, θ_wp, hc)
+    fsm_Ec[i], fsm_Es[i] = swc_stress(_θ_unsat, pEc, θ_fc[i], θ_wp[i], hc)
 
     _Ec_pot_sat = Ec_pot[i] * (1 - frac_unsat) # GW
     _Ec_pot_unsat = Ec_pot[i] * frac_unsat     # SM
 
     Ec_sm[i] = _Ec_pot_unsat * f_cons * fsm_Ec[i]
-    Ec_sm[i] = clamp(Ec_sm[i], 0, max(Δz[i] * (_θ_unsat - θ_wp) * frac_unsat, 0)) # 限制最大蒸发量
+    Ec_sm[i] = clamp(Ec_sm[i], 0, max(Δz[i] * (_θ_unsat - θ_wp[i]) * frac_unsat, 0)) # 限制最大蒸发量
 
     Ec_gw[i] = _Ec_pot_sat * f_cons
   end
@@ -67,7 +65,7 @@ function Evapotranspiration!(soil::Soil, pEc::T, pEs::T, fwet::T, f_cons::T) whe
   for i = 2:N
     _θ = i == j ? _θ_unsat : θ[i]
     depth = i == j ? zwt - z₊ₕ[i-1] : Δz[i]
-    sink[i] = clamp(Ec_sm[i], 0, depth * (_θ - θ_wp))
+    sink[i] = clamp(Ec_sm[i], 0, depth * (_θ - θ_wp[i]))
   end
   return Tr, Es
 end

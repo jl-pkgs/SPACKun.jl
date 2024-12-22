@@ -9,17 +9,16 @@ function absmax(d::AbstractDataFrame; fun=maximum)
   NamedTuple{Symbol.(keys)}(values)
 end
 
-function init_param(soiltype=2, lc=11)
-  soil = Soil{Float64}(; zwt=0.0, snowpack=0.0, soiltype, lc)
-  soil.θ .= soil.param.θ_sat
-  soil
-end
-
 dir_root = "$(@__DIR__)/.."
 d = fread("$dir_root/data/dat_栾城_ERA5L_2010.csv")
 
-
 function test_LuanCheng(; zwt=0.0, method_SW="Kun")
+  function init_param(soiltype=2, lc=11)
+    soil = Soil{Float64}(; zwt=0.0, snowpack=0.0, soiltype, lc)
+    soil.θ .= soil.param.θ_sat
+    soil
+  end
+
   soil = init_param()
   soil.zwt = zwt
   topt = 24.0
