@@ -46,7 +46,7 @@ function SiTHv2!(output::SpacOutput{T}, soil::Soil,
   Ei, fwet, PE = interception(P, pEc, LAI, param.β)  # Interception evaporation
 
   # Snow sublimation, snow melt
-  soil.snowpack, Esb, _, Pnet = snp_balance(PE, Ta, Tas, snowpack, pEs)
+  soil.snowpack, Esb, _, Pnet = snowpack_balance(PE, Ta, Tas, snowpack, pEs)
 
   RS, I, Vmax = runoff_up(Pnet, θ, zwt, Δz, θ_sat)
 

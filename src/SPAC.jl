@@ -8,7 +8,7 @@ using Printf
 
 export Soil
 export get_pftpar, get_soilpar
-export cal_PET, PT_partition!, interception, snp_balance, runoff_up
+export cal_PET, PT_partition!, interception, snowpack_balance, runoff_up
 export Δz, z₊ₕ
 export atm
 
@@ -27,9 +27,9 @@ include("SpacOutput.jl")
 include("PET.jl")
 include("Evapotranspiration.jl")
 
-include("interception.jl")
-include("snp_balance.jl")
-include("runoff_up.jl")
+include("modules.jl")
+# include("snowpack_balance.jl")
+# include("runoff_up.jl")
 
 # include("GroundWater/GroundWater.jl")
 include("Soil_Kun/sw_balance.jl")
