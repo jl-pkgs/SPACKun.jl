@@ -1,3 +1,7 @@
+const funcs = Dict(
+  "Kun" => sw_balance,
+  "CoLM" => sw_balance_CoLM)
+
 """
 ## Model input
 - Rn     : Net Radiation, W/m-2
@@ -35,9 +39,6 @@ function SiTHv2!(output::SpacOutput{T}, soil::Soil,
   θ_sat = param.θ_sat[1]
   # update_VegParam!(param, doy) # update kA, rs, hc
 
-  funcs = Dict(
-    "Kun" => sw_balance,
-    "CoLM" => sw_balance_CoLM)
   _sw_balance = funcs[method_SW]
 
   ## 这里还需要输入，VPD和风速数据
