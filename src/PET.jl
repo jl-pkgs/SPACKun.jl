@@ -14,7 +14,7 @@ Potential ET partition
 - β   : 土壤水分限制因子, [0~1], 1充分供水
 
 ## Optional:
-- kA  : 消光系数，default `[0.6, 0.6, 0.6]`
+- kA  : 消光系数，default `[0.6, 0.6, 0.6]`, [ungrowing, wheat, cron]
 - Kc  : 作物折腾转换系数，default `[0.75, 0.9, 1.0]`
 
 ## 优化参数
@@ -29,12 +29,13 @@ Potential ET partition
 - pEs   : potential Soil evaporation, mm/day
 """
 function cal_PET(Rn::FT, G::FT, LAI::FT, Ta::FT, Pa::FT, VPD::FT, U2::FT, doy::Int;
+  PC::FT=1.0,
   param::SoilParam=SoilParam(3), # 3 layers
   method="PT72", β=1.0
 ) where {FT<:Real}
   # Kc::Vector{FT}=[0.75, 0.9, 1.0],
   (; hc, rs, kA, α_soil) = param
-  
+
   i = iGrowthPeriod(doy)
   # Radiation located into soil and canopy, separately
   Rns = exp(-kA * LAI) * Rn
@@ -42,18 +43,18 @@ function cal_PET(Rn::FT, G::FT, LAI::FT, Ta::FT, Pa::FT, VPD::FT, U2::FT, doy::I
 
   ## Potential Transpiration and Soil evaporation, mm/day
   # ET0 = ET0_PT72(Rn, Ta, Pa)
-  # ET0 = ET0_Penman48(Rn, Ta, VPD, U2, Pa) # all
+  # ET0 = ET0_Penman48(Rn, Ta, VPD, U2, Pa) # all  
   ## canopy
   if method == "Penman48"
-    pEc = ET0_Penman48(Rnc, Ta, VPD, U2, Pa)
+    pEc = ET0_Penman48(Rnc, Ta, VPD, U2, Pa) * PC
   elseif method == "PT72"
-    pEc = ET0_PT72(Rnc, Ta, Pa)
+    pEc = ET0_PT72(Rnc, Ta, Pa) * PC
   elseif method == "Monteith65"
     hc = param._hc[i]
     rs = param._rs[i]
     # kA = param._kA[i]
     rs = rs / LAI # NSE高0.03
-    pEc = ET0_Monteith65(Rnc, Ta, VPD, U2, Pa, β; rs, hc)
+    pEc = ET0_Monteith65(Rnc, Ta, VPD, U2, Pa, β; rs, hc) * PC
   end
   pEs = ET0_eq(Rns - G, Ta, Pa)[1] * α_soil # PML
   return pEc, pEs
@@ -144,7 +145,7 @@ function aerodynamic_resistance(U2::T, h::T=0.12) where {T<:Real}
   z_oh = 0.1 * z_om
   z_m = z_h = 2
   ra = safe_log((z_m - d) / z_om) * safe_log((z_h - d) / z_oh) / (k^2 * U2)
-  isnan(ra) && return 208.0/U2 # 70s/m
+  isnan(ra) && return 208.0 / U2 # 70s/m
   ra
 end
 
@@ -204,7 +205,7 @@ function PT_partition!(soil::Soil, pEc::T, fwet::T) where {T<:Real}
   (; D50, D95) = param
   b = param.b[1]
   θ_sat = param.θ_sat[1]
-  
+
   c = -2.944 / log(D95 / D50)
   r1 = (1 / (1 + (Δz[1] / D50)^c)) # Zhang 2019, Eq. 21, root depths function
   r2 = (1 / (1 + (Δz[2] / D50)^c)) - (1 / (1 + (Δz[1] / D50)^c))

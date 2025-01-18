@@ -1,3 +1,6 @@
+_getindex(V::AbstractVector, i::Int) = V[i]
+_getindex(V::Real, i::Int) = V
+
 const funcs = Dict(
   "Kun" => sw_balance,
   "CoLM" => sw_balance_CoLM)
@@ -33,7 +36,8 @@ function SiTHv2!(output::SpacOutput{T}, soil::Soil,
   Rn::T, Ta::T, Tas::T, Topt::T, P::T, Pa::T,
   s_VOD::T, G::T, LAI::T,
   VPD::T=0.0, U2::T=0.0; # Monteith method
-  doy::Int=-1, method_SW="Kun", method_PET="PT72") where {T<:Real}
+  doy::Int=-1, PC::T=1.0,
+  method_SW="Kun", method_PET="PT72") where {T<:Real}
 
   (; θ, zwt, snowpack, param) = soil
   θ_sat = param.θ_sat[1]
@@ -43,7 +47,7 @@ function SiTHv2!(output::SpacOutput{T}, soil::Soil,
 
   ## 这里还需要输入，VPD和风速数据
   pEc, pEs = cal_PET(Rn, G, LAI, Ta, Pa, VPD, U2, doy;
-    param, method=method_PET)
+    PC, param, method=method_PET)
   Ei, fwet, PE = interception(P, pEc, LAI, param.β)  # Interception evaporation
 
   # Snow sublimation, snow melt
@@ -65,19 +69,25 @@ function SiTHv2!(output::SpacOutput{T}, soil::Soil,
   # return ET, Tr, Es, Ei, Esb, RS, Pnet, I, Vmax
 end
 
-
 ## WITH VPD and U2 as INPUT
+# - `doy`: in `args...`
+# - `PC` : in `kw...`
 function _run_model!(res::SpacOutputs{FT}, soil::Soil,
   Rn::V, Ta::V, Tas::V, Prcp::V, Pa::V,
   G::V, LAI::V, s_VOD::V, Top::FT,
-  VPD::V, U2::V, doy::AbstractVector; kw...) where {FT<:Real,V<:AbstractVector{FT}}
+  VPD::V, U2::V;
+  doy::Union{Int,AbstractVector{Int}}=-1,
+  PC::Union{FT,V}=1.0, kw...) where {FT<:Real,V<:AbstractVector{FT}}
 
   ntime = size(Rn, 1) # 1365
   output = SpacOutput{FT}()
   for i in 1:ntime
+    _PC = _getindex(PC, i)
+    _doy = _getindex(doy, i)
+
     SiTHv2!(output, soil,
       Rn[i], Ta[i], Tas[i], Top, Prcp[i], Pa[i], s_VOD[i], G[i], LAI[i], VPD[i], U2[i];
-      doy=doy[i], kw...)
+      doy=_doy, PC=_PC, kw...)
     res[i] = output
   end
   return res
@@ -96,7 +106,6 @@ function _run_model!(res::SpacOutputs{FT}, soil::Soil,
   end
   return res
 end
-
 
 """
     SiTHv2_site(soil, Rn, Ta, Tas, Prcp, Pa, G, LAI, s_VOD, Top, args...; spin::Bool=false, kw...)
