@@ -13,18 +13,16 @@ Pkg.add(url="https://github.com/CUG-hydro/SPACKun.jl")
 ```
 
 ## TODO
-
 - [ ] 测试三种土壤水运动方案
   + [x] SITH
-  + [ ] BEPS
-  + [ ] Bonan2019
+  + [x] BEPS
+  + [x] Bonan2019
 
 ### 地下水更新的计算方案
 
 现在的版本是分开计算的。
 
 - `ET_SM`: `SM_discharge!`，简化版`Richards`方程，非饱和流方程
-
 - `ET_GW`: 直接从`Δw`中扣除
   `Δw = exceed + vw2 - sum(Ec_gw) - GW_Rsb(zwt)`
 
@@ -45,7 +43,7 @@ Pkg.add(url="https://github.com/CUG-hydro/SPACKun.jl")
 
 - [ ] **模型未建立起冠层导度与LAI之间的关系**
 
-- [ ] 地下水水位更新过程汇总，$\theta$不统一，一会是原始的$\theta_{unsat}$，一会考虑补给之后的$\theta$
+- [ ] 地下水水位更新过程汇总$\theta$不统一，sometime原始的$\theta_{unsat}$，sometime考虑补给之后的$\theta$
 
-- [ ] `soil_drainage!`方案存在严重漏洞
+- [ ] `soil_drainage!`方案存在改进空间
   ![](./docs/Kun2019_soil_drainage.png)
